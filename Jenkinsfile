@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // 환경 변수를 정의할 수 있습니다.
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +13,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startsWith('feature/')) {
                         // 빌드 단계
-                        sh 'make build'
+                        sh './gradlew build'
                     }
                 }
             }
@@ -25,9 +21,9 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startswith('feature/')) {
+                    if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startsWith('feature/')) {
                         // 테스트 단계
-                        sh 'make test'
+                        sh './gradlew test'
                     }
                 }
             }
@@ -38,7 +34,7 @@ pipeline {
             }
             steps {
                 // 릴리스 단계
-                sh 'make release'
+                sh './gradlew publish'
             }
         }
         stage('Hotfix') {
@@ -47,16 +43,16 @@ pipeline {
             }
             steps {
                 // 핫픽스 단계
-                sh 'make hotfix'
+                sh './gradlew build'
             }
         }
         stage('Deploy') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 // 배포 단계
-                sh 'make deploy'
+                sh './gradlew deploy'
             }
         }
     }
