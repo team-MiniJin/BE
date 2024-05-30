@@ -5,20 +5,22 @@
 
 # Footer(위에 작성)
 ################## <type> list
-# feat: 새로운 기능 추가
-# add : feat 이외의 부수적인 코드, 라이브러리 등을 추가한 경우, 새로운 파일(Component나 Activity 등)을 생성한 경우도 포함
-# fix: 버그 수정
-# docs: 문서 수정
-# style: 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우
-# refactor: 코드 리팩토링
-# test: 테스트 코드, 리팩토링 테스트 코드 추가
-# chore: 빌드 업무 수정, 패키지 매니저 수정, production code와 무관한 부분들 (.gitignore, build.gradle 같은)
-# comment: 주석 추가 및 변경
-# remove: 파일, 폴더 삭제
-# rename: 파일, 폴더명 수정
-# layout: 스타일 코드 작성 및 수정
-################## <explain> (실제작성시 # 제거 ##부분은 실제작성시에도 #유지)
-# feat: "헤더 화면 프로필구현"
+# feat:✨(:sparkles:) A new feature 새로운 기능 추가
+# fix:🐛(:bug:) A bug fix 이슈나 애러 해결
+# docs:📝(:memo:) Changes to documentation 문서 수정(리드미, ignore)
+# style:🎨(:art:) Formatting, missing semi colons, etc; no code change 코드와 관련 없는 코드 포맷팅 변경
+# refactor:♻️(:recycle:) Refactoring production code 리팩토링
+# test:✅(:white_check_mark:) Adding tests, refactoring test; no production code change 테스트코드와 관련된 부분
+# chore:👷(:construction_worker:) adding , 💚(:green_heart:) Updating build tasks, package manager configs, etc; no production code change
+# layout:💄(:lipstick:)스타일 코드 작성 및 수정
+# add:🔧(:wrench:) **feat 이외의 부수적인 코드, 새로운 파일)을 생성한 경우도 포함**
+# remove:🔥(:fire:) 삭제
+# comment:💡(:bulb:) 주석 추가/수정
+# rename:🚚(:truck:) 이름 변경, 파일 이동 Move or rename resources
+# 🗃️(:card_file_box:) DB관련 타입 세팅&작성&수정 시 emoji 추가
+# 🔊(:loud_sound:) Log 관련 타입 세팅&작성&수정 시 emoji 추가
+################## <example> (실제작성시 # 제거 ##부분은 실제작성시에도 #유지)
+# feat:✨ 헤더 화면 프로필구현
 ## type: Subject (위에 작성) i 누르시고 작성 완료 후 esc누른 뒤 :wq 입력
 # 프로필 클릭시 햄버거메뉴 추가
 ## Body(위에 작성)
