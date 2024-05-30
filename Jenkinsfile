@@ -49,6 +49,7 @@ pipeline {
                 sh './gradlew build'
             }
         }
+        /*
         stage('Deploy') {
             when {
                 branch 'main'
@@ -58,5 +59,6 @@ pipeline {
                 sh './gradlew deploy'
             }
         }
+         */
     }
 }
