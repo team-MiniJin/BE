@@ -5,7 +5,7 @@
 
 # Footer(위에 작성)
 ################## <type> list
-# feat:✨(:sparkles:) A new feature 새로운 기능 추가
+# feat:✨(:sparkles:)A new feature 새로운 기능 추가
 # fix:🐛(:bug:) A bug fix 이슈나 애러 해결
 # docs:📝(:memo:) Changes to documentation 문서 수정(리드미, ignore)
 # style:🎨(:art:) Formatting, missing semi colons, etc; no code change 코드와 관련 없는 코드 포맷팅 변경
