@@ -7,7 +7,7 @@ package com.minizin.travel.tour.domain.dto;
  *
  * @author dong-hoshin
  * @date 6/3/24 19:58 Copyright (c) 2024 MiniJin
- * @see <a href="https://github.com/lyckabc">GitHub Repository</a>
+ * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 public class TourAPIResponseDTO {
     private Long responseId;
