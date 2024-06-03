@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  *
  * @author dong-hoshin
  * @date 6/3/24 20:03 Copyright (c) 2024 MiniJin
- * @see <a href="https://github.com/lyckabc">GitHub Repository</a>
+ * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 @Repository
 public interface TourAPIResponseRepository extends JpaRepository<TourAPIResponse, Long> {

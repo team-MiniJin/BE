@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
  *
  * @author dong-hoshin
  * @date 6/3/24 19:46 Copyright (c) 2024 MiniJin
- * @see <a href="https://github.com/lyckabc">GitHub Repository</a>
+ * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 
 @Entity
