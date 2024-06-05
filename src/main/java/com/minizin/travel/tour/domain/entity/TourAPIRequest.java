@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
 
 /**
  * Class: TourAPIRequest Project: travel Package: com.minizin.travel.tour.domain.entity
@@ -16,6 +17,7 @@ import jakarta.persistence.Table;
  * @date 6/3/24 19:23 Copyright (c) 2024 MiniJin
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
+@Getter
 @Entity
 @Table(name = "tour_api_request")
 public class TourAPIRequest {
@@ -24,8 +26,8 @@ public class TourAPIRequest {
     @Column(name = "request_id", nullable = false)
     private Long requestId;
 
-    @Column(name = "_type")
-    private String type;
+    @Column(name = "type")
+    private String _type;
 
     @Column(name = "area_code")
     private String areaCode;
