@@ -35,6 +35,6 @@ spring:
       hibernate:
         SQL: DEBUG
         type: descriptor.sql.BasicBinder=TRACE
-api:
+api-tour:
   serviceKey_De: K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA==
   serviceKey_En: K9eWaIkQyqUUDZPWH%2BjI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA%3D%3D
