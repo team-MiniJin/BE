@@ -45,6 +45,7 @@ dependencies {
 	// API DOC swagger
 	implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
 	implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.8")
+	implementation 'io.swagger.core.v3:swagger-annotations:2.1.12'
 }
 
 tasks.named('test') {
