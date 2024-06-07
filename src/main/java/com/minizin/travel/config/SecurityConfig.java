@@ -1,8 +1,8 @@
 package com.minizin.travel.config;
 
-import com.minizin.travel.jwt.JwtAuthenticationFilter;
-import com.minizin.travel.jwt.JwtUtil;
-import com.minizin.travel.oauth2.CustomSuccessHandler;
+import com.minizin.travel.user.jwt.JwtAuthenticationFilter;
+import com.minizin.travel.user.jwt.TokenProvider;
+import com.minizin.travel.user.oauth2.CustomSuccessHandler;
 import com.minizin.travel.user.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
-    private final JwtUtil jwtUtil;
+    private final TokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -62,7 +62,7 @@ public class SecurityConfig {
 
         //JWTFilter 추가
         http
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
 
         //oauth2
