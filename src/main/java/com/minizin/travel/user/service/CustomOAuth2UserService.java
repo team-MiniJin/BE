@@ -6,15 +6,14 @@ import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
-
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (user.isEmpty()) {
             userRepository.save(CustomOAuth2User.toUserEntity(customOAuth2User));
         } else {
-            user.get().updateNickname(customOAuth2User.getNickname());
+            user.get().setNickname(customOAuth2User.getNickname());
         }
 
         return customOAuth2User;

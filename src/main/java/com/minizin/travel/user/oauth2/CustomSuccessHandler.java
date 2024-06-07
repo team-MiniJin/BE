@@ -1,6 +1,6 @@
-package com.minizin.travel.oauth2;
+package com.minizin.travel.user.oauth2;
 
-import com.minizin.travel.jwt.JwtUtil;
+import com.minizin.travel.user.jwt.TokenProvider;
 import com.minizin.travel.user.domain.dto.CustomOAuth2User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -17,7 +17,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
+    private final TokenProvider tokenProvider;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -27,7 +27,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String username = customUserDetails.getUsername();
 
-        String token = jwtUtil.createJwt(username, 60 * 60 * 60L);
+        String token = tokenProvider.createJwt(username, 60 * 60 * 60L);
 
         // 응답에 쿠키로 jwt 발급
         response.addCookie(createCookie("Authorization", token));
