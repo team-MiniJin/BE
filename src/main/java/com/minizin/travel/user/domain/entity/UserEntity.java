@@ -45,12 +45,15 @@ public class UserEntity {
     private String phone;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "login_type")
     private LoginType loginType;
 
     @CreatedDate
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public void updateNickname(String nickname) {
