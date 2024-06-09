@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    @GetMapping("/cookie-to-header")
-    public ResponseEntity<?> convert(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/auth/jwt")
+    public ResponseEntity<?> getJwt(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
