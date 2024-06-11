@@ -19,8 +19,8 @@ import lombok.Getter;
  */
 @Getter
 @Entity
-@Table(name = "tour_api_request")
-public class TourAPIRequest {
+@Table(name = "tour_api")
+public class TourAPI {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id", nullable = false)

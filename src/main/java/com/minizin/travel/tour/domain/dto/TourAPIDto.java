@@ -9,7 +9,7 @@ package com.minizin.travel.tour.domain.dto;
  * @date 6/3/24 19:56 Copyright (c) 2024 MiniJin
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
-public class TourAPIRequestDTO {
+public class TourAPIDto {
     private Long requestId;
     private String type;
     private String areaCode;

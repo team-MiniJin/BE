@@ -1,6 +1,6 @@
 package com.minizin.travel.tour.domain.repository;
 
-import com.minizin.travel.tour.domain.entity.TourAPIRequest;
+import com.minizin.travel.tour.domain.entity.TourAPI;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 @Repository
-public interface TourAPIRequestRepository extends JpaRepository<TourAPIRequest, Long> {
-    Optional<TourAPIRequest> findByRequestId(Long RequestId);
+public interface TourAPIRequestRepository extends JpaRepository<TourAPI, Long> {
+    Optional<TourAPI> findByRequestId(Long RequestId);
 
 }
