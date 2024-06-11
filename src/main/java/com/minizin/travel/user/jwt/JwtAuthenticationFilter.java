@@ -26,12 +26,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 특정 경로 무시 (무한 루프 방지)
         String requestUri = request.getRequestURI();
-        if (requestUri.matches("^\\/login(?:\\/.*)?$")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-        if (requestUri.matches("^\\/oauth2(?:\\/.*)?$")) {
+        if (requestUri.matches("^\\/login(?:\\/.*)?$") ||
+                requestUri.matches("^\\/oauth2(?:\\/.*)?$") ||
+                requestUri.matches("^\\/auth\\/join(?:\\/.*)?$")) {
 
             filterChain.doFilter(request, response);
             return;
