@@ -104,7 +104,7 @@ public class PlanService {
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
     // #29 2024.06.02 내 여행 일정 조회 START //
-    public ResponseListPlanDto selectList(Long cursorId) {
+    public ResponseListPlanDto selectListPlan(Long cursorId) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 

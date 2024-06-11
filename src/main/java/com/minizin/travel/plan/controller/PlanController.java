@@ -28,9 +28,9 @@ public class PlanController {
 
     // #29 2024.06.02 내 여행 일정 조회 START //
     @GetMapping("/plans")
-    public ResponseEntity<?> selectPlan(@RequestParam("cursor_id") Long cursorId) {
+    public ResponseEntity<?> selectListPlan(@RequestParam("cursor_id") Long cursorId) {
 
-        var result = planService.selectList(cursorId);
+        var result = planService.selectListPlan(cursorId);
 
         return ResponseEntity.ok(result);
     }
