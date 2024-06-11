@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -31,8 +32,6 @@ public class UserEntity {
     private String nickname;
 
     private String name;
-
-    private String phone;
 
     @Enumerated(EnumType.STRING)
     private LoginType loginType;
