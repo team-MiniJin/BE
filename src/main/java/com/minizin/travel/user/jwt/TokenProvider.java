@@ -8,6 +8,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,5 +40,14 @@ public class TokenProvider {
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public Authentication getAuthentication(String token) {
+        UserDetails userDetails = User
+                .withUsername(this.getUsername(token))
+                .build();
+
+        return new UsernamePasswordAuthenticationToken(userDetails,
+                "", null);
     }
 }

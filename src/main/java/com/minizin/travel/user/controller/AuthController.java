@@ -26,7 +26,7 @@ public class AuthController {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("Authorization")) {
                     String token = cookie.getValue();
-                    response.setHeader("Authorization", token);
+                    response.setHeader("Authorization", "Bearer " + token);
                     return ResponseEntity.ok("JWT 헤더로 발급");
                 }
             }

@@ -1,7 +1,7 @@
 package com.minizin.travel.user.service;
 
-import com.minizin.travel.user.domain.dto.CustomOAuth2User;
 import com.minizin.travel.user.domain.dto.KakaoResponse;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.repository.UserRepository;
@@ -39,20 +39,21 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디 값을 만듬
         String username = kakaoResponse.getProvider() + " " + kakaoResponse.getProviderId();
-        CustomOAuth2User customOAuth2User = CustomOAuth2User.builder()
-                .username(username)
-                .email(kakaoResponse.getEmail())
-                .nickname(kakaoResponse.getNickname())
-                .loginType(LoginType.KAKAO)
-                .build();
 
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            userRepository.save(CustomOAuth2User.toUserEntity(customOAuth2User));
+        UserEntity userEntity = null;
+        Optional<UserEntity> existUser = userRepository.findByUsername(username);
+        if (existUser.isEmpty()) {
+            userEntity = userRepository.save(UserEntity.builder()
+                    .username(username)
+                    .email(kakaoResponse.getEmail())
+                    .nickname(kakaoResponse.getNickname())
+                    .loginType(LoginType.KAKAO)
+                    .build());
         } else {
-            user.get().setNickname(customOAuth2User.getNickname());
+            userEntity = existUser.get();
+            userEntity.setNickname(kakaoResponse.getNickname());
         }
 
-        return customOAuth2User;
+        return new PrincipalDetails(userEntity);
     }
 }

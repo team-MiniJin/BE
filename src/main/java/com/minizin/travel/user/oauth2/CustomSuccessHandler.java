@@ -1,7 +1,7 @@
 package com.minizin.travel.user.oauth2;
 
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.jwt.TokenProvider;
-import com.minizin.travel.user.domain.dto.CustomOAuth2User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,9 +23,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         //OAuth2User
-        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        String username = principalDetails.getUsername();
 
         String token = tokenProvider.createJwt(username, 60 * 60 * 60L);
 

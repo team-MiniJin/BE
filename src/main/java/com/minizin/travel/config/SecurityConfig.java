@@ -1,5 +1,6 @@
 package com.minizin.travel.config;
 
+import com.minizin.travel.user.auth.LoginFilter;
 import com.minizin.travel.user.jwt.JwtAuthenticationFilter;
 import com.minizin.travel.user.jwt.TokenProvider;
 import com.minizin.travel.user.oauth2.CustomSuccessHandler;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -24,13 +27,21 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final TokenProvider tokenProvider;
 
+    // BCryptPasswordEncoder Bean 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // AuthenticationManager Bean 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
@@ -66,11 +77,6 @@ public class SecurityConfig {
         http
                 .httpBasic((auth) -> auth.disable());
 
-        //JWTFilter 추가
-        http
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
-                        UsernamePasswordAuthenticationFilter.class);
-
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
@@ -83,6 +89,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/auth/join", "/auth/login").permitAll()
                         .anyRequest().authenticated());
+
+        // UsernamePasswordAuthenticationFilter 자리에 LoginFilter 추가
+        http
+                .addFilterAt(new LoginFilter(
+                        authenticationManager(authenticationConfiguration), tokenProvider
+                ), UsernamePasswordAuthenticationFilter.class);
+
+        //JWT Authentication Filter 추가
+        http
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
+                        LoginFilter.class);
 
         //세션 설정 : STATELESS
         http
