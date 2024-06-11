@@ -33,5 +33,7 @@ public class PlanScheduleDto {
     private Double x;
     private Double y;
 
+    // #29 2024.06.02 내 여행 일정 조회
+    private String placeAddr;
 }
 

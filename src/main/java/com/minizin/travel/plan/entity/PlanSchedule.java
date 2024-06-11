@@ -49,6 +49,10 @@ public class PlanSchedule {
 
     private Double y;
 
+    // #29 2024.06.02 내 여행 일정 조회
+    @Column(name = "place_addr")
+    private String placeAddr;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;

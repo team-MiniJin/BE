@@ -9,12 +9,16 @@ import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -75,6 +79,7 @@ public class PlanService {
                 .scheduleDate(planScheduleDto.getScheduleDate())
                 .placeCategory(planScheduleDto.getPlaceCategory())
                 .placeName(planScheduleDto.getPlaceName())
+                .placeAddr(planScheduleDto.getPlaceAddr()) // #29 2024.06.02 내 여행 일정 조회
                 .region(planScheduleDto.getRegion())
                 .placeMemo(planScheduleDto.getPlaceMemo())
                 .arrivalTime(LocalTime.parse(planScheduleDto.getArrivalTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
@@ -97,4 +102,66 @@ public class PlanService {
                 .build());
     }
     // #28 2024.05.30 내 여행 일정 생성하기 END //
+
+    // #29 2024.06.02 내 여행 일정 조회 START //
+    public ResponseListPlanDto selectList(Long cursorId) {
+
+        Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
+
+        // 테스트
+        Long userId = 1L;
+
+        List<Plan> planList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
+        List<ListPlanDto> listPlanDtoList = new ArrayList<>();
+        Long planId = 0L;
+
+        for (Plan plan : planList) {
+            planId = plan.getId();
+            List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
+            List<ListPlanScheduleDto> listPlanScheduleDtoList = new ArrayList<>();
+            List<String> waypoints = new ArrayList<>();
+
+            for (PlanSchedule planSchedule : planScheduleList) {
+                ListPlanScheduleDto newResponseScheduleDto = ListPlanScheduleDto.toDto(planSchedule);
+                listPlanScheduleDtoList.add(newResponseScheduleDto);
+                waypoints.add(planSchedule.getRegion());
+            }
+            ListPlanDto newPlanDto = ListPlanDto.toDto(plan);
+            newPlanDto.setListPlanScheduleDtoList(listPlanScheduleDtoList);
+            newPlanDto.setWaypoints(duplicateWaypoints(waypoints));
+            listPlanDtoList.add(newPlanDto);
+        }
+
+        return ResponseListPlanDto.builder()
+                .data(listPlanDtoList)
+                .nextCursor(planId)
+                .build();
+    }
+
+    private List<String> duplicateWaypoints(List<String> waypoints) {
+
+        if (waypoints.size() <= 1) {
+            return waypoints;
+        }
+
+        List<String> newWaypoints = new ArrayList<>();
+        newWaypoints.add(waypoints.get(0));
+
+        for (int i = 1; i < waypoints.size(); i++) {
+            if (waypoints.get(i - 1).equals(waypoints.get(i))) {
+                continue;
+            }
+            newWaypoints.add(waypoints.get(i));
+        }
+
+        return newWaypoints;
+    }
+
+    private List<Plan> findAllByCursorIdCheckExistCursor(Long userId, Long cursorId, Pageable page) {
+
+        return cursorId == 0 ? planRepository.findAllByUserIdOrderByIdDesc(userId, page)
+                : planRepository.findByIdLessThanAndUserIdOrderByIdDesc(cursorId, userId, page);
+
+    }
+    // #29 2024.06.02 내 여행 일정 조회 END //
 }
