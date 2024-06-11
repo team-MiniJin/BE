@@ -16,7 +16,6 @@ import org.springframework.stereotype.Repository;
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 @Repository
-public interface TourAPIRequestRepository extends JpaRepository<TourAPI, Long> {
-    Optional<TourAPI> findByRequestId(Long RequestId);
+public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
 
 }
