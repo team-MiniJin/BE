@@ -25,5 +25,6 @@ public class PlanController {
 
     }
     // #28 2024.05.30 내 여행 일정 생성하기 END //
+
 }
 

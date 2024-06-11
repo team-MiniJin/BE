@@ -26,11 +26,12 @@ public class PlanService {
     private final PlanBudgetRepository planBudgetRepository;
 
     final int INITIAL_VALUE = 0;
+    final int DEFAULT_PAGE_SIZE = 6; // #29
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
     public ResponsePlanDto createPlan(PlanDto planDto) {
 
-        Plan newPlan = Plan.builder()
+        Plan newPlan = planRepository.save(Plan.builder()
                 .userId(planDto.getUserId())
                 .planName(planDto.getPlanName())
                 .theme(planDto.getTheme())
@@ -42,15 +43,12 @@ public class PlanService {
                 .numberOfScraps(INITIAL_VALUE)
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
-                .build();
+                .build());
 
-        planRepository.save(newPlan);
         Long planId = newPlan.getId();
-        planDto.setId(planId);
 
         for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
             Long scheduleId = createPlanSchedule(planScheduleDto, planId).getId();
-            planScheduleDto.setId(scheduleId);
 
             for (PlanBudgetDto planBudgetDto : planScheduleDto.getPlanBudgetDtos()) {
                 createPlanBudget(planBudgetDto, scheduleId);
@@ -72,7 +70,7 @@ public class PlanService {
 
     public PlanSchedule createPlanSchedule(PlanScheduleDto planScheduleDto, Long planId) {
 
-        PlanSchedule newPlanSchedule = PlanSchedule.builder()
+        return planScheduleRepository.save(PlanSchedule.builder()
                 .planId(planId)
                 .scheduleDate(planScheduleDto.getScheduleDate())
                 .placeCategory(planScheduleDto.getPlaceCategory())
@@ -82,25 +80,21 @@ public class PlanService {
                 .arrivalTime(LocalTime.parse(planScheduleDto.getArrivalTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
                 .x(planScheduleDto.getX())
                 .y(planScheduleDto.getY())
-                .createdAt(LocalDate.now())
-                .modifiedAt(LocalDate.now())
-                .build();
-
-        return planScheduleRepository.save(newPlanSchedule);
+                .createdAt(LocalDateTime.now())
+                .modifiedAt(LocalDateTime.now())
+                .build());
     }
 
     public PlanBudget createPlanBudget(PlanBudgetDto planBudgetDto, Long scheduleId) {
 
-        PlanBudget newPlanBudget = PlanBudget.builder()
+        return planBudgetRepository.save(PlanBudget.builder()
                 .scheduleId(scheduleId)
                 .budgetCategory(planBudgetDto.getBudgetCategory())
                 .cost(planBudgetDto.getCost())
                 .budgetMemo(planBudgetDto.getBudgetMemo())
-                .createdAt(LocalDate.now())
-                .modifiedAt(LocalDate.now())
-                .build();
-
-        return planBudgetRepository.save(newPlanBudget);
+                .createdAt(LocalDateTime.now())
+                .modifiedAt(LocalDateTime.now())
+                .build());
     }
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 }
