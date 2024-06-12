@@ -35,5 +35,15 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
     // #29 2024.06.02 내 여행 일정 조회 END //
+
+    // #38 2024.06.08 내 여행 일정 상세 보기 START //
+    @GetMapping("/plans/{plan_id}")
+    public ResponseEntity<?> selectDetailPlan(@PathVariable("plan_id") Long planId) {
+
+        var result = planService.selectDetailPlan(planId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #38 2024.06.08 내 여행 일정 상세 보기 END //
 }
 
