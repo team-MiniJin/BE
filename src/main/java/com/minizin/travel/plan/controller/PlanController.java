@@ -26,5 +26,14 @@ public class PlanController {
     }
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
+    // #29 2024.06.02 내 여행 일정 조회 START //
+    @GetMapping("/plans")
+    public ResponseEntity<?> selectListPlan(@RequestParam("cursor_id") Long cursorId) {
+
+        var result = planService.selectListPlan(cursorId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #29 2024.06.02 내 여행 일정 조회 END //
 }
 
