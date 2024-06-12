@@ -120,6 +120,7 @@ public class PlanService {
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
             List<ListPlanScheduleDto> listPlanScheduleDtoList = new ArrayList<>();
             List<String> waypoints = new ArrayList<>();
+            int totalBudget = calculateTotalPlanBudget(planScheduleList); // #44 여행 일정 예산 추가
 
             for (PlanSchedule planSchedule : planScheduleList) {
                 ListPlanScheduleDto newResponseScheduleDto = ListPlanScheduleDto.toDto(planSchedule);
@@ -127,6 +128,7 @@ public class PlanService {
                 waypoints.add(planSchedule.getRegion());
             }
             ListPlanDto newPlanDto = ListPlanDto.toDto(plan);
+            newPlanDto.setPlanBudget(totalBudget); // #44 여행 일정 예산 추가
             newPlanDto.setListPlanScheduleDtoList(listPlanScheduleDtoList);
             newPlanDto.setWaypoints(duplicateWaypoints(waypoints));
             listPlanDtoList.add(newPlanDto);
@@ -164,4 +166,21 @@ public class PlanService {
 
     }
     // #29 2024.06.02 내 여행 일정 조회 END //
+
+    // #44 2024.06.12 여행 일정 예산 계산하기 START //
+    private int calculateTotalPlanBudget(List<PlanSchedule> planScheduleList) {
+
+        int totalPlanBudget = 0;
+
+        for (PlanSchedule planSchedule : planScheduleList) {
+            List<PlanBudget> planBudgetList = planBudgetRepository.findAllByScheduleId(planSchedule.getId());
+
+            for (PlanBudget planBudget : planBudgetList) {
+                totalPlanBudget += planBudget.getCost();
+            }
+        }
+
+        return totalPlanBudget;
+    }
+    // #44 2024.06.12 여행 일정 예산 계산하기 END //
 }

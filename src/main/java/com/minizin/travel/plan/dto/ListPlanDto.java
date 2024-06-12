@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
-@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "responseScheduleListDtos"})
+@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "responseScheduleListDtos"})
 public class ListPlanDto {
 
     @JsonProperty("plan_id")
@@ -30,6 +30,9 @@ public class ListPlanDto {
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    @Setter
+    private int planBudget; // #44 여행 일정 예산 추가
 
     private boolean scope;
 
