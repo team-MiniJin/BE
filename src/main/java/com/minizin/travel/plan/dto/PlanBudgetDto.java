@@ -15,6 +15,4 @@ public class PlanBudgetDto {
 
     private int cost;
 
-    private String budgetMemo;
-
 }

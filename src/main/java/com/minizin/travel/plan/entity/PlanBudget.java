@@ -27,9 +27,6 @@ public class PlanBudget {
 
     private int cost;
 
-    @Column(name = "budget_memo")
-    private String budgetMemo;
-
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;

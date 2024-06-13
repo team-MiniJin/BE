@@ -96,7 +96,6 @@ public class PlanService {
                 .scheduleId(scheduleId)
                 .budgetCategory(planBudgetDto.getBudgetCategory())
                 .cost(planBudgetDto.getCost())
-                .budgetMemo(planBudgetDto.getBudgetMemo())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build());
