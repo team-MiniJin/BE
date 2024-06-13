@@ -21,6 +21,18 @@ spring:
       hibernate:
         format_sql: true
 
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: ENC(VjnM+wDg8lmtHcsk8QE9ECyZJYbH6R+5t5WyYDnFnWYNcb6Mw3yH0ksvC/MUed2laFNHUTlkIP/JHcHfvx8H0Q==)
+    password: ENC(CKqFnC3DcwpqaKq0jBK/xhV/gKlKk/iyKVGvnya9ci/cPhvn3XMDvXHcGBNKYYbl)
+
   jwt:
     secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
 
