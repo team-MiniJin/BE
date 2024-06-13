@@ -3,6 +3,11 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
+    h2:
+      url: jdbc:h2:mem:test
+      username: sa
+      password:
+      driverClassName: org.h2.Driver
     mariadb:
       url: jdbc:mariadb://localhost:3306/travel
       username: root
@@ -14,9 +19,8 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
-
+    database-platform: org.hibernate.dialect.MariaDBDialect
 
   logging:
     level:
@@ -31,6 +35,6 @@ spring:
       hibernate:
         SQL: DEBUG
         type: descriptor.sql.BasicBinder=TRACE
-api-tour:
+api:
   serviceKey_De: K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA==
   serviceKey_En: K9eWaIkQyqUUDZPWH%2BjI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA%3D%3D

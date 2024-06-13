@@ -1,32 +1,19 @@
 package com.minizin.travel.tour.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minizin.travel.tour.domain.dto.TourAPIDto;
-import com.minizin.travel.tour.domain.entity.TourAPI;
-import com.minizin.travel.tour.domain.repository.TourAPIRepository;
-import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.JsonSyntaxException;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.minizin.travel.tour.domain.entity.TourAPIRequest;
+import com.minizin.travel.tour.domain.entity.TourAPIResponse;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
-//import lombok.Value;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Value;
+import netscape.javascript.JSObject;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.stereotype.Service;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * Class: TourService Project: travel Package: com.minizin.travel.tour.service
@@ -41,116 +28,65 @@ import java.net.ProtocolException;
 @RequiredArgsConstructor
 public class TourService {
 
-    @Value("${api-tour.serviceKey_De}")
+    @Value("${api.serviceKey_De}")
     public String serviceKey;
-    private final OkHttpClient client = new OkHttpClient();
-    private final Gson gson = new Gson();
-    private final String baseUrl = "https://apis.data.go.kr/B551011/KorService1/";
-    private final TourAPIRepository tourAPIRepository ;
 
-    public List<TourAPI> getTourAPIFromSiteAreaCode() {
-        String areaCodeUrl = baseUrl + "areaCode1";
-
-        Map<String, String> params = new HashMap<>();
-        params.put("ServiceKey", serviceKey); // 필수
-        params.put("MobileOS", "ETC"); // 필수
-        params.put("MobileApp", "AppTest"); // 필수
-        params.put("_type", "json");
-
-        String url = buildUrlWithParams(areaCodeUrl, params);
-
-        Request request = new Request.Builder()
-            .url(url)
-            .get()
-            .addHeader("Content-type", "application/json")
-            .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-
-            String responseJson = response.body().string();
-            System.out.println(responseJson);
-            TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
-
-
-            List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
-            for (TourAPI tourAPI : tourAPIList) {
-                tourAPIRepository.save(tourAPI);
-            }
-
-            return tourAPIList;
-        } catch (IOException | JsonSyntaxException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
-
-    private String buildUrlWithParams(String baseUrl, Map<String, String> params) {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl).newBuilder();
-        params.forEach((key, value) -> urlBuilder.addQueryParameter(key, value));
-        return urlBuilder.build().toString();
-    }
-
-
-    public TourAPIDto getTourAPIFromSite() {
+    public TourAPIResponse getTourAPIFromSite () {
         int[] areaCode = {1, 2, 3, 4, 5, 6, 7, 8, 31, 32};
-        StringBuilder sb = new StringBuilder();
 
         for (int i : areaCode) {
-            try {
-                StringBuilder urlBuilder = new StringBuilder(
-                    "http://api.visitkorea.or.kr/openapi/service/rest/KorService/areaBasedList");
-                urlBuilder.append("?");
-                urlBuilder.append("&" + URLEncoder.encode("ServiceKey", "UTF-8")
-                    + "=" + URLEncoder.encode(serviceKey, "UTF-8")); // 필수
-                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8")
-                    + "=" + URLEncoder.encode("10", "UTF-8"));
-                urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8")
-                    + "=" + URLEncoder.encode("1", "UTF-8"));
-                urlBuilder.append("&" + URLEncoder.encode("MobileOS", "UTF-8")
-                    + "=" + URLEncoder.encode("ETC", "UTF-8")); // 필수
-                urlBuilder.append("&" + URLEncoder.encode("MobileApp", "UTF-8")
-                    + "=" + URLEncoder.encode("AppTest", "UTF-8")); // 필수
-                urlBuilder.append("&" + URLEncoder.encode("_type", "UTF-8")
-                    + "=" + URLEncoder.encode("json", "UTF-8"));
-                urlBuilder.append("&" + URLEncoder.encode("listYN", "UTF-8")
-                    + "=" + URLEncoder.encode("Y", "UTF-8"));
-                urlBuilder.append("&" + URLEncoder.encode("areaCode", "UTF-8")
-                    + "=" + URLEncoder.encode(String.valueOf(i), "UTF-8"));
-                URL url = new URL(urlBuilder.toString());
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("Content-type", "application/json");
+            StringBuilder urlBuilder = new StringBuilder("http://api.visitkorea.or.kr/openapi/service/rest/KorService/areaBasedList");
+            urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + "=서비스키를 넣어주세요");
+            urlBuilder.append("&" + URLEncoder.encode("ServiceKey", "UTF-8") + "=" + URLEncoder.encode(serviceKey, "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("2", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("MobileOS", "UTF-8") + "=" + URLEncoder.encode("ETC", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("MobileApp", "UTF-8") + "=" + URLEncoder.encode("AppTest", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("_type", "UTF-8") + "=" + URLEncoder.encode("json", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("listYN", "UTF-8") + "=" + URLEncoder.encode("Y", "UTF-8"));
+            urlBuilder.append("&" + URLEncoder.encode("areaCode", "UTF-8") + "=" + URLEncoder.encode(String.valueOf(i), "UTF-8"));
+            URL url = new URL(urlBuilder.toString());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Content-type", "application/json");
 
-                System.out.println("Response code: " + conn.getResponseCode());
-                BufferedReader rd;
-                if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-                    rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                } else {
-                    rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                }
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-                rd.close();
-                conn.disconnect();
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            System.out.println("Response code: " + conn.getResponseCode());
+            BufferedReader rd;
+            if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            } else {
+                rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
             }
-        }
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+            rd.close();
+            conn.disconnect();
+            System.out.println(sb.toString());
 
-        System.out.println(sb.toString());
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(sb.toString(), TourAPIDto.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
+    }
+    /*@GetMapping("/api/load")
+    public TourAPIResponse getTourAPIFromSite () {
+        String result = "";
+        String MobileOS = "ETC";
+        String MobileApp = "AppTest";
+        try{
+            URL url = new URL("https://apis.data.go.kr/B551011/KorService1/");
+            HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Content-type","application/json");
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+            result = br.readLine();
+
+            JSONParser jsonParser = new JSONParser();
+
+        }
+
+        return
+    }*/
 }

@@ -42,14 +42,6 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// API DOC swagger
-	implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
-	implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.8")
-	implementation 'io.swagger.core.v3:swagger-annotations:2.1.12'
-	// gson
-	implementation 'com.google.code.gson:gson:2.8.8'
-	// okhttp
-	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 }
 
 tasks.named('test') {
