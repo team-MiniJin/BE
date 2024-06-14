@@ -70,21 +70,20 @@ public class ScrapService {
         }
 
         List<Scrap> scrapList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
-        List<Plan> planList = new ArrayList<>();
+        List<SelectScrapedPlansDto> scrapedPlansDtoList = new ArrayList<>();
         Long scrapId = 0L;
         for (Scrap scrap : scrapList) {
             scrapId = scrap.getId();
-            planList.add(planRepository.findById(scrap.getPlanId()).get());
-        }
+            Plan plan = planRepository.findById(scrap.getPlanId()).get();
 
-        List<SelectScrapedPlansDto> scrapedPlansDtoList = new ArrayList<>();
-        for (Plan plan : planList) {
             SelectScrapedPlansDto newListScrpaedPlanDto = SelectScrapedPlansDto.toDto(plan);
-
+            newListScrpaedPlanDto.setId(scrapId);
             // 닉네임 추가 필요
 
+            // 예산 계산
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
             newListScrpaedPlanDto.setPlanBudget(planSerivce.calculateTotalPlanBudget(planScheduleList));
+
             scrapedPlansDtoList.add(newListScrpaedPlanDto);
         }
 
