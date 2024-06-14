@@ -14,7 +14,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startsWith('feature/')) {
+                    if (env.BRANCH_NAME == 'develop') {
                         // 빌드 단계
                         sh './gradlew clean build'
                     }
