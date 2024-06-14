@@ -10,7 +10,6 @@ pipeline {
         JENKINS_SERVER = "172.17.0.2"
         NGINX_MINIJIN = "172.17.0.3"
         BUILD_PJASYPT = credentials('Pjasypt')
-
     }
     stages {
         stage('Checkout') {
@@ -76,7 +75,6 @@ pipeline {
                 sh './gradlew build'
             }
         }
-
         stage('Deploy') {
             steps {
                 script {
@@ -90,10 +88,10 @@ pipeline {
                                 pkill -f 'java -jar /home/user/travel-0.0.1-SNAPSHOT.jar' || true
                                 nohup java -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=80 > /dev/null 2>&1 &
                             '''
+                        }
                     }
                 }
             }
         }
-
     }
 }
