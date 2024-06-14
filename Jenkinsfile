@@ -23,12 +23,14 @@ pipeline {
                 sh '''
                 # MariaDB JDBC 드라이버 경로
                 JDBC_DRIVER_PATH="/usr/local/lib/mariadb-java-client-3.3.3.jar"
+                # 작업 디렉토리
+                WORK_DIR="/tmp"
 
                 # Java 파일 컴파일
-                javac -cp .:$JDBC_DRIVER_PATH /usr/local/lib/TestJDBC.java
+                javac -cp .:$JDBC_DRIVER_PATH $WORK_DIR/TestJDBC.java
 
                 # Java 파일 실행
-                java -cp .:/usr/local/lib:$JDBC_DRIVER_PATH TestJDBC
+                java -cp .:$WORK_DIR:$JDBC_DRIVER_PATH TestJDBC
                 '''
             }
         }
