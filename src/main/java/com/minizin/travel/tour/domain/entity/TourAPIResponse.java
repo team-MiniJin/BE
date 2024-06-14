@@ -91,8 +91,10 @@ public class TourAPIResponse {
     @Column(name = "mlevel")
     private String mlevel;
 
+
     @Column(name = "modified_time")
     private String modifiedTime;
+
 
     @Column(name = "name")
     private String name;
