@@ -110,9 +110,9 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-
-        return (web) -> web.ignoring().requestMatchers(PathRequest.toH2Console());
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//
+//        return (web) -> web.ignoring().requestMatchers(PathRequest.toH2Console());
+//    }
 }
