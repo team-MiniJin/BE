@@ -156,7 +156,7 @@ public class TourAPI {
     private String hanok;
 
     @Column(name = "mlevel")
-    private Integer mlevel;
+    private String mlevel;
 
     @Column(name = "name")
     private String name;
