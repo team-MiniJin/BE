@@ -81,21 +81,15 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
-                        def remote1 = [:]
-                        remote1.name = 'nginx-minijin'
-                        remote1.host = NGINX_MINIJIN
-                        remote1.user = 'root'
-                        remote1.identityFile = '~/.ssh/authorized_keys'
-                        remote1.allowAnyHosts = true
+                        sshagent (credentials: ['jenkins-ssh-key']) {
+                            // 빌드된 JAR 파일을 Nginx 서버로 전송
+                            sshPut remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', identityFile: "~/.ssh/authorized_keys", allowAnyHosts: true], from: 'build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
 
-                        // 빌드된 JAR 파일을 두 Nginx 서버로 전송
-                        sshPut remote: remote1, from: '/var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
-
-                        // Nginx 서버에서 애플리케이션 실행
-                        sshCommand remote: remote1, command: '''
-                          pkill -f 'java -jar /home/user/travel-0.0.1-SNAPSHOT.jar' || true
-                          nohup java -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /dev/null 2>&1 &
-                        '''
+                            // Nginx 서버에서 애플리케이션 실행
+                            sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', identityFile: "~/.ssh/authorized_keys", allowAnyHosts: true], command: '''
+                                pkill -f 'java -jar /home/user/travel-0.0.1-SNAPSHOT.jar' || true
+                                nohup java -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=80 > /dev/null 2>&1 &
+                            '''
                     }
                 }
             }
