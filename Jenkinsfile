@@ -9,6 +9,7 @@ pipeline {
         DB_PASSWORD = '1q!1q!'
         JENKINS_SERVER = "172.17.0.2"
         NGINX_MINIJIN = "172.17.0.3"
+        BUILD_PJASYPT = credentials('Pjasypt')
 
     }
     stages {
@@ -42,7 +43,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
                         // 빌드 단계
-                        sh './gradlew clean build'
+                        sh "./gradlew clean build ${BUILD_PJASYPT}"
                     }
                 }
             }
