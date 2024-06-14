@@ -46,6 +46,9 @@ public class ScrapService {
             throw new RuntimeException("이미 저장된 plan");
         }
 
+        Plan plan = planRepository.findById(planId).get();
+        plan.setNumberOfScraps(plan.getNumberOfScraps() + 1);
+
         return ResponseCreateScrapPlanDto.toDto(scrapRepository.save(Scrap.builder()
                 .userId(userId)
                 .planId(planId)
