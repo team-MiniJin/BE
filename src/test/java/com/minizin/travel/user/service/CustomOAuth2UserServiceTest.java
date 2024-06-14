@@ -1,7 +1,8 @@
 package com.minizin.travel.user.service;
 
-import com.minizin.travel.user.domain.dto.CustomOAuth2User;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.entity.UserEntity;
+import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,15 +58,22 @@ class CustomOAuth2UserServiceTest {
         when(oAuth2User.getAttributes()).thenReturn(attributes);
         given(userRepository.findByUsername(anyString()))
                 .willReturn(Optional.empty());
+        given(userRepository.save(any()))
+                .willReturn(UserEntity.builder()
+                        .username("kakao 12345")
+                        .email("test@example.com")
+                        .nickname("Test User")
+                        .loginType(LoginType.KAKAO)
+                        .build());
 
         //when
         OAuth2User oAuth2User1 = customOAuth2UserService.loadUser(userRequest);
 
         //then
         assertNotNull(oAuth2User1);
-        assertEquals("kakao 12345", ((CustomOAuth2User) oAuth2User1).getUsername());
-        assertEquals("test@example.com", ((CustomOAuth2User) oAuth2User1).getEmail());
-        assertEquals("Test User", ((CustomOAuth2User) oAuth2User1).getNickname());
+        assertEquals("kakao 12345", ((PrincipalDetails) oAuth2User1).getUsername());
+        assertEquals("test@example.com", ((PrincipalDetails) oAuth2User1).getUserEntity().getEmail());
+        assertEquals("Test User", ((PrincipalDetails) oAuth2User1).getUserEntity().getNickname());
 
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }

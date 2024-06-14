@@ -30,11 +30,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 @MappedSuperclass
 public abstract class BaseEntity{
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false,  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false,  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "modified_at",nullable = true)
+    @Column(nullable = true)
     private LocalDateTime modifiedAt;
 
 }
