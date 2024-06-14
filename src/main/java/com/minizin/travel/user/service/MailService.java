@@ -1,6 +1,7 @@
 package com.minizin.travel.user.service;
 
-import com.minizin.travel.user.domain.dto.SendMailDto;
+import com.minizin.travel.user.domain.dto.SendAuthCodeDto;
+import com.minizin.travel.user.domain.dto.VerifyAuthCodeDto;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,21 @@ public class MailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    public void sendMail(SendMailDto sendMailDto) {
+    public Boolean verifyAuthCode(VerifyAuthCodeDto verifyAuthCodeDto) {
+        String email = verifyAuthCodeDto.getEmail();
+        String authCode = verifyAuthCodeDto.getAuthCode();
+
+        String data = redisService.getData(email);
+        if (data == null) {
+            return false;
+        }
+
+        return authCode.equals(data);
+    }
+
+    public void sendAuthCode(SendAuthCodeDto sendAuthCodeDto) {
         try {
-            javaMailSender.send(this.createEmailForm(sendMailDto.getEmail()));
+            javaMailSender.send(this.createEmailForm(sendAuthCodeDto.getEmail()));
         } catch (Exception e) {
             throw new RuntimeException("인증코드 발송에 실패했습니다.", e);
         }

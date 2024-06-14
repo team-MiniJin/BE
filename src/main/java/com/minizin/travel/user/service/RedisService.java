@@ -16,4 +16,8 @@ public class RedisService {
         stringRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(duration));
     }
 
+    public String getData(String key) {
+        return stringRedisTemplate.opsForValue().get(key);
+    }
+
 }
