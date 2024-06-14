@@ -6,6 +6,7 @@ import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
 import com.minizin.travel.plan.service.PlanService;
 import com.minizin.travel.scrap.dto.ResponseCreateScrapPlanDto;
+import com.minizin.travel.scrap.dto.ResponseDeleteScrapedPlanDto;
 import com.minizin.travel.scrap.dto.ResponseSelectScrapedPlansDto;
 import com.minizin.travel.scrap.dto.SelectScrapedPlansDto;
 import com.minizin.travel.scrap.entity.Scrap;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -99,4 +101,31 @@ public class ScrapService {
                 : scrapRepository.findByIdLessThanAndUserIdOrderByIdDesc(cursorId, userId, page);
     }
     // #50 스크랩 조회 END //
+
+    // #51 스크랩 삭제 START //
+    @Transactional
+    public ResponseDeleteScrapedPlanDto deleteScrapedPlan(Long scrapId) {
+
+        if (!scrapRepository.existsById(scrapId)) {
+
+            return ResponseDeleteScrapedPlanDto.builder()
+                    .success(false)
+                    .message("존재하지 않는 scrap 입니다.")
+                    .scrapId(scrapId)
+                    .build();
+        }
+
+        Long planId = scrapRepository.findById(scrapId).get().getPlanId();
+        Plan plan = planRepository.findById(planId).get();
+        plan.setNumberOfScraps(plan.getNumberOfScraps() - 1);
+
+        scrapRepository.deleteById(scrapId);
+
+        return ResponseDeleteScrapedPlanDto.builder()
+                .success(true)
+                .message("Scrap Deleted Successfully")
+                .scrapId(scrapId)
+                .build();
+    }
+    // #51 스크랩 삭제 END //
 }
