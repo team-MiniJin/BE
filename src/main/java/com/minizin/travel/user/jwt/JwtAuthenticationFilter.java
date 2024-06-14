@@ -28,7 +28,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
         if (requestUri.matches("^\\/login(?:\\/.*)?$") ||
             requestUri.matches("^\\/oauth2(?:\\/.*)?$") ||
-            requestUri.matches("^\\/auth(?:\\/.*)?$")
+            requestUri.matches("^\\/auth(?:\\/.*)?$") ||
+            requestUri.matches("^\\/mails\\/auth-code(?:\\/.*)?$")
         ) {
 
             filterChain.doFilter(request, response);
