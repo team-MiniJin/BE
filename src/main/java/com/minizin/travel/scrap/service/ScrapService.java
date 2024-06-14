@@ -68,14 +68,14 @@ public class ScrapService {
 
         List<Scrap> scrapList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
         List<Plan> planList = new ArrayList<>();
+        Long scrapId = 0L;
         for (Scrap scrap : scrapList) {
+            scrapId = scrap.getId();
             planList.add(planRepository.findById(scrap.getPlanId()).get());
         }
 
         List<SelectScrapedPlansDto> scrapedPlansDtoList = new ArrayList<>();
-        Long planId = 0L;
         for (Plan plan : planList) {
-            planId = plan.getId();
             SelectScrapedPlansDto newListScrpaedPlanDto = SelectScrapedPlansDto.toDto(plan);
 
             // 닉네임 추가 필요
@@ -87,7 +87,7 @@ public class ScrapService {
 
         return ResponseSelectScrapedPlansDto.builder()
                 .data(scrapedPlansDtoList)
-                .cursorId(planId)
+                .cursorId(scrapId)
                 .build();
     }
 
