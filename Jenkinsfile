@@ -7,6 +7,9 @@ pipeline {
         DB_URL = 'jdbc:mariadb://localhost:3306/travel'
         DB_USERNAME = 'root'
         DB_PASSWORD = '1q!1q!'
+        JENKINS_SERVER = "172.17.0.2"
+        NGINX_MINIJIN = "172.17.0.3"
+
     }
     stages {
         stage('Checkout') {
@@ -72,16 +75,30 @@ pipeline {
                 sh './gradlew build'
             }
         }
-        /*
+
         stage('Deploy') {
-            when {
-                branch 'main'
-            }
             steps {
-                // 배포 단계
-                sh './gradlew deploy'
+                script {
+                    if (env.BRANCH_NAME == 'develop') {
+                        def remote1 = [:]
+                        remote1.name = 'nginx-minijin'
+                        remote1.host = NGINX_MINIJIN
+                        remote1.user = 'root'
+                        remote1.identityFile = '~/.ssh/authorized_keys'
+                        remote1.allowAnyHosts = true
+
+                        // 빌드된 JAR 파일을 두 Nginx 서버로 전송
+                        sshPut remote: remote1, from: '/var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
+
+                        // Nginx 서버에서 애플리케이션 실행
+                        sshCommand remote: remote1, command: '''
+                          pkill -f 'java -jar /home/user/travel-0.0.1-SNAPSHOT.jar' || true
+                          nohup java -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /dev/null 2>&1 &
+                        '''
+                    }
+                }
             }
         }
-         */
+
     }
 }
