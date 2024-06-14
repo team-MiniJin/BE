@@ -1,24 +1,24 @@
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   profiles:
     include: oauth
 
   datasource:
-    url: jdbc:h2:mem:test
-    username: sa
-    password:
-    driverClassName: org.h2.Driver
-
-  h2:
-    console:
-      enabled: true
+    url: jdbc:mariadb://localhost:3306/travel
+    username: root
+    password: 1q!1q!
+    driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
 
   jwt:
@@ -26,4 +26,18 @@ spring:
 
   logging:
     level:
-      org.hibernate.SQL: debug
+      root: INFO
+    file:
+      name: logs/myapp.log
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %class{50}.%M:%line - %msg%n"
+      file: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50}:%line - %msg%n"
+    org:
+      springframework: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type: descriptor.sql.BasicBinder=TRACE
+
+api-tour:
+  serviceKey_De: K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA==
+  serviceKey_En: K9eWaIkQyqUUDZPWH%2BjI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA%3D%3D
