@@ -7,10 +7,6 @@ pipeline {
         DB_URL = 'jdbc:mariadb://localhost:3306/travel'
         DB_USERNAME = 'root'
         DB_PASSWORD = '1q!1q!'
-        // 추가 환경 변수
-        JWT_SECRET = 'vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb'
-        SERVICE_KEY_DE = 'K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA=='
-        SERVICE_KEY_EN = 'K9eWaIkQyqUUDZPWH%2BjI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA%3D%3D'
     }
     stages {
         stage('Checkout') {
