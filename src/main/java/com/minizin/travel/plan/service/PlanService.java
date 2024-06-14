@@ -96,7 +96,6 @@ public class PlanService {
                 .scheduleId(scheduleId)
                 .budgetCategory(planBudgetDto.getBudgetCategory())
                 .cost(planBudgetDto.getCost())
-                .budgetMemo(planBudgetDto.getBudgetMemo())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build());
@@ -183,4 +182,38 @@ public class PlanService {
         return totalPlanBudget;
     }
     // #44 2024.06.12 여행 일정 예산 계산하기 END //
+
+    // #38 2024.06.08 내 여행 일정 상세 보기 START //
+    public DetailPlanDto selectDetailPlan(Long planId) {
+
+        Plan plan = planRepository.findById(planId).get();
+
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId); // DB를 가져온 list
+        List<DetailPlanScheduleDto> detailPlanScheduleDtoList = new ArrayList<>(); // 객체를 가져온 list
+        List<String> waypoints = new ArrayList<>();
+        int days = 0;
+
+        for (PlanSchedule planSchedule : planScheduleList) {
+            List<PlanBudget> planBudgetList = planBudgetRepository.findAllByScheduleId(planSchedule.getId());
+            List<DetailPlanBudgetDto> detailPlanBudgetDtoList = new ArrayList<>();
+
+            for (PlanBudget planBudget : planBudgetList) {
+                detailPlanBudgetDtoList.add(DetailPlanBudgetDto.toDto(planBudget));
+            }
+
+            DetailPlanScheduleDto detailPlanScheduleDto = DetailPlanScheduleDto.toDto(planSchedule);
+            waypoints.add(planSchedule.getRegion());
+            detailPlanScheduleDto.setScheduleDays(++days);
+            detailPlanScheduleDto.setDetailPlanBudgetDtoList(detailPlanBudgetDtoList);
+            detailPlanScheduleDtoList.add(detailPlanScheduleDto);
+        }
+
+        DetailPlanDto detailPlanDto = DetailPlanDto.toDto(plan);
+        detailPlanDto.setPlanBudget(calculateTotalPlanBudget(planScheduleList));
+        detailPlanDto.setWaypoints(duplicateWaypoints(waypoints));
+        detailPlanDto.setDetailPlanScheduleDtoList(detailPlanScheduleDtoList);
+
+        return detailPlanDto;
+    }
+    // #38 2024.06.08 내 여행 일정 상세 보기 END //
 }
