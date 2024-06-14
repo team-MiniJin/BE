@@ -53,7 +53,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startsWith('feature/')) {
                         // 테스트 단계
-                        sh './gradlew test'
+                        sh "./gradlew test ${BUILD_PJASYPT}"
                     }
                 }
             }
