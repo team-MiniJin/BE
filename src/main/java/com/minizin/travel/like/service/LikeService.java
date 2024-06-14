@@ -68,21 +68,20 @@ public class LikeService {
         }
 
         List<Likes> likeList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
-        List<Plan> planList = new ArrayList<>();
+        List<SelectLikedPlansDto> listLikedPlansDtoList = new ArrayList<>();
         Long likeId = 0L;
         for (Likes like : likeList) {
             likeId = like.getId();
-            planList.add(planRepository.findById(like.getPlanId()).get());
-        }
+            Plan plan = planRepository.findById(like.getPlanId()).get();
 
-        List<SelectLikedPlansDto> listLikedPlansDtoList = new ArrayList<>();
-        for (Plan plan : planList) {
             SelectLikedPlansDto newSelectLikedPlansDto = SelectLikedPlansDto.toDto(plan);
-
+            newSelectLikedPlansDto.setId(likeId);
             // 닉네임 추가 필요 newLikedPlansDto.setUserNickname
 
+            // 예산 계산
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
             newSelectLikedPlansDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
+
             listLikedPlansDtoList.add(newSelectLikedPlansDto);
         }
 
