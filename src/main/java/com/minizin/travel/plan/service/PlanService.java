@@ -168,7 +168,7 @@ public class PlanService {
     // #29 2024.06.02 내 여행 일정 조회 END //
 
     // #44 2024.06.12 여행 일정 예산 계산하기 START //
-    private int calculateTotalPlanBudget(List<PlanSchedule> planScheduleList) {
+    public int calculateTotalPlanBudget(List<PlanSchedule> planScheduleList) {
 
         int totalPlanBudget = 0;
 
