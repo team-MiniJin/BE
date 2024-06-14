@@ -98,7 +98,6 @@ public class CreatePlanTest {
                 .scheduleId(insertedPlanSchedule.getId())
                 .budgetCategory(planBudgetDto.getBudgetCategory())
                 .cost(planBudgetDto.getCost())
-                .budgetMemo(planBudgetDto.getBudgetMemo())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
