@@ -21,58 +21,14 @@ pipeline {
                 echo "Building branch: ${env.BRANCH_NAME}"
                 // JDBC 연결 테스트
                 sh '''
-                #!/bin/bash
+                # MariaDB JDBC 드라이버 경로
+                JDBC_DRIVER_PATH="/usr/local/lib/mariadb-java-client-3.3.3.jar"
 
-                # MariaDB connection details
-                DB_HOST="localhost"
-                DB_PORT="3306"
-                DB_NAME="travel"
-                DB_USER="root"
-                DB_PASSWORD="1q!1q!"
+                # Java 파일 컴파일
+                javac -cp .:$JDBC_DRIVER_PATH /usr/local/lib/TestJDBC.java
 
-                # JDBC URL
-                JDBC_URL="jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}"
-
-                # SQL query to test connection
-                SQL_QUERY="SELECT 1;"
-
-                # Java code to test JDBC connection
-                JAVA_CODE=$(cat <<EOF
-                import java.sql.Connection;
-                import java.sql.DriverManager;
-                import java.sql.ResultSet;
-                import java.sql.Statement;
-
-                public class TestJDBC {
-                    public static void main(String[] args) {
-                        try {
-                            Class.forName("org.mariadb.jdbc.Driver");
-                            Connection conn = DriverManager.getConnection("$JDBC_URL", "$DB_USER", "$DB_PASSWORD");
-                            Statement stmt = conn.createStatement();
-                            ResultSet rs = stmt.executeQuery("$SQL_QUERY");
-                            while (rs.next()) {
-                                System.out.println("JDBC Connection Successful: " + rs.getInt(1));
-                            }
-                            rs.close();
-                            stmt.close();
-                            conn.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
-                    }
-                }
-                EOF
-                )
-
-                # Save Java code to file
-                echo "$JAVA_CODE" > TestJDBC.java
-
-                # Compile Java code
-                javac -cp /usr/local/lib/mariadb-java-client-3.3.3.jar TestJDBC.java
-
-                # Run Java code
-                java -cp .:/usr/local/lib/mariadb-java-client-3.3.3.jar TestJDBC
+                # Java 파일 실행
+                java -cp .:/usr/local/lib:$JDBC_DRIVER_PATH TestJDBC
                 '''
             }
         }
