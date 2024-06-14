@@ -22,7 +22,6 @@ repositories {
 }
 
 dependencies {
-<<<<<<< feature/mail-send
     // Framework
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -48,36 +47,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-=======
-	// Framework
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	//jwt
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-	// lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	// DB
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	//// test for
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// API DOC swagger
-	implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
-	implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.8")
-	implementation 'io.swagger.core.v3:swagger-annotations:2.1.12'
-	// gson
-	implementation 'com.google.code.gson:gson:2.8.8'
-	// okhttp
-	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
->>>>>>> develop
+    // API DOC swagger
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
+    implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.8")
+    implementation 'io.swagger.core.v3:swagger-annotations:2.1.12'
+    // gson
+    implementation 'com.google.code.gson:gson:2.8.8'
+    // okhttp
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 }
 
 tasks.named('test') {
