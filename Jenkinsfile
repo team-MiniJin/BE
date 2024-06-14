@@ -42,7 +42,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
                         // 빌드 단계
-                        sh './gradlew clean build'
+                        sh './gradlew clean build -Pjasypt.encryptor.password=minizin'
                     }
                 }
             }
