@@ -9,18 +9,18 @@ pipeline {
             steps {
                 // 저장소의 해당 브랜치를 체크아웃합니다.
                 git branch: env.BRANCH_NAME, url: 'https://github.com/team-MiniJin/BE.git'
+                // Java 버전 확인
+                sh 'java -version'
+                // Gradle 버전 확인
+                sh './gradlew -v'
+                // 브랜치 이름 확인
+                echo "Building branch: ${env.BRANCH_NAME}"
             }
         }
         stage('Build') {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
-                        // Java 버전 확인
-                        sh 'java -version'
-                        // Gradle 버전 확인
-                        sh './gradlew -v'
-                        // 브랜치 이름 확인
-                        echo "Building branch: ${env.BRANCH_NAME}"
                         // 빌드 단계
                         sh './gradlew clean build'
                     }
