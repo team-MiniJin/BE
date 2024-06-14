@@ -14,7 +14,7 @@ public class MailController {
 
     private final MailService mailService;
 
-    @PostMapping("/mails/send")
+    @PostMapping("/mails/auth-code")
     public String sendMail(
             @RequestBody @Valid SendMailDto sendMailDto
     ) {
