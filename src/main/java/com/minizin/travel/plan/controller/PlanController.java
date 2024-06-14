@@ -45,5 +45,15 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
+
+    // #39 2024.06.10 다가오는 여행 일정 조회 START //
+    @GetMapping("/plans/upcoming")
+    public ResponseEntity<?> selectUpcomingPlan() {
+
+        var result = planService.selectUpcomingPlan();
+
+        return ResponseEntity.ok(result);
+    }
+    // #39 2024.06.10 다가오는 여행 일정 조회 END //
 }
 
