@@ -5,11 +5,14 @@ import com.minizin.travel.plan.entity.PlanSchedule;
 import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
 import com.minizin.travel.plan.service.PlanService;
-import com.minizin.travel.scrap.dto.ListScrapedPlansDto;
 import com.minizin.travel.scrap.dto.ResponseCreateScrapPlanDto;
+import com.minizin.travel.scrap.dto.ResponseSelectScrapedPlansDto;
+import com.minizin.travel.scrap.dto.SelectScrapedPlansDto;
 import com.minizin.travel.scrap.entity.Scrap;
 import com.minizin.travel.scrap.repository.ScrapRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +27,8 @@ public class ScrapService {
     private final PlanRepository planRepository;
     private final PlanScheduleRepository planScheduleRepository;
     private final PlanService planSerivce;
+
+    final int DEFAULT_PAGE_SIZE = 6;
 
     // #49 스크랩 생성 START //
     public ResponseCreateScrapPlanDto createScrap(Long planId) {
@@ -50,7 +55,9 @@ public class ScrapService {
     // #49 스크랩 생성 END //
 
     // #50 스크랩 조회 START //
-    public List<ListScrapedPlansDto> selectListScrapedPlans() {
+    public ResponseSelectScrapedPlansDto selectListScrapedPlans(Long cursorId) {
+
+        Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
         // 테스트
         Long userId = 1L;
@@ -59,28 +66,35 @@ public class ScrapService {
             throw new RuntimeException("스크랩된 plan이 없습니다.");
         }
 
-        List<Scrap> scrapList = scrapRepository.findAllByUserId(userId);
+        List<Scrap> scrapList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
         List<Plan> planList = new ArrayList<>();
         for (Scrap scrap : scrapList) {
             planList.add(planRepository.findById(scrap.getPlanId()).get());
         }
 
-        System.out.println(scrapList.size());
-        System.out.println(planList.size());
-
-        List<ListScrapedPlansDto> listScrapedPlansDtoList = new ArrayList<>();
+        List<SelectScrapedPlansDto> scrapedPlansDtoList = new ArrayList<>();
+        Long planId = 0L;
         for (Plan plan : planList) {
-            ListScrapedPlansDto newListScrpaedPlanDto = ListScrapedPlansDto.toDto(plan);
+            planId = plan.getId();
+            SelectScrapedPlansDto newListScrpaedPlanDto = SelectScrapedPlansDto.toDto(plan);
 
             // 닉네임 추가 필요
 
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
             newListScrpaedPlanDto.setPlanBudget(planSerivce.calculateTotalPlanBudget(planScheduleList));
-            listScrapedPlansDtoList.add(newListScrpaedPlanDto);
+            scrapedPlansDtoList.add(newListScrpaedPlanDto);
         }
 
-        System.out.println(listScrapedPlansDtoList.size());
-        return listScrapedPlansDtoList;
+        return ResponseSelectScrapedPlansDto.builder()
+                .data(scrapedPlansDtoList)
+                .cursorId(planId)
+                .build();
+    }
+
+    private List<Scrap> findAllByCursorIdCheckExistCursor(Long userId, Long cursorId, Pageable page) {
+
+        return cursorId == 0 ? scrapRepository.findAllByUserIdOrderByIdDesc(userId, page)
+                : scrapRepository.findByIdLessThanAndUserIdOrderByIdDesc(cursorId, userId, page);
     }
     // #50 스크랩 조회 END //
 }

@@ -25,10 +25,10 @@ public class ScrapController {
     // #49 스크랩 생성 END //
 
     // #50 스크랩 조회 START //
-    @GetMapping("/scraps")
-    public ResponseEntity<?> selectListScrapedPlans() {
+    @GetMapping("/scraps/{cursor_id}")
+    public ResponseEntity<?> selectListScrapedPlans(@PathVariable("cursor_id") Long cursorId) {
 
-        var result = scrapService.selectListScrapedPlans();
+        var result = scrapService.selectListScrapedPlans(cursorId);
 
         return ResponseEntity.ok(result);
     }
