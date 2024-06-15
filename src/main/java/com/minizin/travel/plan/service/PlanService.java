@@ -216,4 +216,25 @@ public class PlanService {
         return detailPlanDto;
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
+
+    // #39 2024.06.10 다가오는 여행 일정 조회 START //
+    public List<UpcomingPlanDto> selectUpcomingPlan() {
+
+        // 테스트
+        Long userId = 1L;
+
+        List<UpcomingPlanDto> upcomingPlanDtoList = new ArrayList<>();
+        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(userId, LocalDate.now());
+
+        for (Plan plan : planList) {
+            List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
+
+            UpcomingPlanDto upcomingPlanDto = UpcomingPlanDto.toDto(plan);
+            upcomingPlanDto.setPlanBudget(calculateTotalPlanBudget(planScheduleList));
+            upcomingPlanDtoList.add(upcomingPlanDto);
+        }
+
+        return upcomingPlanDtoList;
+    }
+    // #39 2024.06.10 다가오는 여행 일정 조회 END //
 }
