@@ -1,6 +1,7 @@
 package com.minizin.travel.plan.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.minizin.travel.plan.dto.EditPlanDto;
 import com.minizin.travel.plan.dto.PlanDto;
 import com.minizin.travel.plan.service.PlanService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,17 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
     // #29 2024.06.02 내 여행 일정 조회 END //
+
+    // #32 2024.06.07 내 여행 일정 수정 START //
+    @PutMapping("/plans/{plan_id}")
+    public ResponseEntity<?> updatePlan(@PathVariable("plan_id") Long planId,
+                                        @RequestBody EditPlanDto request) {
+
+        var result = planService.updatePlan(planId, request);
+
+        return ResponseEntity.ok(result);
+    }
+    // #32 2024.06.07 내 여행 일정 수정 END //
 
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
     @GetMapping("/plans/{plan_id}")

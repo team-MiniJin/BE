@@ -27,7 +27,7 @@ public class PlanScheduleDto {
 
     private String arrivalTime;
 
-    @JsonProperty("budget")
+    @JsonProperty("budgets")
     private List<PlanBudgetDto> planBudgetDtos;
 
     private Double x;

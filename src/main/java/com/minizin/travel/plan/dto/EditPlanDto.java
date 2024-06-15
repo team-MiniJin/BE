@@ -4,18 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
-@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "scheduleDtos"})
-public class PlanDto {
+@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate"
+        , "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "scheduleDtos"})
+public class EditPlanDto {
 
     private Long userId;
 
@@ -31,11 +33,7 @@ public class PlanDto {
 
     private int numberOfMembers;
 
-    //private int numberOfLikes;
-
-    //private int numberOfScraps;
-
-    //private List<String> waypoints;
+    private int numberOfScraps;
 
     @JsonProperty("schedules")
     private List<PlanScheduleDto> planScheduleDtos;
