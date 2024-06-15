@@ -81,7 +81,7 @@ pipeline {
                     if (env.BRANCH_NAME == 'develop') {
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                   sh """"
+                                   sh """
                                    echo "Starting SSH connection..."
                                    ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
                                    echo "SSH connection established successfully."
