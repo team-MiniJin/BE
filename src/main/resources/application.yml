@@ -1,7 +1,4 @@
 spring:
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
   profiles:
     include: oauth
 
@@ -38,6 +35,7 @@ spring:
 
   logging:
     level:
+      com.minizin.travel.config: DEBUG
       root: INFO
     file:
       name: logs/myapp.log
@@ -45,7 +43,10 @@ spring:
       console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %class{50}.%M:%line - %msg%n"
       file: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50}:%line - %msg%n"
     org:
-      springframework: DEBUG
+      springframework:
+        security: DEBUG
+        web: DEBUG
+        beans.factory: DEBUG
       hibernate:
         SQL: DEBUG
         type: descriptor.sql.BasicBinder=TRACE
