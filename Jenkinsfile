@@ -81,21 +81,21 @@ pipeline {
                     if (env.BRANCH_NAME == 'develop') {
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                   sh """
-                                   echo "Starting SSH connection..."
-                                   ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
-                                   echo "SSH connection established successfully."
-                                   scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${NGINX_MINIJIN}:/home/user/
-                                   echo "File transferred successfully."
-                                   echo "Trying java Deploy with jar"
-                                   ssh -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'nohup java ${BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &'
-                                   echo "Success java Deploy"
-                                   """
-                               } catch (Exception e) {
-                                   echo "SSH connection or file transfer failed: ${e}"
-                                   error "Stopping pipeline due to SSH failure"
-                               }
-                           }
+                                sh '''
+                                echo "Starting SSH connection..."
+                                ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
+                                echo "SSH connection established successfully."
+                                echo "Transferring file..."
+                                scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${NGINX_MINIJIN}:/home/user/
+                                echo "File transferred successfully."
+                                echo "Deploying the application..."
+                                ssh -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'nohup java ${BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &'
+                                echo "Application deployed successfully."
+                                '''
+                            } catch (Exception e) {
+                                echo "SSH connection or file transfer failed: ${e}"
+                                error "Stopping pipeline due to SSH failure"
+                            }
                         }
                     }
                 }
