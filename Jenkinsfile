@@ -80,14 +80,22 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
                         sshagent (credentials: ['jenkins-ssh-key']) {
-                            // 빌드된 JAR 파일을 Nginx 서버로 전송
-                            sshPut remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true], from: 'build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
-
-                           // Nginx 서버에서 애플리케이션 실행
-                           sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true], command: """
-                               pkill -f 'java -jar /home/user/travel-0.0.1-SNAPSHOT.jar' || true
-                               nohup java ${BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &
-                           """
+                            try {
+                                   sh """"
+                                   echo "Starting SSH connection..."
+                                   ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
+                                   echo "SSH connection established successfully."
+                                   scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${NGINX_MINIJIN}:/home/user/
+                                   echo "File transferred successfully."
+                                   echo "Trying java Deploy with jar"
+                                   ssh -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'nohup java ${BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &'
+                                   echo "Success java Deploy"
+                                   """
+                               } catch (Exception e) {
+                                   echo "SSH connection or file transfer failed: ${e}"
+                                   error "Stopping pipeline due to SSH failure"
+                               }
+                           }
                         }
                     }
                 }
