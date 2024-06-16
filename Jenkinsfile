@@ -84,16 +84,16 @@ pipeline {
                             try {
                                 sh """
                                 echo "Starting SSH connection..."
-                                ssh -i ~/.ssh/id_rsa root@$NGINX_MINIJIN 'echo "SSH connection successful"'
+                                ssh -i ~/.ssh/jenkins_agent_key root@$NGINX_MINIJIN 'echo "SSH connection successful"'
                                 echo "SSH connection established successfully."
                                 echo "Killing 8080, java service"
-                                ssh -i ~/.ssh/id_rsa root@$NGINX_MINIJIN '/home/user/kill_java.sh'
+                                ssh -i ~/.ssh/jenkins_agent_key root@$NGINX_MINIJIN '/home/user/kill_java.sh'
                                 echo "Killing Complete 8080, java service"
                                 echo "Transferring file..."
-                                scp -i ~/.ssh/id_rsa /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${env.NGINX_MINIJIN}:/home/user/
+                                scp -i ~/.ssh/jenkins_agent_key /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${env.NGINX_MINIJIN}:/home/user/
                                 echo "File transferred successfully."
                                 echo "Deploying the application..."
-                                ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
+                                ssh -i ~/.ssh/jenkins_agent_key -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
                                 echo "Application deployed successfully."
                                 """
 
