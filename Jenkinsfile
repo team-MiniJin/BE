@@ -81,17 +81,17 @@ pipeline {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.contains('jenkins')) {
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                sh """"
+                                sh """
                                 echo "Starting SSH connection..."
                                 ssh -vvv -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} 'echo "SSH connection successful"'
                                 echo "SSH connection established successfully."
                                 echo "Killing 8080, java service"
                                 ssh -o StrictHostKeyChecking=no root@172.17.0.3 << 'EOF'
-                                PIDS=$(lsof -t -i:8080)
-                                if [ -n "$PIDS" ]; then
-                                  echo "Killing processes using port 8080: $PIDS"
-                                  for PID in $PIDS; do
-                                    kill -9 $PID || echo "Failed to kill process $PID"
+                                PIDS=\$(lsof -t -i:8080)
+                                if [ -n "\$PIDS" ]; then
+                                  echo "Killing processes using port 8080: \$PIDS"
+                                  for PID in \$PIDS; do
+                                    kill -9 \$PID || echo "Failed to kill process \$PID"
                                   done
                                 else
                                   echo "No process found using port 8080"
@@ -107,7 +107,7 @@ pipeline {
                                 echo "Application deployed successfully."
                                 """
                             } catch (Exception e) {
-                                echo "SSH connection or file transfer failed: ${e}"g
+                                echo "SSH connection or file transfer failed: ${e}"
                                 error "Stopping pipeline due to SSH failure"
                             }
                         }
