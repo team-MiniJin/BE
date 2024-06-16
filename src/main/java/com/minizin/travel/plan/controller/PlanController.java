@@ -1,10 +1,11 @@
 package com.minizin.travel.plan.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.minizin.travel.plan.dto.EditPlanDto;
 import com.minizin.travel.plan.dto.PlanDto;
 import com.minizin.travel.plan.service.PlanService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +18,8 @@ public class PlanController {
     // #28 2024.05.30 내 여행 일정 생성하기 START //
     @PostMapping("/plans")
     public ResponseEntity<?> createPlan(
-            @RequestBody PlanDto request
-    ) throws JsonProcessingException {
+            @RequestBody @Valid PlanDto request // @Valid : #87 Request 예외/에러 처리
+    ) throws BadRequestException {
 
         var result = planService.createPlan(request);
 

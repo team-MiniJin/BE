@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -11,14 +12,16 @@ import java.util.List;
 
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
-@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "scheduleDtos"})
+@JsonPropertyOrder({"userId", "planName", "theme", "startDate", "endDate", "scope", "numberOfMembers", "schedules"})
 public class PlanDto {
 
     private Long userId;
 
+    // #87 Request 예외/에러 처리
+    @Size(min = 2, max = 30, message = "'여행 일정 이름'은 2 ~ 30자여야 합니다.")
     private String planName;
 
     private String theme;
@@ -29,13 +32,9 @@ public class PlanDto {
 
     private boolean scope;
 
+    // #87 Request 예외/에러 처리
+    @Size(min = 1, max = 20, message = "'여행 인원'은 1 ~ 20명이어야 합니다.")
     private int numberOfMembers;
-
-    //private int numberOfLikes;
-
-    //private int numberOfScraps;
-
-    //private List<String> waypoints;
 
     @JsonProperty("schedules")
     private List<PlanScheduleDto> planScheduleDtos;
