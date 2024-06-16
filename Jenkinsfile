@@ -79,6 +79,7 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.contains('jenkins')) {
+                        echo "Using SSH credentials: jenkins-ssh-key"
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
                                 sh """
@@ -86,7 +87,7 @@ pipeline {
                                 ssh -vvv -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} 'echo "SSH connection successful"'
                                 echo "SSH connection established successfully."
                                 echo "Killing 8080, java service"
-                                ssh -o StrictHostKeyChecking=no root@172.17.0.3 << 'EOF'
+                                ssh -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} << 'EOF'
                                 PIDS=\$(lsof -t -i:8080)
                                 if [ -n "\$PIDS" ]; then
                                   echo "Killing processes using port 8080: \$PIDS"
