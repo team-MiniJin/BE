@@ -66,14 +66,14 @@ pipeline {
                         echo "Using SSH credentials: jenkins-ssh-key"
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                sshCommand remote: [host: "${NGINX_MINIJIN}", user: 'root', credentialsId: 'jenkins-ssh-key', allowAnyHosts: true], command: """
+                                sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true], command: """
                                   echo "Killing 8080, java service"
                                   /home/user/kill_java.sh
                                   echo "Killing Complete 8080, java service"
                                 """
-                                sshPut remote: [host: "${NGINX_MINIJIN}", user: 'root', credentialsId: 'jenkins-ssh-key', allowAnyHosts: true], from: 'build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
+                                sshPut remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true], from: 'build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
 
-                                sshCommand remote: [host: "${NGINX_MINIJIN}", user: 'root', credentialsId: 'jenkins-ssh-key', allowAnyHosts: true], command: """
+                                sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true], command: """
                                   echo "Deploying the application..."
                                   nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &
                                   echo "Application deployed successfully."
