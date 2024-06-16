@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +34,7 @@ public class PlanDto {
     private boolean scope;
 
     // #87 Request 예외/에러 처리
-    @Size(min = 1, max = 20, message = "'여행 인원'은 1 ~ 20명이어야 합니다.")
+    @Range(min = 1, max = 20, message = "'여행 인원'은 1 ~ 20명이어야 합니다.")
     private int numberOfMembers;
 
     @JsonProperty("schedules")
