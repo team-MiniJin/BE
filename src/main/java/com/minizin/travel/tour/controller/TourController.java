@@ -39,4 +39,12 @@ public class TourController {
         return ResponseEntity.ok(tourService.getTourAPIFromSiteAreaCode());
     }
 
+//    @Operation(summary = "Get searchkeyword", description = "Retrieve a specific searchkeyword by keyword")
+    @GetMapping("/searchkeyword")
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getTourAPIFromSiteSearchKeyword() {
+        return tourService.getTourAPIFromSiteSearchKeyword()
+            .thenApply(ResponseEntity::ok)
+            .exceptionally(throwable -> ResponseEntity.status(500).build());
+    }
+
 }
