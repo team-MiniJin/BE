@@ -1,6 +1,7 @@
 package com.minizin.travel.plan.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.minizin.travel.plan.dto.EditPlanDto;
 import com.minizin.travel.plan.dto.PlanDto;
 import com.minizin.travel.plan.service.PlanService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,17 @@ public class PlanController {
     }
     // #29 2024.06.02 내 여행 일정 조회 END //
 
+    // #32 2024.06.07 내 여행 일정 수정 START //
+    @PutMapping("/plans/{plan_id}")
+    public ResponseEntity<?> updatePlan(@PathVariable("plan_id") Long planId,
+                                        @RequestBody EditPlanDto request) {
+
+        var result = planService.updatePlan(planId, request);
+
+        return ResponseEntity.ok(result);
+    }
+    // #32 2024.06.07 내 여행 일정 수정 END //
+
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
     @GetMapping("/plans/{plan_id}")
     public ResponseEntity<?> selectDetailPlan(@PathVariable("plan_id") Long planId) {
@@ -45,5 +57,25 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
+
+    // #47 2024.06.13 내 여행 일정 삭제 START //
+    @DeleteMapping("/plans/{plan_id}")
+    public ResponseEntity<?> deletePlan(@PathVariable("plan_id") Long planId) {
+
+        var result = planService.deletePlan(planId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #47 2024.06.13 내 여행 일정 삭제 END //
+
+    // #39 2024.06.10 다가오는 여행 일정 조회 START //
+    @GetMapping("/plans/upcoming")
+    public ResponseEntity<?> selectUpcomingPlan() {
+
+        var result = planService.selectUpcomingPlan();
+
+        return ResponseEntity.ok(result);
+    }
+    // #39 2024.06.10 다가오는 여행 일정 조회 END //
 }
 

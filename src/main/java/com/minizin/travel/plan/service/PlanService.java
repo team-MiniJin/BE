@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -183,6 +184,56 @@ public class PlanService {
     }
     // #44 2024.06.12 여행 일정 예산 계산하기 END //
 
+    // #32 2024.06.07 내 여행 일정 수정 START //
+    @Transactional
+    public ResponseEditPlanDto updatePlan(Long planId, EditPlanDto editPlanDto) {
+
+        /* 추후 PUT요청에 id값이 포함되면 변경 예정 */
+
+        // 기존 PlanSchedule 및 PlanBudget 삭제
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
+        for (PlanSchedule planSchedule : planScheduleList) {
+            planBudgetRepository.deleteByScheduleId(planSchedule.getId());
+        }
+        planScheduleRepository.deleteByPlanId(planId);
+
+        // plan id 로 plan DB 찾아오기
+        // plan DB 에 저장
+        Plan plan = planRepository.findById(planId).get();
+
+        Plan newPlan = planRepository.save(Plan.builder()
+                .id(planId)
+                .userId(plan.getUserId())
+                .planName(editPlanDto.getPlanName())
+                .theme(editPlanDto.getTheme())
+                .startDate(editPlanDto.getStartDate())
+                .endDate(editPlanDto.getEndDate())
+                .scope(editPlanDto.isScope())
+                .numberOfMembers(editPlanDto.getNumberOfMembers())
+                .numberOfScraps(plan.getNumberOfScraps())
+                .createdAt(plan.getCreatedAt())
+                .modifiedAt(LocalDateTime.now())
+                .build());
+
+        for (PlanScheduleDto planScheduleDto : editPlanDto.getPlanScheduleDtos()) {
+            Long scheduleId = createPlanSchedule(planScheduleDto, planId).getId();
+
+            for (PlanBudgetDto planBudgetDto : planScheduleDto.getPlanBudgetDtos()) {
+                createPlanBudget(planBudgetDto, scheduleId);
+            }
+        }
+
+        return ResponseEditPlanDto.builder()
+                .success(true)
+                .message("일정을 수정하였습니다.")
+                .planId(planId)
+                .createdAt(newPlan.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .updatedAt(newPlan.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .numberOfScraps(newPlan.getNumberOfScraps())
+                .build();
+    }
+    // #32 2024.06.07 내 여행 일정 수정 END //
+
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
     public DetailPlanDto selectDetailPlan(Long planId) {
 
@@ -216,4 +267,55 @@ public class PlanService {
         return detailPlanDto;
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
+
+    // #47 2024.06.13 내 여행 일정 삭제 START //
+    @Transactional
+    public ResponseDeletePlanDto deletePlan(Long planId) {
+
+        // 로그인한 유저 비교
+
+        if (!planRepository.existsById(planId)) {
+            return ResponseDeletePlanDto.builder()
+                    .success(false)
+                    .message("여행 일정 id가 유효하지 않습니다.")
+                    .planId(planId)
+                    .build();
+        }
+
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
+        for (PlanSchedule planSchedule : planScheduleList) {
+            planBudgetRepository.deleteByScheduleId(planSchedule.getId());
+        }
+        planScheduleRepository.deleteByPlanId(planId);
+
+        planRepository.deleteById(planId);
+
+        return ResponseDeletePlanDto.builder()
+                .success(true)
+                .message("일정을 삭제하였습니다.")
+                .planId(planId)
+                .build();
+    }
+    // #47 2024.06.13 내 여행 일정 삭제 END //
+
+    // #39 2024.06.10 다가오는 여행 일정 조회 START //
+    public List<UpcomingPlanDto> selectUpcomingPlan() {
+
+        // 테스트
+        Long userId = 1L;
+
+        List<UpcomingPlanDto> upcomingPlanDtoList = new ArrayList<>();
+        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(userId, LocalDate.now());
+
+        for (Plan plan : planList) {
+            List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
+
+            UpcomingPlanDto upcomingPlanDto = UpcomingPlanDto.toDto(plan);
+            upcomingPlanDto.setPlanBudget(calculateTotalPlanBudget(planScheduleList));
+            upcomingPlanDtoList.add(upcomingPlanDto);
+        }
+
+        return upcomingPlanDtoList;
+    }
+    // #39 2024.06.10 다가오는 여행 일정 조회 END //
 }

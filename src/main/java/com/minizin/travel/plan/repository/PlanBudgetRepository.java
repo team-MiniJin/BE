@@ -10,4 +10,7 @@ import java.util.List;
 public interface PlanBudgetRepository extends JpaRepository<PlanBudget, Long> {
 
     List<PlanBudget> findAllByScheduleId(Long scheduleId);
+
+    // #47 2024.06.13 내 여행 일정 삭제
+    void deleteByScheduleId(Long scheduleId);
 }
