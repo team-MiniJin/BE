@@ -78,7 +78,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'develop') {
+                    if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.contains('jenkins')) {
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
                                 sh '''
