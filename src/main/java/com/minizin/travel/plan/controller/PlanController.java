@@ -58,6 +58,16 @@ public class PlanController {
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
 
+    // #47 2024.06.13 내 여행 일정 삭제 START //
+    @DeleteMapping("/plans/{plan_id}")
+    public ResponseEntity<?> deletePlan(@PathVariable("plan_id") Long planId) {
+
+        var result = planService.deletePlan(planId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #47 2024.06.13 내 여행 일정 삭제 END //
+
     // #39 2024.06.10 다가오는 여행 일정 조회 START //
     @GetMapping("/plans/upcoming")
     public ResponseEntity<?> selectUpcomingPlan() {
