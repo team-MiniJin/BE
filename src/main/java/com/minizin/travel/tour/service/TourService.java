@@ -47,9 +47,51 @@ public class TourService {
     private final Gson gson = new Gson();
     private final String baseUrl = "https://apis.data.go.kr/B551011/KorService1/";
     private final TourAPIRepository tourAPIRepository;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteSearchKeyword() {
+        String getCategoryUrl = baseUrl + "searchKeyword1";
+
+        Map<String, String> params = new HashMap<>();
+        params.put("ServiceKey", serviceKey); // 필수
+        params.put("MobileOS", "ETC"); // 필수
+        params.put("MobileApp", "AppTest"); // 필수
+        params.put("keyword", "강원");
+        params.put("_type", "json");
+
+        String url = buildUrlWithParams(getCategoryUrl, params);
+
+        Request request = new Request.Builder()
+            .url(url)
+            .get()
+            .addHeader("Content-type", "application/json")
+            .build();
+
+        return CompletableFuture.supplyAsync(() -> {
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                }
+
+                String responseJson = response.body().string();
+                System.out.println(responseJson);
+                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+
+                List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
+                for (TourAPI tourAPI : tourAPIList) {
+                    tourAPIRepository.save(tourAPI);
+                }
+
+                return tourAPIList;
+            } catch (IOException | JsonSyntaxException e) {
+                e.printStackTrace();
+                return Collections.emptyList();
+            }
+        }, executorService);
+    }
 
     public List<TourAPI> getTourAPIFromSiteAreaCode() {
-        String areaCodeUrl = baseUrl + "areaCode1";
+        String getCategoryUrl = baseUrl + "areaCode1";
 
         Map<String, String> params = new HashMap<>();
         params.put("ServiceKey", serviceKey); // 필수
@@ -57,7 +99,7 @@ public class TourService {
         params.put("MobileApp", "AppTest"); // 필수
         params.put("_type", "json");
 
-        String url = buildUrlWithParams(areaCodeUrl, params);
+        String url = buildUrlWithParams(getCategoryUrl, params);
 
         Request request = new Request.Builder()
             .url(url)
