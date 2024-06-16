@@ -1,6 +1,7 @@
 package com.minizin.travel.user.service;
 
 import com.minizin.travel.user.domain.dto.FindIdDto;
+import com.minizin.travel.user.domain.dto.FindPasswordDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.repository.UserRepository;
@@ -22,6 +23,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MailService mailService;
 
     @InjectMocks
     private UserService userService;
@@ -63,4 +67,44 @@ class UserServiceTest {
         assertEquals("등록되지 않은 이메일입니다.", exception.getMessage());
     }
 
+    @Test
+    @DisplayName("임시 비밀번호 발급 성공")
+    void findPassword_success() {
+        //given
+        FindPasswordDto.Request request = new FindPasswordDto.Request();
+        request.setUsername("username");
+        request.setEmail("email");
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .email("email")
+                .build();
+        given(userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail()))
+                .willReturn(Optional.of(userEntity));
+        given(mailService.sendTemporaryPassword(request))
+                .willReturn("password");
+
+
+        //when
+        userService.findPassword(request);
+
+        //then
+        assertEquals("password", userEntity.getPassword());
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 발급 실패 - 존재하지 않는 사용자")
+    void findPassword_fail_userNotFound() {
+        //given
+        FindPasswordDto.Request request = new FindPasswordDto.Request();
+        request.setUsername("username");
+        request.setEmail("email");
+        given(userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail()))
+                .willReturn(Optional.empty());
+
+        //when
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.findPassword(request));
+
+        //then
+        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+    }
 }
