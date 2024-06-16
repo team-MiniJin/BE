@@ -81,9 +81,9 @@ pipeline {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.contains('jenkins')) {
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                sh '''
+                                sh """"
                                 echo "Starting SSH connection..."
-                                ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
+                                ssh -vvv -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} 'echo "SSH connection successful"'
                                 echo "SSH connection established successfully."
                                 echo "Killing 8080, java service"
                                 ssh -o StrictHostKeyChecking=no root@172.17.0.3 << 'EOF'
@@ -100,13 +100,12 @@ pipeline {
                                 EOF
                                 echo "Killing Complete 8080, java service"
                                 echo "Transferring file..."
-                                scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${NGINX_MINIJIN}:/home/user/
+                                scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${env.NGINX_MINIJIN}:/home/user/
                                 echo "File transferred successfully."
                                 echo "Deploying the application..."
-                                '''
-                                ssh -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} "nohup java ${BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
+                                ssh -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
                                 echo "Application deployed successfully."
-
+                                """
                             } catch (Exception e) {
                                 echo "SSH connection or file transfer failed: ${e}"g
                                 error "Stopping pipeline due to SSH failure"
