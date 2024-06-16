@@ -86,18 +86,18 @@ pipeline {
                                 ssh -vvv -o StrictHostKeyChecking=no root@${NGINX_MINIJIN} 'echo "SSH connection successful"'
                                 echo "SSH connection established successfully."
                                 echo "Killing 8080, java service"
-                                ssh -o StrictHostKeyChecking=no root@172.17.0.3 '
-                                PIDS=$(lsof -t -i:8080) &&
+                                ssh -o StrictHostKeyChecking=no root@172.17.0.3 << 'EOF'
+                                PIDS=$(lsof -t -i:8080)
                                 if [ -n "$PIDS" ]; then
                                   echo "Killing processes using port 8080: $PIDS"
                                   for PID in $PIDS; do
-                                    kill -9 $PID
+                                    kill -9 $PID || echo "Failed to kill process $PID"
                                   done
                                 else
                                   echo "No process found using port 8080"
-                                fi &&
+                                fi
                                 pkill -f "java -jar /home/user/travel-0.0.1-SNAPSHOT.jar" || true
-                                '
+                                EOF
                                 echo "Killing Complete 8080, java service"
                                 echo "Transferring file..."
                                 scp -v /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${NGINX_MINIJIN}:/home/user/
