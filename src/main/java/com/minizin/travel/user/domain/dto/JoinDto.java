@@ -4,18 +4,21 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class JoinDto {
     @Getter
+    @Setter
     public static class Request {
         @NotBlank
         @Size(min = 6, max = 20, message = "Username must be between 6 and 20 characters")
@@ -36,9 +39,6 @@ public class JoinDto {
         @Size(max = 320, message = "Email must be less than 320 characters")
         private String email;
 
-        @NotBlank
-        @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
-        private String name;
     }
 
     @Getter
@@ -50,7 +50,7 @@ public class JoinDto {
         private String password;
         private String nickname;
         private String email;
-        private String name;
+        private Role role;
         private LoginType loginType;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
@@ -63,7 +63,7 @@ public class JoinDto {
                     .password(userEntity.getPassword())
                     .nickname(userEntity.getNickname())
                     .email(userEntity.getEmail())
-                    .name(userEntity.getName())
+                    .role(userEntity.getRole())
                     .loginType(userEntity.getLoginType())
                     .createdAt(userEntity.getCreatedAt())
                     .updatedAt(userEntity.getUpdatedAt())

@@ -3,6 +3,7 @@ package com.minizin.travel.user.service;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,14 +32,14 @@ class CustomUserDetailsServiceTest {
     @DisplayName("username 으로 principalDetails 획득 성공")
     void loadUserByUsername_success() {
         //given
-        given(userRepository.findByUsername(anyString()))
+        given(userRepository.findByUsername("username"))
                 .willReturn(Optional.of(
                         UserEntity.builder()
                                 .username("username")
                                 .password("password")
                                 .email("email")
-                                .name("name")
                                 .nickname("nickname")
+                                .role(Role.ROLE_USER)
                                 .loginType(LoginType.LOCAL)
                                 .build()
                 ));
@@ -51,8 +51,8 @@ class CustomUserDetailsServiceTest {
         assertEquals("username", ((PrincipalDetails) userDetails).getUserEntity().getUsername());
         assertEquals("password", ((PrincipalDetails) userDetails).getUserEntity().getPassword());
         assertEquals("email", ((PrincipalDetails) userDetails).getUserEntity().getEmail());
-        assertEquals("name", ((PrincipalDetails) userDetails).getUserEntity().getName());
         assertEquals("nickname", ((PrincipalDetails) userDetails).getUserEntity().getNickname());
+        assertEquals(Role.ROLE_USER, ((PrincipalDetails) userDetails).getUserEntity().getRole());
         assertEquals(LoginType.LOCAL, ((PrincipalDetails) userDetails).getUserEntity().getLoginType());
     }
 
@@ -60,7 +60,7 @@ class CustomUserDetailsServiceTest {
     @DisplayName("username 으로 principalDetails 획득 실패 - 존재하지 않는 사용자")
     void loadUserByUsername_fail_UserNotFound() {
         //given
-        given(userRepository.findByUsername(anyString()))
+        given(userRepository.findByUsername("username"))
                 .willReturn(Optional.empty());
 
         //when

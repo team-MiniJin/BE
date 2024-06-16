@@ -3,6 +3,7 @@ package com.minizin.travel.user.service;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -40,10 +40,10 @@ class CustomOAuth2UserServiceTest {
     @DisplayName("소셜 로그인 시 사용자 정보 획득 성공")
     void loadUser_success() {
         //given
-        OAuth2User oAuth2User = mock(OAuth2User.class);
-        given(delegate.loadUser(any())).willReturn(oAuth2User);
-
         OAuth2UserRequest userRequest = mock(OAuth2UserRequest.class);
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        given(delegate.loadUser(userRequest)).willReturn(oAuth2User);
+
         ClientRegistration clientRegistration = mock(ClientRegistration.class);
         when(userRequest.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn("kakao");
@@ -56,13 +56,14 @@ class CustomOAuth2UserServiceTest {
                 )
         );
         when(oAuth2User.getAttributes()).thenReturn(attributes);
-        given(userRepository.findByUsername(anyString()))
+        given(userRepository.findByUsername("kakao 12345"))
                 .willReturn(Optional.empty());
-        given(userRepository.save(any()))
+        given(userRepository.save(any(UserEntity.class)))
                 .willReturn(UserEntity.builder()
                         .username("kakao 12345")
                         .email("test@example.com")
                         .nickname("Test User")
+                        .role(Role.ROLE_USER)
                         .loginType(LoginType.KAKAO)
                         .build());
 

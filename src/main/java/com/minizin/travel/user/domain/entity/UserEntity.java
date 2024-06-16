@@ -1,6 +1,7 @@
 package com.minizin.travel.user.domain.entity;
 
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,7 +32,8 @@ public class UserEntity {
     @Setter
     private String nickname;
 
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     private LoginType loginType;

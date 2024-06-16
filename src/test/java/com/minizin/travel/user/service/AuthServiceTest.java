@@ -3,6 +3,7 @@ package com.minizin.travel.user.service;
 import com.minizin.travel.user.domain.dto.JoinDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,12 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -35,20 +36,23 @@ class AuthServiceTest {
     @DisplayName("회원가입 성공")
     void join_success() {
         //given
-        JoinDto.Request request = mock(JoinDto.Request.class);
-        when(request.getUsername()).thenReturn("username");
-        given(userRepository.existsByUsername(anyString()))
+        JoinDto.Request request = new JoinDto.Request();
+        request.setUsername("username");
+        request.setPassword("password");
+        request.setNickname("nickname");
+        request.setEmail("email");
+
+        given(userRepository.existsByUsername(request.getUsername()))
                 .willReturn(false);
-        when(request.getPassword()).thenReturn("password");
-        given(bCryptPasswordEncoder.encode(anyString()))
+        given(bCryptPasswordEncoder.encode(request.getPassword()))
                 .willReturn("password");
-        given(userRepository.save(any()))
+        given(userRepository.save(any(UserEntity.class)))
                 .willReturn(UserEntity.builder()
                         .username("username")
                         .password("password")
                         .nickname("nickname")
-                        .email("local@domain.com")
-                        .name("name")
+                        .email("email")
+                        .role(Role.ROLE_USER)
                         .loginType(LoginType.LOCAL)
                         .build());
 
@@ -59,8 +63,8 @@ class AuthServiceTest {
         assertEquals("username", response.getUsername());
         assertEquals("password", response.getPassword());
         assertEquals("nickname", response.getNickname());
-        assertEquals("local@domain.com", response.getEmail());
-        assertEquals("name", response.getName());
+        assertEquals("email", response.getEmail());
+        assertEquals(Role.ROLE_USER, response.getRole());
         assertEquals(LoginType.LOCAL, response.getLoginType());
 
         verify(userRepository, times(1)).save(any(UserEntity.class));
@@ -70,9 +74,9 @@ class AuthServiceTest {
     @DisplayName("회원가입 실패 - 이미 존재하는 사용자")
     void join_fail_alreadyExistsUser() {
         //given
-        JoinDto.Request request = mock(JoinDto.Request.class);
-        when(request.getUsername()).thenReturn("username");
-        given(userRepository.existsByUsername(anyString()))
+        JoinDto.Request request = new JoinDto.Request();
+        request.setUsername("username");
+        given(userRepository.existsByUsername("username"))
                 .willReturn(true);
 
         //when

@@ -1,6 +1,7 @@
 package com.minizin.travel.user.oauth2;
 
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.jwt.TokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -26,8 +27,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         String username = principalDetails.getUsername();
+        Role role = principalDetails.getUserEntity().getRole();
 
-        String token = tokenProvider.createJwt(username, 60 * 60 * 60L);
+        String token = tokenProvider.createJwt(username, role.toString(), 60 * 60 * 60L);
 
         // 응답에 쿠키로 jwt 발급
         response.addCookie(createCookie("Authorization", token));
