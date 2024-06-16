@@ -3,6 +3,7 @@ pipeline {
     environment {
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+        // 데이터베이스 환경 변수
         DB_URL = 'jdbc:mariadb://localhost:3306/travel'
         DB_USERNAME = 'root'
         DB_PASSWORD = '1q!1q!'
@@ -13,14 +14,25 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // 저장소의 해당 브랜치를 체크아웃합니다.
                 git branch: env.BRANCH_NAME, url: 'https://github.com/team-MiniJin/BE.git'
+                // Java 버전 확인
                 sh 'java -version'
+                // Gradle 버전 확인
                 sh './gradlew -v'
+                // 브랜치 이름 확인
                 echo "Building branch: ${env.BRANCH_NAME}"
+                // JDBC 연결 테스트
                 sh '''
+                # MariaDB JDBC 드라이버 경로
                 JDBC_DRIVER_PATH="/usr/local/lib/mariadb-java-client-3.3.3.jar"
+                # 작업 디렉토리
                 WORK_DIR="/tmp"
+
+                # Java 파일 컴파일
                 javac -cp .:$JDBC_DRIVER_PATH $WORK_DIR/TestJDBC.java
+
+                # Java 파일 실행
                 java -cp .:$WORK_DIR:$JDBC_DRIVER_PATH TestJDBC
                 '''
             }
@@ -29,6 +41,7 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'develop') {
+                        // 빌드 단계
                         sh "./gradlew clean build ${BUILD_PJASYPT}"
                     }
                 }
@@ -38,6 +51,7 @@ pipeline {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME.startsWith('feature/')) {
+                        // 테스트 단계
                         sh "./gradlew test ${BUILD_PJASYPT}"
                     }
                 }
@@ -48,6 +62,7 @@ pipeline {
                 branch 'release/*'
             }
             steps {
+                // 릴리스 단계
                 sh './gradlew publish'
             }
         }
@@ -56,6 +71,7 @@ pipeline {
                 branch 'hotfix/*'
             }
             steps {
+                // 핫픽스 단계
                 sh './gradlew build'
             }
         }
@@ -66,17 +82,19 @@ pipeline {
                         echo "Using SSH credentials: jenkins-ssh-key"
                         sshagent (credentials: ['jenkins-ssh-key']) {
                             try {
-                                sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true, credentialsId: 'jenkins-ssh-key'], command: """
-                                  echo "Killing 8080, java service"
-                                  /home/user/kill_java.sh
-                                  echo "Killing Complete 8080, java service"
-                                """
-                                sshPut remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true, credentialsId: 'jenkins-ssh-key'], from: 'build/libs/travel-0.0.1-SNAPSHOT.jar', into: '/home/user/'
-
-                                sshCommand remote: [name: 'nginx-minijin', host: "${NGINX_MINIJIN}", user: 'root', allowAnyHosts: true, credentialsId: 'jenkins-ssh-key'], command: """
-                                  echo "Deploying the application..."
-                                  nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &
-                                  echo "Application deployed successfully."
+                                sh """
+                                echo "Starting SSH connection..."
+                                ssh -i ~/.ssh/id_rsa root@$NGINX_MINIJIN 'echo "SSH connection successful"'
+                                echo "SSH connection established successfully."
+                                echo "Killing 8080, java service"
+                                ssh -i ~/.ssh/id_rsa root@$NGINX_MINIJIN '/home/user/kill_java.sh'
+                                echo "Killing Complete 8080, java service"
+                                echo "Transferring file..."
+                                scp -i ~/.ssh/id_rsa /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${env.NGINX_MINIJIN}:/home/user/
+                                echo "File transferred successfully."
+                                echo "Deploying the application..."
+                                ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
+                                echo "Application deployed successfully."
                                 """
 
                             } catch (Exception e) {
