@@ -72,7 +72,7 @@ public class TourService {
                 if (!response.isSuccessful()) {
                     throw new IOException("Unexpected code " + response);
                 }
-
+                System.out.println("Response ="+ response);
                 String responseJson = response.body().string();
                 System.out.println(responseJson);
                 TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
@@ -111,7 +111,7 @@ public class TourService {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
-
+            System.out.println("Response ="+ response);
             String responseJson = response.body().string();
             System.out.println(responseJson);
             TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);

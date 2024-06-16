@@ -106,7 +106,7 @@ public class SecurityConfig  {
         http
             .authorizeHttpRequests((auth) -> {
                 log.debug("Configuring URL authorization");
-                auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt", "/mails/auth-code","/tour/*").permitAll()
+                auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt", "/mails/auth-code","/tour/**").permitAll()
                     .anyRequest().authenticated();
             });
 

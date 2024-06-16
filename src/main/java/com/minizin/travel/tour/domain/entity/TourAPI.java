@@ -1,11 +1,13 @@
 package com.minizin.travel.tour.domain.entity;
 
+import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -141,7 +143,7 @@ public class TourAPI {
     private String createdTime;
 
     @Column(name = "dist")
-    private double dist;
+    private String dist;
 
     @Column(name = "first_image")
     private String firstImage;
@@ -187,4 +189,12 @@ public class TourAPI {
 
     @Column(name = "overview")
     private String overview;
+
+    public TourAPIDto.TourResponse.Body.Items.Item toDto() {
+        return TourAPIDto.TourResponse.Body.Items.Item.builder()
+            .rnum(Optional.ofNullable(this.getTourId()).map(Long::intValue).orElse(0))
+            .code(this.getAreaCode())
+            .name(this.getName())
+            .build();
+    }
 }

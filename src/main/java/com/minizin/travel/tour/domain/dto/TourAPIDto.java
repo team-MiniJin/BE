@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,23 +20,60 @@ import lombok.Setter;
  * @date 6/3/24 19:56 Copyright (c) 2024 MiniJin
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TourAPIDto {
+    private TourRequest request;
+    @Data
+    @Getter
+    @Setter
+    public static class TourRequest {
+        private String MobileOS;
+        private String MobileApp;
+        private String _type;
+        private String ServiceKey;
 
-    private Response response;
+        private String areaCode;
+        private String arrange;
+        private String cat1;
+        private String cat2;
+        private String cat3;
+        private String contentTypeId;
+        private String eventStartDate;
+        private String keyword;
+        private String listYN;
+        private String mapX;
+        private String mapY;
+        private String modifiedtime;
+        private String numOfRows;
+        private String pageNo;
+        private String radius;
+        private String sigunguCode;
+        private String contentId;
+        private String defaultYN;
+        private String firstImageYN;
+        private String areacodeYN;
+        private String catcodeYN;
+        private String addrinfoYN;
+        private String mapinfoYN;
+        private String overviewYN;
+    }
+
+    private TourResponse response;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class Response {
+    public static class TourResponse {
         private Header header;
         private Body body;
+
 
         @Getter
         @Setter
@@ -85,7 +123,7 @@ public class TourAPIDto {
                     private String contenttypeid;
                     private String cpyrhtDivCd;
                     private String createdtime;
-                    private double dist;
+                    private String dist;
                     private String eventstartdate;
                     private String firstimage;
                     private String firstimage2;
@@ -108,7 +146,7 @@ public class TourAPIDto {
                     private String homepage;
                     private String telname;
                     private String overview;
-                    private int readcount;
+                    private String readcount;
 
                     public TourAPI toEntity() {
                         return TourAPI.builder()
@@ -125,7 +163,7 @@ public class TourAPIDto {
                             .contentTypeId(Optional.ofNullable(contenttypeid).orElse(""))
                             .cpyrhtDivCd(Optional.ofNullable(cpyrhtDivCd).orElse(""))
                             .createdTime(Optional.ofNullable(createdtime).orElse(""))
-                            .dist(Optional.ofNullable(dist).orElse((double)0))
+                            .dist(Optional.ofNullable(dist).orElse(""))
                             .eventStartDate(Optional.ofNullable(eventstartdate).orElse(""))
                             .firstImage(Optional.ofNullable(firstimage).orElse(""))
                             .firstImage2(Optional.ofNullable(firstimage2).orElse(""))
@@ -158,7 +196,7 @@ public class TourAPIDto {
     public List<TourAPI> toEntityList() {
         List<TourAPI> tourAPIList = new ArrayList<>();
         if (response != null && response.getBody() != null && response.getBody().getItems() != null) {
-            for (Response.Body.Items.Item item : response.getBody().getItems().getItem()) {
+            for (TourResponse.Body.Items.Item item : response.getBody().getItems().getItem()) {
                 TourAPI tourAPI = item.toEntity();
                 tourAPIList.add(tourAPI);
             }
