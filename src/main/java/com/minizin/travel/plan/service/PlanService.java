@@ -268,6 +268,36 @@ public class PlanService {
     }
     // #38 2024.06.08 내 여행 일정 상세 보기 END //
 
+    // #47 2024.06.13 내 여행 일정 삭제 START //
+    @Transactional
+    public ResponseDeletePlanDto deletePlan(Long planId) {
+
+        // 로그인한 유저 비교
+
+        if (!planRepository.existsById(planId)) {
+            return ResponseDeletePlanDto.builder()
+                    .success(false)
+                    .message("여행 일정 id가 유효하지 않습니다.")
+                    .planId(planId)
+                    .build();
+        }
+
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
+        for (PlanSchedule planSchedule : planScheduleList) {
+            planBudgetRepository.deleteByScheduleId(planSchedule.getId());
+        }
+        planScheduleRepository.deleteByPlanId(planId);
+
+        planRepository.deleteById(planId);
+
+        return ResponseDeletePlanDto.builder()
+                .success(true)
+                .message("일정을 삭제하였습니다.")
+                .planId(planId)
+                .build();
+    }
+    // #47 2024.06.13 내 여행 일정 삭제 END //
+
     // #39 2024.06.10 다가오는 여행 일정 조회 START //
     public List<UpcomingPlanDto> selectUpcomingPlan() {
 
