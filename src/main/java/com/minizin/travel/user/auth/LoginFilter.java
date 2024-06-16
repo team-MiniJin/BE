@@ -1,6 +1,7 @@
 package com.minizin.travel.user.auth;
 
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.jwt.TokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,8 +46,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         String username = principalDetails.getUsername();
+        Role role = principalDetails.getUserEntity().getRole();
 
-        String token = tokenProvider.createJwt(username, 60 * 60 * 10L);
+        String token = tokenProvider.createJwt(username, role.toString(), 60 * 60 * 10L);
 
         response.addHeader("Authorization", "Bearer " + token);
     }

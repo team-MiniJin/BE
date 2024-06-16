@@ -4,6 +4,7 @@ import com.minizin.travel.user.domain.dto.KakaoResponse;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .username(username)
                     .email(kakaoResponse.getEmail())
                     .nickname(kakaoResponse.getNickname())
+                    .role(Role.ROLE_USER)
                     .loginType(LoginType.KAKAO)
                     .build());
         } else {

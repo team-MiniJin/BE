@@ -3,6 +3,7 @@ package com.minizin.travel.user.service;
 import com.minizin.travel.user.domain.dto.JoinDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,7 +28,7 @@ public class AuthService {
                 )
                 .nickname(request.getNickname())
                 .email(request.getEmail())
-                .name(request.getName())
+                .role(Role.ROLE_USER)
                 .loginType(LoginType.LOCAL)
                 .build());
 
