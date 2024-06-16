@@ -10,6 +10,7 @@ pipeline {
         JENKINS_SERVER = "172.17.0.2"
         NGINX_MINIJIN = "172.17.0.3"
         BUILD_PJASYPT = credentials('Pjasypt')
+        DEPLOY_DJASYPT = credentials('Djasypt')
     }
     stages {
         stage('Checkout') {
@@ -93,7 +94,7 @@ pipeline {
                                 scp -i ~/.ssh/jenkins_agent_key /var/jenkins_home/workspace/minijin_BE_develop/build/libs/travel-0.0.1-SNAPSHOT.jar root@${env.NGINX_MINIJIN}:/home/user/
                                 echo "File transferred successfully."
                                 echo "Deploying the application..."
-                                ssh -i ~/.ssh/jenkins_agent_key -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.BUILD_PJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
+                                ssh -i ~/.ssh/jenkins_agent_key -o StrictHostKeyChecking=no root@${env.NGINX_MINIJIN} "nohup java ${env.DEPLOY_DJASYPT} -jar /home/user/travel-0.0.1-SNAPSHOT.jar --server.port=8080 > /home/user/travel.log 2>&1 &"
                                 echo "Application deployed successfully."
                                 """
 
