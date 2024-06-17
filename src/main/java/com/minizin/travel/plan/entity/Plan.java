@@ -37,10 +37,10 @@ public class Plan {
 
     private boolean scope;
 
-    @Setter
     @Column(name = "number_of_members")
     private int numberOfMembers;
 
+    @Setter
     @Column(name = "number_of_scraps")
     private int numberOfScraps;
 
