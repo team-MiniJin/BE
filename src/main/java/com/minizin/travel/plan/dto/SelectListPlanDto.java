@@ -43,7 +43,7 @@ public class SelectListPlanDto {
     @Setter
     private List<String> regionList; // 방문 장소 경로 ex) [ 서울 -> 부산 -> 서울 ]
 
-    @JsonProperty("schedule")
+    @JsonProperty("schedules")
     @Setter
     private List<SelectListPlanScheduleDto> listPlanScheduleDtoList;
 
