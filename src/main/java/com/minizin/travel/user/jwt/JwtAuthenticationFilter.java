@@ -32,7 +32,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 requestUri.matches("^\\/mails\\/auth-code(?:\\/.*)?$") ||
                 requestUri.matches("^\\/users\\/find-id(?:\\/.*)?$") ||
                 requestUri.matches("^\\/users\\/find-password(?:\\/.*)?$") ||
-                requestUri.matches("^\\/plans(?:\\/.*)?$")
+                requestUri.matches("^\\/plans(?:\\/.*)?$") ||
+                requestUri.matches("^\\/chat(?:\\/.*)?$") ||
+                requestUri.matches("^\\/s3(?:\\/.*)?$") ||
+                requestUri.matches("^\\/travels(?:\\/.*)?$")
         ) {
 
             filterChain.doFilter(request, response);
