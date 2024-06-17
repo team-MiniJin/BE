@@ -1,3 +1,4 @@
+/*
 package com.minizin.travel.like.controller;
 
 import com.minizin.travel.like.service.LikeService;
@@ -42,3 +43,4 @@ public class LikeController {
     // #54 2024.06.14 좋아요 삭제 END //
 
 }
+*/

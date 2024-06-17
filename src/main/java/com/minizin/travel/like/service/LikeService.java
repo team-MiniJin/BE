@@ -1,3 +1,4 @@
+/*
 package com.minizin.travel.like.service;
 
 import com.minizin.travel.like.dto.ResponseCreateLikePlanDto;
@@ -126,3 +127,4 @@ public class LikeService {
     // #54 2024.06.14 좋아요 삭제 END //
 
 }
+*/
