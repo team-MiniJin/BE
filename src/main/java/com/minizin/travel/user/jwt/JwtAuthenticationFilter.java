@@ -27,9 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 특정 경로 무시
         String requestUri = request.getRequestURI();
         if (requestUri.matches("^\\/login(?:\\/.*)?$") ||
-            requestUri.matches("^\\/oauth2(?:\\/.*)?$") ||
-            requestUri.matches("^\\/auth(?:\\/.*)?$") ||
-            requestUri.matches("^\\/mails\\/auth-code(?:\\/.*)?$")
+                requestUri.matches("^\\/oauth2(?:\\/.*)?$") ||
+                requestUri.matches("^\\/auth(?:\\/.*)?$") ||
+                requestUri.matches("^\\/mails\\/auth-code(?:\\/.*)?$") ||
+                requestUri.matches("^\\/users\\/find-id(?:\\/.*)?$") ||
+                requestUri.matches("^\\/users\\/find-password(?:\\/.*)?$")
         ) {
 
             filterChain.doFilter(request, response);

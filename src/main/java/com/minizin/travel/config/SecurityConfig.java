@@ -7,7 +7,6 @@ import com.minizin.travel.user.oauth2.CustomSuccessHandler;
 import com.minizin.travel.user.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -107,7 +105,8 @@ public class SecurityConfig  {
             .authorizeHttpRequests((auth) -> {
                 log.debug("Configuring URL authorization");
                 auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt",
-                            "/mails/auth-code", "/mails/auth-code/verification", "/tour/**").permitAll()
+                            "/mails/auth-code", "/mails/auth-code/verification", "/tour/**",
+                                "/users/find-id", "/users/find-password").permitAll()
                     .anyRequest().authenticated();
             });
 
