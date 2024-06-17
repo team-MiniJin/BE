@@ -9,6 +9,7 @@ import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,49 @@ public class PlanService {
     final int DEFAULT_PAGE_SIZE = 6; // #29
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
-    public ResponsePlanDto createPlan(PlanDto planDto) {
+    public ResponsePlanDto createPlan(PlanDto planDto)
+            throws BadRequestException {
+
+        // #87 Request 예외/에러 처리 START
+        // 여행 일자 최소 1일 ~ 최대 7일 START //
+        Long plan_days = ChronoUnit.DAYS.between(planDto.getStartDate(), planDto.getEndDate());
+        if (plan_days < 0 || plan_days > 7) {
+            throw new BadRequestException();
+        }
+
+        // 일정당 장소 최소 1개
+        if (planDto.getPlanScheduleDtos().isEmpty()) {
+            throw new BadRequestException();
+        }
+
+        // 예산 ~ 100,000,000원
+        int totalPlanBudget = 0;
+        for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
+
+            if (planScheduleDto.getPlanBudgetDtos() != null) { // #87 Request 예외/에러 처리
+                for (PlanBudgetDto planBudgetDto : planScheduleDto.getPlanBudgetDtos()) {
+                    totalPlanBudget += planBudgetDto.getCost();
+                }
+            }
+        }
+        if (totalPlanBudget > 100000000) {
+            throw new BadRequestException();
+        }
+
+        // schedule 날짜가 유효하지 않은 경우
+        for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
+            if (planScheduleDto.getScheduleDate().isBefore(planDto.getStartDate())
+             || planScheduleDto.getScheduleDate().isAfter(planDto.getEndDate())) {
+
+                return ResponsePlanDto.fail(
+                        ResponsePlanDto.Data.builder()
+                                    .startDate(planDto.getStartDate())
+                                    .endDate(planDto.getEndDate())
+                                    .scheduleDate(planScheduleDto.getScheduleDate())
+                                    .build());
+            }
+        }
+        // #87 Request 예외/에러 처리 END //
 
         Plan newPlan = planRepository.save(Plan.builder()
                 .userId(planDto.getUserId())
@@ -44,7 +88,6 @@ public class PlanService {
                 .endDate(planDto.getEndDate())
                 .scope(planDto.isScope())
                 .numberOfMembers(planDto.getNumberOfMembers())
-                .numberOfLikes(INITIAL_VALUE)
                 .numberOfScraps(INITIAL_VALUE)
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
@@ -53,24 +96,17 @@ public class PlanService {
         Long planId = newPlan.getId();
 
         for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
-            Long scheduleId = createPlanSchedule(planScheduleDto, planId).getId();
+                Long scheduleId = createPlanSchedule(planScheduleDto, planId).getId();
 
-            for (PlanBudgetDto planBudgetDto : planScheduleDto.getPlanBudgetDtos()) {
-                createPlanBudget(planBudgetDto, scheduleId);
+            if (planScheduleDto.getPlanBudgetDtos() != null) { // #87 Request 예외/에러 처리
+                for (PlanBudgetDto planBudgetDto : planScheduleDto.getPlanBudgetDtos()) {
+                    createPlanBudget(planBudgetDto, scheduleId);
+                }
             }
         }
 
-        ResponsePlanDto newResponsePlanDto = ResponsePlanDto.builder()
-                .success(true)
-                .message("일정을 생성하였습니다.")
-                .planId(planId)
-                .numberOfLikes(newPlan.getNumberOfLikes())
-                .numberOfScraps(newPlan.getNumberOfScraps())
-                .createAt(newPlan.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .updatedAt(newPlan.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .build();
+        return ResponsePlanDto.success(newPlan); // #87 Request 예외/에러 처리 : Response success 코드 정리
 
-        return newResponsePlanDto;
     }
 
     public PlanSchedule createPlanSchedule(PlanScheduleDto planScheduleDto, Long planId) {

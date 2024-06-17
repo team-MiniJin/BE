@@ -1,29 +1,64 @@
 package com.minizin.travel.plan.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.minizin.travel.plan.entity.Plan;
+import lombok.*;
 
-@Data
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ResponsePlanDto {
 
-    boolean success;
-    String message;
+    private boolean success;
+    private String message;
 
-    Long planId;
+    private Long planId;
 
-    int numberOfLikes;
+    private Integer numberOfScraps; // #87 Request 예외/에러 처리
 
-    int numberOfScraps;
+    private String createAt;
 
-    String createAt;
+    private String updatedAt;
 
-    String updatedAt;
+    private Data data;
+
+    @Builder
+    @Getter
+    @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
+    public static class Data {
+
+        private LocalDate startDate;
+
+        private LocalDate endDate;
+
+        private LocalDate scheduleDate;
+    }
+
+    public static ResponsePlanDto success(Plan plan) {
+
+        return ResponsePlanDto.builder()
+                .success(true)
+                .message("일정을 생성하였습니다.")
+                .planId(plan.getId())
+                .numberOfScraps(plan.getNumberOfScraps())
+                .createAt(plan.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .updatedAt(plan.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .build();
+    }
+
+    public static ResponsePlanDto fail(ResponsePlanDto.Data data) {
+
+        return ResponsePlanDto.builder()
+                .success(false)
+                .message("날짜가 유효하지 않습니다.")
+                .data(data).build();
+    }
 }
