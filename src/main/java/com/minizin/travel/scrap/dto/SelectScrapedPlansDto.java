@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Getter
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonPropertyOrder({"id", "planId", "userNickname", "planName", "theme", "startDate", "endDate",
-        "planBudget", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps"})
+        "planBudget", "scope", "numberOfMembers", "numberOfScraps"})
 public class SelectScrapedPlansDto {
 
     @Setter
@@ -42,8 +42,6 @@ public class SelectScrapedPlansDto {
 
     private int numberOfMembers;
 
-    private int numberOfLikes;
-
     private int numberOfScraps;
 
     public static SelectScrapedPlansDto toDto(Plan plan) {
@@ -54,7 +52,6 @@ public class SelectScrapedPlansDto {
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .scope(plan.isScope())
-                .numberOfLikes(plan.getNumberOfLikes())
                 .numberOfMembers(plan.getNumberOfMembers())
                 .numberOfScraps(plan.getNumberOfScraps())
                 .build();
