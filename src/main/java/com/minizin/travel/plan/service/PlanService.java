@@ -41,7 +41,9 @@ public class PlanService {
 
         // #87 Request 예외/에러 처리 START
         // 여행 일자 최소 1일 ~ 최대 7일 START //
-        Long plan_days = ChronoUnit.DAYS.between(planDto.getStartDate(), planDto.getEndDate());
+        LocalDate startDate = LocalDate.parse(planDto.getStartDate());
+        LocalDate endDate = LocalDate.parse(planDto.getEndDate());
+        Long plan_days = ChronoUnit.DAYS.between(startDate, endDate);
         if (plan_days < 0 || plan_days > 7) {
             throw new BadRequestException();
         }
@@ -67,8 +69,9 @@ public class PlanService {
 
         // schedule 날짜가 유효하지 않은 경우
         for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
-            if (planScheduleDto.getScheduleDate().isBefore(planDto.getStartDate())
-             || planScheduleDto.getScheduleDate().isAfter(planDto.getEndDate())) {
+            LocalDate scheduleDate = LocalDate.parse(planScheduleDto.getScheduleDate());
+            if (scheduleDate.isBefore(startDate)
+             || scheduleDate.isAfter(endDate)) {
 
                 return ResponsePlanDto.fail(
                         ResponsePlanDto.Data.builder()
@@ -84,8 +87,8 @@ public class PlanService {
                 .userId(planDto.getUserId())
                 .planName(planDto.getPlanName())
                 .theme(planDto.getTheme())
-                .startDate(planDto.getStartDate())
-                .endDate(planDto.getEndDate())
+                .startDate(startDate)
+                .endDate(endDate)
                 .scope(planDto.isScope())
                 .numberOfMembers(planDto.getNumberOfMembers())
                 .numberOfScraps(INITIAL_VALUE)
@@ -113,7 +116,7 @@ public class PlanService {
 
         return planScheduleRepository.save(PlanSchedule.builder()
                 .planId(planId)
-                .scheduleDate(planScheduleDto.getScheduleDate())
+                .scheduleDate(LocalDate.parse(planScheduleDto.getScheduleDate()))
                 .placeCategory(planScheduleDto.getPlaceCategory())
                 .placeName(planScheduleDto.getPlaceName())
                 .placeAddr(planScheduleDto.getPlaceAddr()) // #29 2024.06.02 내 여행 일정 조회
@@ -140,65 +143,66 @@ public class PlanService {
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
     // #29 2024.06.02 내 여행 일정 조회 START //
-    public ResponseListPlanDto selectListPlan(Long cursorId) {
+    public ResponseSelectListPlanDto selectListPlan(Long lastPlanId) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
         // 테스트
         Long userId = 1L;
 
-        List<Plan> planList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
-        List<ListPlanDto> listPlanDtoList = new ArrayList<>();
+        List<Plan> planList = findAllByLastPlanIdCheckExistCursor(userId, lastPlanId, page);
+        List<SelectListPlanDto> listPlanDtoList = new ArrayList<>();
         Long planId = 0L;
 
         for (Plan plan : planList) {
             planId = plan.getId();
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
-            List<ListPlanScheduleDto> listPlanScheduleDtoList = new ArrayList<>();
-            List<String> waypoints = new ArrayList<>();
+            List<SelectListPlanScheduleDto> listPlanScheduleDtoList = new ArrayList<>();
+            List<String> regionList = new ArrayList<>();
             int totalBudget = calculateTotalPlanBudget(planScheduleList); // #44 여행 일정 예산 추가
 
             for (PlanSchedule planSchedule : planScheduleList) {
-                ListPlanScheduleDto newResponseScheduleDto = ListPlanScheduleDto.toDto(planSchedule);
-                listPlanScheduleDtoList.add(newResponseScheduleDto);
-                waypoints.add(planSchedule.getRegion());
+                listPlanScheduleDtoList.add(SelectListPlanScheduleDto.toDto(planSchedule));
+                regionList.add(planSchedule.getRegion());
             }
-            ListPlanDto newPlanDto = ListPlanDto.toDto(plan);
-            newPlanDto.setPlanBudget(totalBudget); // #44 여행 일정 예산 추가
-            newPlanDto.setListPlanScheduleDtoList(listPlanScheduleDtoList);
-            newPlanDto.setWaypoints(duplicateWaypoints(waypoints));
-            listPlanDtoList.add(newPlanDto);
+
+            SelectListPlanDto selectListPlanDto = SelectListPlanDto.toDto(plan);
+            selectListPlanDto.setPlanBudget(totalBudget); // #44 여행 일정 예산 추가
+            selectListPlanDto.setListPlanScheduleDtoList(listPlanScheduleDtoList);
+            selectListPlanDto.setRegionList(duplicateRegionList(regionList));
+            listPlanDtoList.add(selectListPlanDto);
         }
 
-        return ResponseListPlanDto.builder()
+        return ResponseSelectListPlanDto.builder()
                 .data(listPlanDtoList)
                 .nextCursor(planId)
                 .build();
     }
 
-    private List<String> duplicateWaypoints(List<String> waypoints) {
+    private List<String> duplicateRegionList(List<String> regionList) {
 
-        if (waypoints.size() <= 1) {
-            return waypoints;
+        if (regionList.size() <= 1) {
+            return regionList;
         }
 
-        List<String> newWaypoints = new ArrayList<>();
-        newWaypoints.add(waypoints.get(0));
+        List<String> newRegionList = new ArrayList<>();
+        newRegionList.add(regionList.get(0));
 
-        for (int i = 1; i < waypoints.size(); i++) {
-            if (waypoints.get(i - 1).equals(waypoints.get(i))) {
+        // [ 서울 -> 서울 -> 부산 ] 인 경우 [ 서울 -> 부산 ] 으로 중복 제거
+        for (int i = 1; i < regionList.size(); i++) {
+            if (regionList.get(i - 1).equals(regionList.get(i))) {
                 continue;
             }
-            newWaypoints.add(waypoints.get(i));
+            newRegionList.add(regionList.get(i));
         }
 
-        return newWaypoints;
+        return newRegionList;
     }
 
-    private List<Plan> findAllByCursorIdCheckExistCursor(Long userId, Long cursorId, Pageable page) {
+    private List<Plan> findAllByLastPlanIdCheckExistCursor(Long userId, Long lastPlanId, Pageable page) {
 
-        return cursorId == 0 ? planRepository.findAllByUserIdOrderByIdDesc(userId, page)
-                : planRepository.findByIdLessThanAndUserIdOrderByIdDesc(cursorId, userId, page);
+        return lastPlanId == 0 ? planRepository.findAllByUserIdOrderByIdDesc(userId, page)
+                : planRepository.findByIdLessThanAndUserIdOrderByIdDesc(lastPlanId, userId, page);
 
     }
     // #29 2024.06.02 내 여행 일정 조회 END //
@@ -297,7 +301,7 @@ public class PlanService {
 
         DetailPlanDto detailPlanDto = DetailPlanDto.toDto(plan);
         detailPlanDto.setPlanBudget(calculateTotalPlanBudget(planScheduleList));
-        detailPlanDto.setWaypoints(duplicateWaypoints(waypoints));
+        detailPlanDto.setWaypoints(duplicateRegionList(waypoints));
         detailPlanDto.setDetailPlanScheduleDtoList(detailPlanScheduleDtoList);
 
         return detailPlanDto;

@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "responseScheduleListDtos"})
-public class ListPlanDto {
+public class SelectListPlanDto {
 
     @JsonProperty("plan_id")
     private Long id;
@@ -38,19 +38,17 @@ public class ListPlanDto {
 
     private int numberOfMembers;
 
-    private int numberOfLikes;
-
     private int numberOfScraps;
 
     @Setter
-    private List<String> waypoints;
+    private List<String> regionList; // 방문 장소 경로 ex) [ 서울 -> 부산 -> 서울 ]
 
     @JsonProperty("schedule")
     @Setter
-    private List<ListPlanScheduleDto> listPlanScheduleDtoList;
+    private List<SelectListPlanScheduleDto> listPlanScheduleDtoList;
 
-    public static ListPlanDto toDto(Plan plan) {
-        return ListPlanDto.builder()
+    public static SelectListPlanDto toDto(Plan plan) {
+        return SelectListPlanDto.builder()
                 .id(plan.getId())
                 .userId(plan.getUserId())
                 .planName(plan.getPlanName())
@@ -59,7 +57,6 @@ public class ListPlanDto {
                 .endDate(plan.getEndDate())
                 .scope(plan.isScope())
                 .numberOfMembers(plan.getNumberOfMembers())
-                .numberOfLikes(plan.getNumberOfLikes())
                 .numberOfScraps(plan.getNumberOfScraps())
                 .build();
     }
