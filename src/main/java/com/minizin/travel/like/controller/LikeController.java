@@ -1,12 +1,10 @@
+/*
 package com.minizin.travel.like.controller;
 
 import com.minizin.travel.like.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,4 +31,16 @@ public class LikeController {
         return ResponseEntity.ok(result);
     }
     // #53 2024.06.13 좋아요 조회 END //
+
+    // #54 2024.06.14 좋아요 삭제 START //
+    @DeleteMapping("/likes/{like_id}")
+    public ResponseEntity<?> deleteLikedPlan(@PathVariable("like_id") Long likeId) {
+
+        var result = likeService.deleteLikedPlan(likeId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #54 2024.06.14 좋아요 삭제 END //
+
 }
+*/

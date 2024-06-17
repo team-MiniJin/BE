@@ -1,6 +1,8 @@
+/*
 package com.minizin.travel.like.service;
 
 import com.minizin.travel.like.dto.ResponseCreateLikePlanDto;
+import com.minizin.travel.like.dto.ResponseDeleteLikePlanDto;
 import com.minizin.travel.like.dto.ResponseSelectLikedPlansDto;
 import com.minizin.travel.like.dto.SelectLikedPlansDto;
 import com.minizin.travel.like.entity.Likes;
@@ -97,4 +99,32 @@ public class LikeService {
                 : likeRepository.findByIdLessThanAndUserIdOrderByIdDesc(cursorId, userId, page);
     }
     // #53 2024.06.13 좋아요 조회 END //
+
+    // #54 2024.06.14 좋아요 삭제 START //
+    public ResponseDeleteLikePlanDto deleteLikedPlan(Long likeId) {
+
+        if (!likeRepository.existsById(likeId)) {
+
+            return ResponseDeleteLikePlanDto.builder()
+                    .success(false)
+                    .message("존재하지 않는 like_id 입니다.")
+                    .likeId(likeId)
+                    .build();
+        }
+
+        Long planId = likeRepository.findById(likeId).get().getPlanId();
+        Plan plan = planRepository.findById(planId).get();
+        plan.setNumberOfLikes(plan.getNumberOfLikes() - 1);
+
+        likeRepository.deleteById(likeId);
+
+        return ResponseDeleteLikePlanDto.builder()
+                .success(true)
+                .message("Like Deleted Successfully")
+                .likeId(likeId)
+                .build();
+    }
+    // #54 2024.06.14 좋아요 삭제 END //
+
 }
+*/
