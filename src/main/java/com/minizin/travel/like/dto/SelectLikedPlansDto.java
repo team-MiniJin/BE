@@ -1,3 +1,4 @@
+/*
 package com.minizin.travel.like.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -60,3 +61,4 @@ public class SelectLikedPlansDto {
                 .build();
     }
 }
+*/
