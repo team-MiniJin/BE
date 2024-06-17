@@ -71,20 +71,31 @@ public class TourService {
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList() {
         String getCategoryUrl = baseUrl + "areaBasedList1";
         int[] areaCodes = {1, 2, 3, 4, 5, 6, 7, 8, 31, 32};
+        int[] contentTypeIds = {12,14,15,25,28,32,38,39};
+       /* int[] sigunguCodes = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 99}; 같은 시군구 코드에 다른지역 표기가 있어 제외*/
 
+        // stream(contentTypeIds) or Arrays.stream(areaCodes) 로 활용
         List<CompletableFuture<List<TourAPI>>> futures = Arrays.stream(areaCodes)
-            .mapToObj(code -> {
-                Map<String, String> params = Map.of(
-                    "ServiceKey", serviceKey,
-                    "MobileOS", "ETC",
-                    "MobileApp", "AppTest",
-                    "_type", "json",
-                    "areaCode", String.valueOf(code)
-                );
+            .boxed()
+            .flatMap(areaCode -> Arrays.stream(contentTypeIds)
+                .mapToObj(contentTypeId -> {
+                    Map<String, String> params = Map.of(
+                        "ServiceKey", serviceKey,
+                        "MobileOS", "ETC",
+                        "MobileApp", "AppTest",
+                        "_type", "json",
+                        "areaCode", String.valueOf(areaCode),
+                        "numOfRows", "50",
+                        "pageNo", "1",
+                        "contentTypeId", String.valueOf(contentTypeId)
+                    );
 
-                String url = buildUrlWithParams(getCategoryUrl, params);
-                return getListCompletableFuture(url);
-            }).collect(Collectors.toList());
+                    String url = buildUrlWithParams(getCategoryUrl, params);
+                    return getListCompletableFuture(url);
+                })
+            ).collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
             .thenApply(v -> futures.stream()
@@ -93,7 +104,6 @@ public class TourService {
                 .collect(Collectors.toList())
             );
     }
-
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode() {
         String getCategoryUrl = baseUrl + "areaCode1";
 
@@ -145,4 +155,5 @@ public class TourService {
         params.forEach((key, value) -> urlBuilder.addQueryParameter(key, value));
         return urlBuilder.build().toString();
     }
+
 }
