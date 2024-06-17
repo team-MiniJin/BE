@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 // 2024.06.05 내 여행 일정 조회 //
 @Builder
@@ -29,7 +30,7 @@ public class SelectListPlanScheduleDto {
 
     private String placeName;
 
-    private LocalTime arrivalTime;
+    private String arrivalTime;
 
     private Double x;
     private Double y;
@@ -43,7 +44,7 @@ public class SelectListPlanScheduleDto {
                 .id(planSchedule.getId())
                 .scheduleDate(planSchedule.getScheduleDate())
                 .placeName(planSchedule.getPlaceName())
-                .arrivalTime(planSchedule.getArrivalTime())
+                .arrivalTime(planSchedule.getArrivalTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .x(planSchedule.getX())
                 .y(planSchedule.getY())
                 .placeAddr(planSchedule.getPlaceAddr())

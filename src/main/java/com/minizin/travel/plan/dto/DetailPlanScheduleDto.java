@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Builder
@@ -33,7 +34,7 @@ public class DetailPlanScheduleDto {
 
     private String placeMemo;
 
-    private LocalTime arrivalTime;
+    private String arrivalTime;
 
     private Double x;
     private Double y;
@@ -53,7 +54,7 @@ public class DetailPlanScheduleDto {
                 .placeName(planSchedule.getPlaceName())
                 .region(planSchedule.getRegion())
                 .placeMemo(planSchedule.getPlaceMemo())
-                .arrivalTime(planSchedule.getArrivalTime())
+                .arrivalTime(planSchedule.getArrivalTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .x(planSchedule.getX())
                 .y(planSchedule.getY())
                 .placeAddr(planSchedule.getPlaceAddr())

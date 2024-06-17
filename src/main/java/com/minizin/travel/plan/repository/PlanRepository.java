@@ -18,4 +18,19 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     // #39 2024.06.10 다가오는 여행 일정 조회 //
     List<Plan> findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(Long userId, LocalDate today);
 
+    // #48 2024.06.10 다른 사람 여행 일정 조회 START //
+
+    List<Plan> findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(Long id, Long userId, Pageable pageable);
+
+    List<Plan> findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(Long userId, Pageable pageable);
+    // #48 2024.06.10 다른 사람 여행 일정 조회 END //
+
+
+    // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
+    List<Plan> findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsAscIdDesc(Long id, Long userId, Pageable pageable);
+
+    List<Plan> findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsAscIdDesc(Long userId, Pageable pageable);
+    // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
+
+    List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsAsc(LocalDate startDate, LocalDate endDate);
 }

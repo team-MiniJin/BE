@@ -3,10 +3,16 @@ package com.minizin.travel.plan.controller;
 import com.minizin.travel.plan.dto.EditPlanDto;
 import com.minizin.travel.plan.dto.PlanDto;
 import com.minizin.travel.plan.service.PlanService;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.entity.UserEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,11 +23,13 @@ public class PlanController {
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
     @PostMapping("/plans")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createPlan(
-            @RequestBody @Valid PlanDto request // @Valid : #87 Request 예외/에러 처리
-    ) throws BadRequestException {
+            @RequestBody @Valid PlanDto request, // @Valid : #87 Request 예외/에러 처리
+            @AuthenticationPrincipal PrincipalDetails user
+            ) throws BadRequestException {
 
-        var result = planService.createPlan(request);
+        var result = planService.createPlan(request, user);
 
         return ResponseEntity.ok(result);
 
@@ -78,5 +86,6 @@ public class PlanController {
         return ResponseEntity.ok(result);
     }
     // #39 2024.06.10 다가오는 여행 일정 조회 END //
+
 }
 

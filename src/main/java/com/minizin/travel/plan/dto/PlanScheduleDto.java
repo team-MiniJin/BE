@@ -20,12 +20,12 @@ public class PlanScheduleDto {
 
     private String placeCategory;
 
-    @Size(min = 1, max = 20, message = "'장소 이름'의 길이는 1 ~ 20자입니다.")
+    @Size(min = 1, max = 40, message = "'장소 이름'의 길이는 1 ~ 40자입니다.")
     private String placeName;
 
     private String region;
 
-    @Size(max = 60, message = "'메모'의 길이는 최대 60자입니다.")
+    @Size(max = 100, message = "'메모'의 길이는 최대 100자입니다.")
     private String placeMemo;
 
     private String arrivalTime;

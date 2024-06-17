@@ -22,7 +22,7 @@ public class PlanDto {
     private Long userId;
 
     // #87 Request 예외/에러 처리
-    @Size(min = 2, max = 30, message = "'여행 일정 이름'은 2 ~ 30자여야 합니다.")
+    @Size(min = 2, max = 60, message = "'여행 일정 이름'은 2 ~ 60자여야 합니다.")
     private String planName;
 
     private String theme;
@@ -34,7 +34,7 @@ public class PlanDto {
     private boolean scope;
 
     // #87 Request 예외/에러 처리
-    @Range(min = 1, max = 20, message = "'여행 인원'은 1 ~ 20명이어야 합니다.")
+    @Range(min = 1, max = 300, message = "'여행 인원'은 1 ~ 20명이어야 합니다.")
     private int numberOfMembers;
 
     @JsonProperty("schedules")

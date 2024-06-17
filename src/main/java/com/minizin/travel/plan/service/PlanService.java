@@ -7,6 +7,8 @@ import com.minizin.travel.plan.entity.PlanSchedule;
 import com.minizin.travel.plan.repository.PlanBudgetRepository;
 import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -31,26 +33,46 @@ public class PlanService {
     private final PlanRepository planRepository;
     private final PlanScheduleRepository planScheduleRepository;
     private final PlanBudgetRepository planBudgetRepository;
+    private final UserRepository userRepository;
 
     final int INITIAL_VALUE = 0;
     final int DEFAULT_PAGE_SIZE = 6; // #29
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
-    public ResponsePlanDto createPlan(PlanDto planDto)
+    public ResponsePlanDto createPlan(PlanDto planDto, PrincipalDetails user)
             throws BadRequestException {
 
+        // user 정보 확인
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+
         // #87 Request 예외/에러 처리 START
-        // 여행 일자 최소 1일 ~ 최대 7일 START //
+        // 여행 일자 최소 1일 ~ 최대 60일 START //
         LocalDate startDate = LocalDate.parse(planDto.getStartDate());
         LocalDate endDate = LocalDate.parse(planDto.getEndDate());
-        Long plan_days = ChronoUnit.DAYS.between(startDate, endDate);
-        if (plan_days < 0 || plan_days > 7) {
+        int planDays = (int) ChronoUnit.DAYS.between(startDate, endDate);
+        if (planDays < 0 || planDays > 60) {
+            System.out.println("여행의 날짜는 최소 1일 ~ 최대 60일이어야 합니다.");
             throw new BadRequestException();
         }
 
         // 일정당 장소 최소 1개
         if (planDto.getPlanScheduleDtos().isEmpty()) {
+            System.out.println("일정은 최소 1개 이상이어야 합니다.");
             throw new BadRequestException();
+        }
+        String curDate = "";
+        int scheduleCnt = 0;
+        for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
+            if (curDate.equals(planScheduleDto.getScheduleDate())) {
+                scheduleCnt++;
+                if (scheduleCnt > 40) {
+                    System.out.println("일정의 개수는 하루당 40개를 넘을 수 없습니다.");
+                    throw new BadRequestException();
+                }
+            } else {
+                curDate = planScheduleDto.getScheduleDate();
+                scheduleCnt = 1;
+            }
         }
 
         // 예산 ~ 100,000,000원
@@ -84,7 +106,7 @@ public class PlanService {
         // #87 Request 예외/에러 처리 END //
 
         Plan newPlan = planRepository.save(Plan.builder()
-                .userId(planDto.getUserId())
+                .userId(userId)
                 .planName(planDto.getPlanName())
                 .theme(planDto.getTheme())
                 .startDate(startDate)
@@ -122,7 +144,7 @@ public class PlanService {
                 .placeAddr(planScheduleDto.getPlaceAddr()) // #29 2024.06.02 내 여행 일정 조회
                 .region(planScheduleDto.getRegion())
                 .placeMemo(planScheduleDto.getPlaceMemo())
-                .arrivalTime(LocalTime.parse(planScheduleDto.getArrivalTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .arrivalTime(LocalTime.parse(planScheduleDto.getArrivalTime(), DateTimeFormatter.ofPattern("HH:mm")))
                 .x(planScheduleDto.getX())
                 .y(planScheduleDto.getY())
                 .createdAt(LocalDateTime.now())
@@ -179,7 +201,7 @@ public class PlanService {
                 .build();
     }
 
-    private List<String> duplicateRegionList(List<String> regionList) {
+    public List<String> duplicateRegionList(List<String> regionList) {
 
         if (regionList.size() <= 1) {
             return regionList;
@@ -358,4 +380,5 @@ public class PlanService {
         return upcomingPlanDtoList;
     }
     // #39 2024.06.10 다가오는 여행 일정 조회 END //
+
 }
