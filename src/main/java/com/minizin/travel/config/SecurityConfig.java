@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsUtils;
 
 import java.util.Collections;
 @Slf4j
@@ -104,6 +105,7 @@ public class SecurityConfig  {
         http
             .authorizeHttpRequests((auth) -> {
                 log.debug("Configuring URL authorization");
+                auth.requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
                 auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt",
                             "/mails/auth-code", "/mails/auth-code/verification", "/tour/**",
                                 "/users/find-id", "/users/find-password").permitAll()
