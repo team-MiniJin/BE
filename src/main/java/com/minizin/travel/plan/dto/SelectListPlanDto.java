@@ -15,7 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
-@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "responseScheduleListDtos"})
+@JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate"
+        , "planBudget", "scope", "numberOfMembers", "numberOfScraps", "regionList", "schedules"})
 public class SelectListPlanDto {
 
     @JsonProperty("plan_id")

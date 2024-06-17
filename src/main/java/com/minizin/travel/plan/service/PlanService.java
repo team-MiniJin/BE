@@ -246,8 +246,8 @@ public class PlanService {
                 .userId(plan.getUserId())
                 .planName(editPlanDto.getPlanName())
                 .theme(editPlanDto.getTheme())
-                .startDate(editPlanDto.getStartDate())
-                .endDate(editPlanDto.getEndDate())
+                .startDate(LocalDate.parse(editPlanDto.getStartDate()))
+                .endDate(LocalDate.parse(editPlanDto.getEndDate()))
                 .scope(editPlanDto.isScope())
                 .numberOfMembers(editPlanDto.getNumberOfMembers())
                 .numberOfScraps(plan.getNumberOfScraps())
@@ -281,7 +281,7 @@ public class PlanService {
 
         List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId); // DB를 가져온 list
         List<DetailPlanScheduleDto> detailPlanScheduleDtoList = new ArrayList<>(); // 객체를 가져온 list
-        List<String> waypoints = new ArrayList<>();
+        List<String> regionList = new ArrayList<>();
         int days = 0;
 
         for (PlanSchedule planSchedule : planScheduleList) {
@@ -293,7 +293,7 @@ public class PlanService {
             }
 
             DetailPlanScheduleDto detailPlanScheduleDto = DetailPlanScheduleDto.toDto(planSchedule);
-            waypoints.add(planSchedule.getRegion());
+            regionList.add(planSchedule.getRegion());
             detailPlanScheduleDto.setScheduleDays(++days);
             detailPlanScheduleDto.setDetailPlanBudgetDtoList(detailPlanBudgetDtoList);
             detailPlanScheduleDtoList.add(detailPlanScheduleDto);
@@ -301,7 +301,7 @@ public class PlanService {
 
         DetailPlanDto detailPlanDto = DetailPlanDto.toDto(plan);
         detailPlanDto.setPlanBudget(calculateTotalPlanBudget(planScheduleList));
-        detailPlanDto.setWaypoints(duplicateRegionList(waypoints));
+        detailPlanDto.setRegionList(duplicateRegionList(regionList));
         detailPlanDto.setDetailPlanScheduleDtoList(detailPlanScheduleDtoList);
 
         return detailPlanDto;

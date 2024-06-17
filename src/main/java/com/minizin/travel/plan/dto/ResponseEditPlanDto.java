@@ -19,8 +19,6 @@ public class ResponseEditPlanDto {
 
     Long planId;
 
-    int numberOfLikes;
-
     int numberOfScraps;
 
     String createdAt;
