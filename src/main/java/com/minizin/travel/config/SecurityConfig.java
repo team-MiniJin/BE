@@ -22,11 +22,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 
 import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig  {
+public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -54,17 +56,16 @@ public class SecurityConfig  {
         http
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(
                         (request -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
                             log.debug("Setting CORS configuration");
+                            CorsConfiguration configuration = new CorsConfiguration();
 
                             configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                            configuration.setAllowedMethods(Collections.singletonList("*"));
+                            configuration.setAllowedMethods(List.of("POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS"));
                             configuration.setAllowCredentials(true);
                             configuration.setAllowedHeaders(Collections.singletonList("*"));
                             configuration.setMaxAge(3600L);
 
-                            configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-                            configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                            configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
 
                             return configuration;
                         })
@@ -72,46 +73,46 @@ public class SecurityConfig  {
 
         //csrf disable
         http
-            .csrf((csrf) -> {
-                log.debug("Disabling CSRF");
-                csrf.disable();
-            });
+                .csrf((csrf) -> {
+                    log.debug("Disabling CSRF");
+                    csrf.disable();
+                });
 
         //From 로그인 방식 disable
         http
-            .formLogin((formLogin) -> {
-                log.debug("Disabling formLogin");
-                formLogin.disable();
-            });
+                .formLogin((formLogin) -> {
+                    log.debug("Disabling formLogin");
+                    formLogin.disable();
+                });
 
         //HTTP Basic 인증 방식 disable
         http
-            .httpBasic((httpBasic) -> {
-                log.debug("Disabling httpBasic");
-                httpBasic.disable();
-            });
+                .httpBasic((httpBasic) -> {
+                    log.debug("Disabling httpBasic");
+                    httpBasic.disable();
+                });
 
 
         //oauth2
         http
-            .oauth2Login((oauth2) -> {
-                log.debug("Configuring OAuth2 login");
-                oauth2.userInfoEndpoint((userInfoEndpointConfig) ->
-                        userInfoEndpointConfig.userService(customOAuth2UserService))
-                    .successHandler(customSuccessHandler);
-            });
+                .oauth2Login((oauth2) -> {
+                    log.debug("Configuring OAuth2 login");
+                    oauth2.userInfoEndpoint((userInfoEndpointConfig) ->
+                                    userInfoEndpointConfig.userService(customOAuth2UserService))
+                            .successHandler(customSuccessHandler);
+                });
 
         //경로별 인가 작업
         http
-            .authorizeHttpRequests((auth) -> {
-                log.debug("Configuring URL authorization");
-                auth.requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
-                auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt",
-                            "/mails/auth-code", "/mails/auth-code/verification", "/tour/**",
-                                "/users/find-id", "/users/find-password", "/plans/**",
-                                "/scraps/**", "/chat/**", "/s3/**", "/travels/**").permitAll()
-                    .anyRequest().authenticated();
-            });
+                .authorizeHttpRequests((auth) -> {
+                    log.debug("Configuring URL authorization");
+                    auth.requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
+                    auth.requestMatchers("/", "/auth/join", "/auth/login", "/auth/jwt",
+                                    "/mails/auth-code", "/mails/auth-code/verification", "/tour/**",
+                                    "/users/find-id", "/users/find-password", "/plans/**",
+                                    "/scraps/**", "/chat/**", "/s3/**", "/travels/**").permitAll()
+                            .anyRequest().authenticated();
+                });
 
         // UsernamePasswordAuthenticationFilter 자리에 LoginFilter 추가
         http
@@ -126,10 +127,10 @@ public class SecurityConfig  {
 
         //세션 설정 : STATELESS
         http
-            .sessionManagement((session) -> {
-                log.debug("Setting session management to stateless");
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-            });
+                .sessionManagement((session) -> {
+                    log.debug("Setting session management to stateless");
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                });
 
         return http.build();
     }
