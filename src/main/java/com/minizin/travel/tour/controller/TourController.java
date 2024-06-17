@@ -29,21 +29,24 @@ public class TourController {
 
 //    @Operation(summary = "Get areaBasedList", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areaBasedList")
-    public ResponseEntity<List<TourAPI>> getAPITourDataAreaBasedList() {
-        return ResponseEntity.ok(tourService.getTourAPIFromSiteAreaBasedList());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedList() {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList());
     }
 
 //    @Operation(summary = "Get areaCode", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areacode")
-    public ResponseEntity<List<TourAPI>> getAPITourDataAreaCode() {
-        return ResponseEntity.ok(tourService.getTourAPIFromSiteAreaCode());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaCode() {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaCode());
     }
 
 //    @Operation(summary = "Get searchkeyword", description = "Retrieve a specific searchkeyword by keyword")
     @GetMapping("/searchkeyword")
     public CompletableFuture<ResponseEntity<List<TourAPI>>> getTourAPIFromSiteSearchKeyword() {
-        return tourService.getTourAPIFromSiteSearchKeyword()
-            .thenApply(ResponseEntity::ok)
+        return createResponseEntity(tourService.getTourAPIFromSiteSearchKeyword());
+    }
+
+    private CompletableFuture<ResponseEntity<List<TourAPI>>> createResponseEntity(CompletableFuture<List<TourAPI>> future) {
+        return future.thenApply(ResponseEntity::ok)
             .exceptionally(throwable -> ResponseEntity.status(500).build());
     }
 
