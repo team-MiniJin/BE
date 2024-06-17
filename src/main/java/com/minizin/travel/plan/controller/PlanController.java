@@ -29,10 +29,10 @@ public class PlanController {
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
     // #29 2024.06.02 내 여행 일정 조회 START //
-    @GetMapping("/plans")
-    public ResponseEntity<?> selectListPlan(@RequestParam("cursor_id") Long cursorId) {
+    @GetMapping("/plans/{cursor_id}")
+    public ResponseEntity<?> selectListPlan(@PathVariable("cursor_id") Long lastPlanId) {  // #102 [GET] /plans : Refactoring - cursorId renaming
 
-        var result = planService.selectListPlan(cursorId);
+        var result = planService.selectListPlan(lastPlanId);
 
         return ResponseEntity.ok(result);
     }
@@ -50,7 +50,7 @@ public class PlanController {
     // #32 2024.06.07 내 여행 일정 수정 END //
 
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
-    @GetMapping("/plans/{plan_id}")
+    @GetMapping("/plans/details/{plan_id}")
     public ResponseEntity<?> selectDetailPlan(@PathVariable("plan_id") Long planId) {
 
         var result = planService.selectDetailPlan(planId);

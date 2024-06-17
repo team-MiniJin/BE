@@ -14,9 +14,11 @@ import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate"
-        , "scope", "numberOfMembers", "numberOfLikes", "numberOfScraps", "waypoints", "scheduleDtos"})
+        , "scope", "numberOfMembers", "numberOfScraps", "schedules"})
 public class EditPlanDto {
 
     private Long userId;
@@ -25,9 +27,9 @@ public class EditPlanDto {
 
     private String theme;
 
-    private LocalDate startDate;
+    private String startDate;
 
-    private LocalDate endDate;
+    private String endDate;
 
     private boolean scope;
 

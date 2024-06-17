@@ -35,11 +35,11 @@ public class ResponsePlanDto {
     @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
     public static class Data {
 
-        private LocalDate startDate;
+        private String startDate;
 
-        private LocalDate endDate;
+        private String endDate;
 
-        private LocalDate scheduleDate;
+        private String scheduleDate;
     }
 
     public static ResponsePlanDto success(Plan plan) {

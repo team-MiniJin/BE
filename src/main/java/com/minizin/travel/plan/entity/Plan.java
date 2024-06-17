@@ -40,11 +40,6 @@ public class Plan {
     @Column(name = "number_of_members")
     private int numberOfMembers;
 
-    @Setter
-    @Column(name = "number_of_likes")
-    private int numberOfLikes;
-
-    @Setter
     @Column(name = "number_of_scraps")
     private int numberOfScraps;
 

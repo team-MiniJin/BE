@@ -16,7 +16,7 @@ import java.util.List;
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class PlanScheduleDto {
 
-    private LocalDate scheduleDate;
+    private String scheduleDate;
 
     private String placeCategory;
 

@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @Getter
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers",
-        "numberOfLikes", "numberOfScraps", "waypoints", "detailPlanScheduleDtoList"})
+        "numberOfScraps", "regionList", "detailPlanScheduleDtoList"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class DetailPlanDto {
 
@@ -39,12 +39,10 @@ public class DetailPlanDto {
 
     private int numberOfMembers;
 
-    private int numberOfLikes;
-
     private int numberOfScraps;
 
     @Setter
-    private List<String> waypoints;
+    private List<String> regionList;
 
     @Setter
     @JsonProperty("schedules")
@@ -60,7 +58,6 @@ public class DetailPlanDto {
                 .endDate(plan.getEndDate())
                 .scope(plan.isScope())
                 .numberOfMembers(plan.getNumberOfMembers())
-                .numberOfLikes(plan.getNumberOfLikes())
                 .numberOfScraps(plan.getNumberOfScraps())
                 .build();
     }

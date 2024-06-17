@@ -20,7 +20,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @JsonPropertyOrder({"id", "scheduleDate", "placeName", "arrivalTime", "x", "y"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class ListPlanScheduleDto {
+public class SelectListPlanScheduleDto {
 
     @JsonProperty("schedule_id")
     private Long id;
@@ -38,8 +38,8 @@ public class ListPlanScheduleDto {
 
     private String placeCategory;
 
-    public static ListPlanScheduleDto toDto(PlanSchedule planSchedule) {
-        return ListPlanScheduleDto.builder()
+    public static SelectListPlanScheduleDto toDto(PlanSchedule planSchedule) {
+        return SelectListPlanScheduleDto.builder()
                 .id(planSchedule.getId())
                 .scheduleDate(planSchedule.getScheduleDate())
                 .placeName(planSchedule.getPlaceName())

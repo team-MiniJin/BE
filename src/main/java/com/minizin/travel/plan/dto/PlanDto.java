@@ -27,9 +27,9 @@ public class PlanDto {
 
     private String theme;
 
-    private LocalDate startDate;
+    private String startDate;
 
-    private LocalDate endDate;
+    private String endDate;
 
     private boolean scope;
 
