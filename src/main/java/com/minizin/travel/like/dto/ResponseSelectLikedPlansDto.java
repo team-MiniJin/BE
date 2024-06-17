@@ -1,4 +1,4 @@
-package com.minizin.travel.like.dto;
+/*package com.minizin.travel.like.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,3 +14,4 @@ public class ResponseSelectLikedPlansDto {
     private Long cursorId;
 
 }
+*/
