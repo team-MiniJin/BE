@@ -1,7 +1,10 @@
 package com.minizin.travel.user.service;
 
+import com.minizin.travel.user.domain.dto.FindPasswordDto;
 import com.minizin.travel.user.domain.dto.SendAuthCodeDto;
 import com.minizin.travel.user.domain.dto.VerifyAuthCodeDto;
+import com.minizin.travel.user.domain.enums.MailErrorCode;
+import com.minizin.travel.user.domain.exception.CustomMailException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,11 +60,11 @@ class MailServiceTest {
                 .willReturn(null);
 
         //when
-        Exception exception = assertThrows(Exception.class,
+        CustomMailException exception = assertThrows(CustomMailException.class,
                 () -> mailService.sendAuthCode(sendAuthCodeDto));
 
         //then
-        assertEquals("인증코드 발송에 실패했습니다.", exception.getMessage());
+        assertEquals(MailErrorCode.AUTH_CODE_SEND_FAILED, exception.getMailErrorCode());
     }
 
     @Test
@@ -98,5 +101,43 @@ class MailServiceTest {
 
         //then
         assertEquals(false, verified);
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 메일 발송 성공")
+    void sendTemporaryPassword_success() {
+        //given
+        FindPasswordDto.Request request = new FindPasswordDto.Request();
+        request.setEmail("email");
+        request.setUsername("username");
+
+        MimeMessage mimeMessage = mock(MimeMessage.class);
+        given(javaMailSender.createMimeMessage())
+                .willReturn(mimeMessage);
+
+        //when
+        mailService.sendTemporaryPassword(request);
+
+        //then
+        verify(javaMailSender, times(1)).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 메일 발송 실패")
+    void sendTemporaryPassword_fail() {
+        //given
+        FindPasswordDto.Request request = new FindPasswordDto.Request();
+        request.setEmail("email");
+        request.setUsername("username");
+
+        given(javaMailSender.createMimeMessage())
+                .willReturn(null);
+
+        //when
+        CustomMailException exception = assertThrows(CustomMailException.class,
+                () -> mailService.sendTemporaryPassword(request));
+
+        //then
+        assertEquals(MailErrorCode.TEMPORARY_PASSWORD_SEND_FAILED, exception.getMailErrorCode());
     }
 }

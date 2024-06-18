@@ -3,6 +3,8 @@ package com.minizin.travel.user.service;
 import com.minizin.travel.user.domain.dto.FindPasswordDto;
 import com.minizin.travel.user.domain.dto.SendAuthCodeDto;
 import com.minizin.travel.user.domain.dto.VerifyAuthCodeDto;
+import com.minizin.travel.user.domain.enums.MailErrorCode;
+import com.minizin.travel.user.domain.exception.CustomMailException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,7 @@ public class MailService {
         try {
             javaMailSender.send(this.createEmailForm(sendAuthCodeDto.getEmail()));
         } catch (Exception e) {
-            throw new RuntimeException("인증코드 발송에 실패했습니다.", e);
+            throw new CustomMailException(MailErrorCode.AUTH_CODE_SEND_FAILED);
         }
 
     }
@@ -52,7 +54,7 @@ public class MailService {
         try {
             javaMailSender.send(this.createPasswordForm(request.getEmail(), password));
         } catch (Exception e) {
-            throw new RuntimeException("임시 비밀번호 발송에 실패했습니다.", e);
+            throw new CustomMailException(MailErrorCode.TEMPORARY_PASSWORD_SEND_FAILED);
         }
 
         return password;
