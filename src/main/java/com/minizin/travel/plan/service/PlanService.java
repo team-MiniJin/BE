@@ -57,10 +57,6 @@ public class PlanService {
         }
 
         // 일정당 장소 최소 1개
-        if (planDto.getPlanScheduleDtos().isEmpty()) {
-            System.out.println("일정은 최소 1개 이상이어야 합니다.");
-            throw new BadRequestException();
-        }
         String curDate = "";
         int scheduleCnt = 0;
         for (PlanScheduleDto planScheduleDto : planDto.getPlanScheduleDtos()) {
