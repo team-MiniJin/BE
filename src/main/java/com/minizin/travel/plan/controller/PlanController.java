@@ -23,13 +23,11 @@ public class PlanController {
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
     @PostMapping("/plans")
-    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> createPlan(
-            @RequestBody @Valid PlanDto request, // @Valid : #87 Request 예외/에러 처리
-            @AuthenticationPrincipal PrincipalDetails user
+            @RequestBody @Valid PlanDto request // @Valid : #87 Request 예외/에러 처리
             ) throws BadRequestException {
 
-        var result = planService.createPlan(request, user);
+        var result = planService.createPlan(request);
 
         return ResponseEntity.ok(result);
 

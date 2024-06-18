@@ -39,11 +39,12 @@ public class PlanService {
     final int DEFAULT_PAGE_SIZE = 6; // #29
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
-    public ResponsePlanDto createPlan(PlanDto planDto, PrincipalDetails user)
+    public ResponsePlanDto createPlan(PlanDto planDto)
             throws BadRequestException {
 
         // user 정보 확인
-        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        // Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        Long userId = 1L;
 
         // #87 Request 예외/에러 처리 START
         // 여행 일자 최소 1일 ~ 최대 60일 START //
