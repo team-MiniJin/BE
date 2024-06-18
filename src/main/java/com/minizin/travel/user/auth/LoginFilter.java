@@ -1,11 +1,14 @@
 package com.minizin.travel.user.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minizin.travel.user.domain.dto.ErrorResponse;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.jwt.TokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -59,7 +62,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(errorResponse);
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("로그인에 실패했습니다.");
+        response.getWriter().write(result);
     }
 }
