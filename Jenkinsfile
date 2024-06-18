@@ -52,7 +52,10 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                expression { env.BRANCH_NAME == 'develop' || currentBuild.changeSets.any { changeSet -> changeSet.kind == 'PR' } || env.BRANCH_NAME.contains('jenkins') }
+                anyOf {
+                    branch 'develop'
+                    changeRequest()
+                }
             }
             steps {
                 script {
