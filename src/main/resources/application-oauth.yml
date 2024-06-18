@@ -8,7 +8,7 @@ spring:
             client-id: 3d90bb75347bd4b5962a422915dcad90
             client-secret: yaE467VCfY8VKFrmiqOBWD6YCVG6BGhZ
             client-authentication-method: client_secret_post
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: http://lyckabc.synology.me:20280/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             scope:
               - profile_nickname
