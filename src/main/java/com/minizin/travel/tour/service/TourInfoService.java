@@ -82,6 +82,24 @@ public class TourInfoService {
         return responseDto;
     }
 
+    public TourAPIDto getTourDataSearchKeyword(TourAPIDto.TourRequest requestUrl) throws IOException {
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("1");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("100");
+        int totalCount = Integer.parseInt(pageNo) * Integer.parseInt(numOfRows);
+        String keyword = Optional.ofNullable(requestUrl.getKeyword()).orElse("강원");
+
+        Pageable pageable = PageRequest.of(0, Integer.parseInt(numOfRows));
+        // 데이터베이스에서 중복 제거된 데이터 가져오기
+        List<TourAPI> rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword, pageable);
+        List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .map(TourAPI::toDto)
+            .collect(Collectors.toList());
+
+        TourAPIDto responseDto = createTourAPIDto(rawItems, Integer.parseInt(pageNo));
+
+        return responseDto;
+    }
+
         private TourAPIDto createTourAPIDto(List<TourAPIDto.TourResponse.Body.Items.Item> itemList, int pageNo) {
         // Items 객체로 변환
         TourAPIDto.TourResponse.Body.Items items = TourAPIDto.TourResponse.Body.Items.builder()
