@@ -35,7 +35,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(createCookie("Authorization", token));
 
         // 프론트 측 특정 uri로 리다이렉트
-        response.sendRedirect("http://localhost:3000/");
+        response.sendRedirect("http://localhost:3000/kakao-redirect");
     }
 
     private Cookie createCookie(String key, String value) {
