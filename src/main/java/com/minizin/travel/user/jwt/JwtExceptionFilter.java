@@ -2,7 +2,7 @@ package com.minizin.travel.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minizin.travel.user.domain.dto.ErrorResponse;
-import com.minizin.travel.user.domain.enums.UserErrorCode;
+import com.minizin.travel.user.domain.enums.JwtErrorCode;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,8 +29,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
 
         ErrorResponse errorResponse = new ErrorResponse(
-                UserErrorCode.INVALID_JWT.getStatus(), UserErrorCode.INVALID_JWT.getMessage(),
-                e.getMessage()
+                JwtErrorCode.INVALID_JWT.getStatus(), JwtErrorCode.INVALID_JWT.getMessage()
         );
 
         ObjectMapper objectMapper = new ObjectMapper();
