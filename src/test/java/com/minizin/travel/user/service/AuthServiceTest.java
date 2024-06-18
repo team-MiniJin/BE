@@ -4,6 +4,8 @@ import com.minizin.travel.user.domain.dto.JoinDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.Role;
+import com.minizin.travel.user.domain.enums.UserErrorCode;
+import com.minizin.travel.user.domain.exception.CustomUserException;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,10 +82,10 @@ class AuthServiceTest {
                 .willReturn(true);
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        CustomUserException customUserException = assertThrows(CustomUserException.class,
                 () -> authService.join(request));
 
         //then
-        assertEquals("이미 존재하는 사용자입니다.", exception.getMessage());
+        assertEquals(UserErrorCode.USER_ALREADY_EXIST, customUserException.getUserErrorCode());
     }
 }

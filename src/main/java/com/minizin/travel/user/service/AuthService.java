@@ -4,6 +4,8 @@ import com.minizin.travel.user.domain.dto.JoinDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.Role;
+import com.minizin.travel.user.domain.enums.UserErrorCode;
+import com.minizin.travel.user.domain.exception.CustomUserException;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +20,7 @@ public class AuthService {
 
     public JoinDto.Response join(JoinDto.Request request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("이미 존재하는 사용자입니다.");
+            throw new CustomUserException(UserErrorCode.USER_ALREADY_EXIST);
         }
 
         UserEntity saved = userRepository.save(UserEntity.builder()
