@@ -22,7 +22,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 
 import java.util.Collections;
-import java.util.List;
 
 @Slf4j
 @Configuration
@@ -60,12 +59,13 @@ public class SecurityConfig {
                             CorsConfiguration configuration = new CorsConfiguration();
 
                             configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                            configuration.setAllowedMethods(List.of("POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS"));
+                            configuration.setAllowedMethods(Collections.singletonList("*"));
                             configuration.setAllowCredentials(true);
                             configuration.setAllowedHeaders(Collections.singletonList("*"));
                             configuration.setMaxAge(3600L);
 
-                            configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                            configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                            configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
                             return configuration;
                         })
