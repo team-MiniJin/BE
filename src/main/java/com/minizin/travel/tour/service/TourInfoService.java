@@ -6,8 +6,14 @@ import com.google.gson.GsonBuilder;
 import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import com.minizin.travel.tour.domain.dto.TourAPIDto.TourRequest;
 import com.minizin.travel.tour.domain.dto.TourAPIDto.TourResponse;
+import com.minizin.travel.tour.domain.entity.TourAPI;
 import com.minizin.travel.tour.domain.repository.TourAPIRepository;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TupleElement;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +26,8 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,15 +51,38 @@ public class TourInfoService {
         int pageNo = 1;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<Object[]> rawItems = tourAPIRepository.findDistinctAreaCode();
-        List<TourAPIDto.TourResponse.Body.Items.Item> itemList = rawItems.stream()
-            .map(result -> TourAPIDto.TourResponse.Body.Items.Item.builder()
-                .code((String) result[0])
-                .name((String) result[1])
-                .rnum((Integer) result[2])
-                .build())
+        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
+        // 응답 객체 생성
+        TourAPIDto responseDto = createTourAPIDto(rawItems, pageNo);
+
+        return responseDto;
+    }
+
+    public TourAPIDto getTourDataByAreaBasedList(TourAPIDto.TourRequest requestUrl) throws IOException {
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("1");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("100");
+        int totalCount = Integer.parseInt(pageNo) * Integer.parseInt(numOfRows);
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("1");
+
+        Pageable pageable = PageRequest.of(Integer.parseInt(pageNo), totalCount);
+        // 데이터베이스에서 중복 제거된 데이터 가져오기
+        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode, pageable);
+        List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .map(TourAPI::toDto)
+            .collect(Collectors.toList());
+
+
+        TourAPIDto responseDto = createTourAPIDto(rawItems, Integer.parseInt(pageNo));
+
+        return responseDto;
+    }
+
+        private TourAPIDto createTourAPIDto(List<TourAPIDto.TourResponse.Body.Items.Item> itemList, int pageNo) {
         // Items 객체로 변환
         TourAPIDto.TourResponse.Body.Items items = TourAPIDto.TourResponse.Body.Items.builder()
             .item(itemList)
@@ -72,30 +103,12 @@ public class TourInfoService {
             .build();
 
         // 최종 응답 객체 생성
-        TourAPIDto responseDto = TourAPIDto.builder()
+        return TourAPIDto.builder()
             .response(TourAPIDto.TourResponse.builder()
                 .header(header)
                 .body(body)
                 .build())
             .build();
-
-        System.out.println(responseDto.toString());
-        return responseDto;
     }
 
-    private String requestUrlCombine(String getCategoryUrl, TourRequest requestUrl) {
-        // requestUrl을 Map으로 변환
-        Map<String, String> paramMap = objectMapper.convertValue(requestUrl, Map.class);
-
-        // 빈값이나 null값은 제외
-        Map<String, String> filteredMap = paramMap.entrySet().stream()
-            .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(getCategoryUrl).newBuilder();
-        // Map의 각 엔트리를 URL 빌더에 추가
-        filteredMap.forEach(urlBuilder::addQueryParameter);
-
-        return urlBuilder.build().toString();
-    }
 }
