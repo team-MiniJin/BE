@@ -3,16 +3,10 @@ package com.minizin.travel.plan.controller;
 import com.minizin.travel.plan.dto.EditPlanDto;
 import com.minizin.travel.plan.dto.PlanDto;
 import com.minizin.travel.plan.service.PlanService;
-import com.minizin.travel.user.domain.dto.PrincipalDetails;
-import com.minizin.travel.user.domain.entity.UserEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,8 +29,8 @@ public class PlanController {
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
     // #29 2024.06.02 내 여행 일정 조회 START //
-    @GetMapping("/plans/{cursor_id}")
-    public ResponseEntity<?> selectListPlan(@PathVariable("cursor_id") Long lastPlanId) {  // #102 [GET] /plans : Refactoring - cursorId renaming
+    @GetMapping("/plans")
+    public ResponseEntity<?> selectListPlan(@RequestParam("cursor_id") Long lastPlanId) {  // #102 [GET] /plans : Refactoring - cursorId renaming
 
         var result = planService.selectListPlan(lastPlanId);
 
