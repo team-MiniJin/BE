@@ -2,12 +2,12 @@ package com.minizin.travel.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minizin.travel.user.domain.dto.ErrorResponse;
-import com.minizin.travel.user.domain.enums.JwtErrorCode;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,7 +29,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
 
         ErrorResponse errorResponse = new ErrorResponse(
-                JwtErrorCode.INVALID_JWT.getStatus(), JwtErrorCode.INVALID_JWT.getMessage()
+                HttpStatus.UNAUTHORIZED, e.getMessage()
         );
 
         ObjectMapper objectMapper = new ObjectMapper();
