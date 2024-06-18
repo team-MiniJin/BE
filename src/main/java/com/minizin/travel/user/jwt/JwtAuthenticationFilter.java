@@ -1,6 +1,5 @@
 package com.minizin.travel.user.jwt;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,9 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = resolveTokenFromRequest(request);
-        if (token == null) {
-            throw new JwtException("Authorization header is empty.");
-        }
 
         // 토큰이 유효하다면
         if (StringUtils.hasText(token) && !tokenProvider.isExpired(token)) {
