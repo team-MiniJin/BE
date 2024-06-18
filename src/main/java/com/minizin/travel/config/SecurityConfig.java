@@ -2,6 +2,7 @@ package com.minizin.travel.config;
 
 import com.minizin.travel.user.auth.LoginFilter;
 import com.minizin.travel.user.jwt.JwtAuthenticationFilter;
+import com.minizin.travel.user.jwt.JwtExceptionFilter;
 import com.minizin.travel.user.jwt.TokenProvider;
 import com.minizin.travel.user.oauth2.CustomSuccessHandler;
 import com.minizin.travel.user.service.CustomOAuth2UserService;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final TokenProvider tokenProvider;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     // BCryptPasswordEncoder Bean 등록
     @Bean
@@ -124,6 +126,9 @@ public class SecurityConfig {
         http
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
                         LoginFilter.class);
+        //JWT 예외 핸들러 filter 등록
+        http
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
         //세션 설정 : STATELESS
         http
