@@ -6,6 +6,7 @@ import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import com.minizin.travel.tour.service.TourInfoService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Protocol;
@@ -37,40 +38,51 @@ public class TourInfoController {
     @GetMapping("/areaCode1")
     public ResponseEntity<String> getTourDataByAreaCode(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
         log.info("Received request: {}", requestUrl);
-
-        if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {
-            TourAPIDto responseDto = tourInfoService.getTourDataByAreaCode();
-            String jsonResponse = gson.toJson(responseDto);
-            log.info(jsonResponse);
-            return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(jsonResponse);
-        } else {
-            String errorResponse = "{\"successful\":false,\"redirect\":false}";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(errorResponse);
-        }
-
+        return processTourRequest(requestUrl, () -> {
+            try {
+                return tourInfoService.getTourDataByAreaCode();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @GetMapping("/areaBasedList1")
     public ResponseEntity<String> getTourDataByBasedList(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
         log.info("Received request: {}", requestUrl);
+        return processTourRequest(requestUrl, () -> {
+            try {
+                return tourInfoService.getTourDataByAreaBasedList(requestUrl);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
-        if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {
-            TourAPIDto responseDto = tourInfoService.getTourDataByAreaBasedList(requestUrl);
-            String jsonResponse = gson.toJson(responseDto);
-            log.info(jsonResponse);
-            return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(jsonResponse);
-        } else {
-            String errorResponse = "{\"successful\":false,\"redirect\":false}";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(errorResponse);
+    private ResponseEntity<String> processTourRequest(TourAPIDto.TourRequest requestUrl, Supplier<TourAPIDto> tourDataSupplier) {
+        try {
+            if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {
+                TourAPIDto responseDto = tourDataSupplier.get();
+                String jsonResponse = gson.toJson(responseDto);
+                log.info(jsonResponse);
+                return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(jsonResponse);
+            } else {
+                String errorResponse = "{\"successful\":false,\"redirect\":false}";
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(errorResponse);
+            }
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                String errorResponse = "{\"successful\":false,\"error\":\"IOException occurred\"}";
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(errorResponse);
+            } else {
+                throw e;
+            }
         }
-
     }
 }
