@@ -30,7 +30,7 @@ public class PlanController {
 
     // #29 2024.06.02 내 여행 일정 조회 START //
     @GetMapping("/plans")
-    public ResponseEntity<?> selectListPlan(@RequestParam("cursor_id") Long lastPlanId) {  // #102 [GET] /plans : Refactoring - cursorId renaming
+    public ResponseEntity<?> selectListPlan(@RequestParam(value = "cursor_id") Long lastPlanId) {  // #102 [GET] /plans : Refactoring - cursorId renaming
 
         var result = planService.selectListPlan(lastPlanId);
 
