@@ -53,4 +53,24 @@ public class TourInfoController {
         }
 
     }
+
+    @GetMapping("/areaBasedList1")
+    public ResponseEntity<String> getTourDataByBasedList(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
+        log.info("Received request: {}", requestUrl);
+
+        if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {
+            TourAPIDto responseDto = tourInfoService.getTourDataByAreaBasedList(requestUrl);
+            String jsonResponse = gson.toJson(responseDto);
+            log.info(jsonResponse);
+            return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(jsonResponse);
+        } else {
+            String errorResponse = "{\"successful\":false,\"redirect\":false}";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(errorResponse);
+        }
+
+    }
 }
