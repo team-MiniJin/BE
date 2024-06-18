@@ -2,6 +2,7 @@ package com.minizin.travel.global;
 
 import com.minizin.travel.global.enums.ValidationErrorCode;
 import com.minizin.travel.user.domain.dto.ErrorResponse;
+import com.minizin.travel.user.domain.exception.CustomMailException;
 import com.minizin.travel.user.domain.exception.CustomUserException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +19,14 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(CustomMailException.class)
+    public ResponseEntity<?> handleCustomMailException(CustomMailException e) {
+        return ResponseEntity.status(e.getMailErrorCode().getStatus())
+                .body(new ErrorResponse(e.getMailErrorCode().getStatus(),
+                        e.getMailErrorCode().getMessage())
+                );
+    }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest()
