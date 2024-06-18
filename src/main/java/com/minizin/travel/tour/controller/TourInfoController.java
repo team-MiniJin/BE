@@ -59,6 +59,18 @@ public class TourInfoController {
         });
     }
 
+    @GetMapping("/searchKeyword1")
+    public ResponseEntity<String> getTourDataBySearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
+        log.info("Received request: {}", requestUrl);
+        return processTourRequest(requestUrl, () -> {
+            try {
+                return tourInfoService.getTourDataSearchKeyword(requestUrl);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     private ResponseEntity<String> processTourRequest(TourAPIDto.TourRequest requestUrl, Supplier<TourAPIDto> tourDataSupplier) {
         try {
             if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {

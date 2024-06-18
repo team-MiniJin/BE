@@ -31,4 +31,7 @@ public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.areaCode = :areaCode")
     List<TourAPI> findDistinctAreaBasedList(@Param("areaCode") String areaCode, Pageable pageable);
 
+    @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.addr1 LIKE CONCAT('%', :keyword, '%')")
+    List<TourAPI> findDistinctSearchKeyword(@Param("keyword") String keyword, Pageable pageable);
+
 }
