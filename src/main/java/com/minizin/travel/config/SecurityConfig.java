@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -60,7 +61,7 @@ public class SecurityConfig {
                             log.debug("Setting CORS configuration");
                             CorsConfiguration configuration = new CorsConfiguration();
 
-                            configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                            configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://fe-two-blond.vercel.app"));
                             configuration.setAllowedMethods(Collections.singletonList("*"));
                             configuration.setAllowCredentials(true);
                             configuration.setAllowedHeaders(Collections.singletonList("*"));
