@@ -32,5 +32,5 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     List<Plan> findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsAscIdDesc(Long userId, Pageable pageable);
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
-    List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsAsc(LocalDate startDate, LocalDate endDate);
+    List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(LocalDate startDate, LocalDate endDate);
 }
