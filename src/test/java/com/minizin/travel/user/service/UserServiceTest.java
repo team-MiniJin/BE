@@ -4,6 +4,8 @@ import com.minizin.travel.user.domain.dto.FindIdDto;
 import com.minizin.travel.user.domain.dto.FindPasswordDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
+import com.minizin.travel.user.domain.enums.UserErrorCode;
+import com.minizin.travel.user.domain.exception.CustomUserException;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,10 +63,11 @@ class UserServiceTest {
                 .willReturn(Optional.empty());
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.findId(request));
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.findId(request));
 
         //then
-        assertEquals("등록되지 않은 이메일입니다.", exception.getMessage());
+        assertEquals(UserErrorCode.EMAIL_UN_REGISTERED, exception.getUserErrorCode());
     }
 
     @Test
@@ -102,9 +105,10 @@ class UserServiceTest {
                 .willReturn(Optional.empty());
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.findPassword(request));
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.findPassword(request));
 
         //then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
     }
 }
