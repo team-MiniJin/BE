@@ -16,7 +16,7 @@ public class OtherPlanController {
 
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
-    @GetMapping("/plans/others/newest/")
+    @GetMapping("/plans/others/newest")
     public ResponseEntity<?> selectOthersListPlan(@RequestParam("cursor_id") Long lastPlanId,
                                                   @RequestParam("region") String region,
                                                   @RequestParam("theme") String theme) {
@@ -28,7 +28,7 @@ public class OtherPlanController {
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
-    @GetMapping("/plans/others/scraps/")
+    @GetMapping("/plans/others/scraps")
     public ResponseEntity<?> selectOthersListPlanScraps(@RequestParam("cursor_id") Long lastPlanId,
                                                         @RequestParam("region") String region,
                                                         @RequestParam("theme") String theme) {
