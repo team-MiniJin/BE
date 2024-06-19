@@ -120,10 +120,10 @@ public class OtherPlanService {
 
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(6);
-        List<Plan> planList = planRepository.findTop20ByStartDateBetweenOrderByNumberOfScrapsAsc(startDate, endDate);
+        List<Plan> planList = planRepository.findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(startDate, endDate);
 
         for (Plan plan : planList) {
-            PopWeekPlanDto newPopWeekPlanDto = new PopWeekPlanDto();
+            PopWeekPlanDto newPopWeekPlanDto = PopWeekPlanDto.toDto(plan);
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
             newPopWeekPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
             // 유저 닉네임 추가 newPopWeekPlanDto.setUserNickname();
