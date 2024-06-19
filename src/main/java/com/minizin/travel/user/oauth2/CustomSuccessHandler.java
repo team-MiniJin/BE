@@ -4,10 +4,10 @@ import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import com.minizin.travel.user.domain.enums.Role;
 import com.minizin.travel.user.jwt.TokenProvider;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -32,26 +32,21 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = tokenProvider.createJwt(username, role.toString(), 60 * 60 * 1000L);
 
         // 응답에 쿠키로 jwt 발급
-        response.addCookie(createCookie("Authorization", token));
+        response.addHeader("Set-Cookie", createCookie("Authorization", token).toString());
 
         // 프론트 측 특정 uri로 리다이렉트
         response.sendRedirect("http://localhost:3000/kakao-redirect");
     }
 
-    private Cookie createCookie(String key, String value) {
+    private ResponseCookie createCookie(String key, String value) {
 
-        Cookie cookie = new Cookie(key, value);
-        // 쿠키 지속 시간
-        cookie.setMaxAge(60 * 60 * 60);
-
-        // https 통신에서만 쿠키 사용
-        cookie.setSecure(false);
-
-        // 쿠키 전역에서 볼 수 있도록 설정
-        cookie.setPath("/");
-
-        // js 접근 방지
-        cookie.setHttpOnly(false);
+        ResponseCookie cookie = ResponseCookie.from(key, value)
+                .maxAge(60 * 60 * 60)
+                .secure(false)
+                .path("/")
+                .httpOnly(true)
+                .sameSite("None")
+                .build();
 
         return cookie;
     }
