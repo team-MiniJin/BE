@@ -298,7 +298,12 @@ public class PlanService {
 
         Plan plan = planRepository.findById(planId).get();
 
-        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId); // DB를 가져온 list
+        return findListOfPlanScheduleDtoAndPlanBudgetDto(plan);
+    }
+
+    public DetailPlanDto findListOfPlanScheduleDtoAndPlanBudgetDto(Plan plan) {
+
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId()); // DB를 가져온 list
         List<DetailPlanScheduleDto> detailPlanScheduleDtoList = new ArrayList<>(); // 객체를 가져온 list
         List<String> regionList = new ArrayList<>();
         int days = 0;
