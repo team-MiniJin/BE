@@ -192,6 +192,10 @@ public class PlanService {
             listPlanDtoList.add(selectListPlanDto);
         }
 
+        if (!planRepository.existsByIdLessThan(planId)) {
+            planId = null;
+        }
+
         return ResponseSelectListPlanDto.builder()
                 .data(listPlanDtoList)
                 .nextCursor(planId)
