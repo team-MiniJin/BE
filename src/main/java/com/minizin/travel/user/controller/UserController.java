@@ -1,9 +1,6 @@
 package com.minizin.travel.user.controller;
 
-import com.minizin.travel.user.domain.dto.FindIdDto;
-import com.minizin.travel.user.domain.dto.FindPasswordDto;
-import com.minizin.travel.user.domain.dto.PrincipalDetails;
-import com.minizin.travel.user.domain.dto.UpdatePasswordDto;
+import com.minizin.travel.user.domain.dto.*;
 import com.minizin.travel.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +37,13 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         return userService.updatePassword(request, principalDetails);
+    }
+
+    @PatchMapping("/users/email")
+    public UpdateEmailDto.Response updateEmail(
+            @RequestBody @Valid UpdateEmailDto.Request request,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return userService.updateEmail(request, principalDetails);
     }
 }

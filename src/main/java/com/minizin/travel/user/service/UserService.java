@@ -1,9 +1,6 @@
 package com.minizin.travel.user.service;
 
-import com.minizin.travel.user.domain.dto.FindIdDto;
-import com.minizin.travel.user.domain.dto.FindPasswordDto;
-import com.minizin.travel.user.domain.dto.PrincipalDetails;
-import com.minizin.travel.user.domain.dto.UpdatePasswordDto;
+import com.minizin.travel.user.domain.dto.*;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.UserErrorCode;
@@ -50,5 +47,17 @@ public class UserService {
         userEntity.setPassword(bCryptPasswordEncoder.encode(request.getChangePassword()));
 
         return UpdatePasswordDto.Response.fromUserEntity(userEntity);
+    }
+
+    @Transactional
+    public UpdateEmailDto.Response updateEmail(
+            UpdateEmailDto.Request request, PrincipalDetails principalDetails
+    ) {
+        UserEntity userEntity = userRepository.findByUsername(principalDetails.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+
+        userEntity.setEmail(request.getEmail());
+
+        return UpdateEmailDto.Response.fromUserEntity(userEntity);
     }
 }
