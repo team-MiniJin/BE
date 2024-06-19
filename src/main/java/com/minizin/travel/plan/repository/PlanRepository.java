@@ -15,6 +15,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     List<Plan> findAllByUserIdOrderByIdDesc(Long userId, Pageable pageable);
 
+    boolean existsByIdLessThan(Long id);
+
     // #39 2024.06.10 다가오는 여행 일정 조회 //
     List<Plan> findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(Long userId, LocalDate today);
 
