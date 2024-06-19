@@ -44,8 +44,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 쿠키 지속 시간
         cookie.setMaxAge(60 * 60 * 60);
 
-        // https 통신에서만 쿠키 사용 (현재는 비활성화)
-        //cookie.setSecure(true);
+        // https 통신에서만 쿠키 사용
+        cookie.setSecure(true);
 
         // 쿠키 전역에서 볼 수 있도록 설정
         cookie.setPath("/");
