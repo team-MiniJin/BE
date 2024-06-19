@@ -45,13 +45,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         cookie.setMaxAge(60 * 60 * 60);
 
         // https 통신에서만 쿠키 사용
-        cookie.setSecure(true);
+        cookie.setSecure(false);
 
         // 쿠키 전역에서 볼 수 있도록 설정
         cookie.setPath("/");
 
         // js 접근 방지
-        // cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
 
         return cookie;
     }
