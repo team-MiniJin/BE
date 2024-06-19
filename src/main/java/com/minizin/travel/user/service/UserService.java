@@ -60,4 +60,16 @@ public class UserService {
 
         return UpdateEmailDto.Response.fromUserEntity(userEntity);
     }
+
+    @Transactional
+    public UpdateNicknameDto.Response updateNickname(
+            UpdateNicknameDto.Request request, PrincipalDetails principalDetails
+    ) {
+        UserEntity userEntity = userRepository.findByUsername(principalDetails.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+
+        userEntity.setNickname(request.getNickname());
+
+        return UpdateNicknameDto.Response.fromUserEntity(userEntity);
+    }
 }

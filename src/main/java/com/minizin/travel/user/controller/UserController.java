@@ -46,4 +46,12 @@ public class UserController {
     ) {
         return userService.updateEmail(request, principalDetails);
     }
+
+    @PatchMapping("/users/nickname")
+    public UpdateNicknameDto.Response updateNickname(
+            @RequestBody @Valid UpdateNicknameDto.Request request,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return userService.updateNickname(request, principalDetails);
+    }
 }
