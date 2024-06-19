@@ -7,12 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -21,16 +23,21 @@ public class AuthController {
 
     @GetMapping("/auth/jwt")
     public ResponseEntity<?> getJwt(HttpServletRequest request, HttpServletResponse response) {
+        log.info("/auth/jwt start");
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
+            log.info("there is cookie");
             for (Cookie cookie : cookies) {
+                log.info("there is cookie : " + cookie.getName());
                 if (cookie.getName().equals("Authorization")) {
+                    log.info("there is Authorization cookie");
                     String token = cookie.getValue();
                     response.setHeader("Authorization", "Bearer " + token);
                     return ResponseEntity.ok("JWT 헤더로 발급");
                 }
             }
         }
+        log.info("cookie is null");
         return ResponseEntity.status(401).body("Unauthorized");
     }
 
