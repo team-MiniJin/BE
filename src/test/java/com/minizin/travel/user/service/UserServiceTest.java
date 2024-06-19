@@ -293,4 +293,44 @@ class UserServiceTest {
         assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
 
     }
+
+    @Test
+    @DisplayName("사용자 삭제 성공")
+    void deleteUser_success() {
+        //given
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+
+        //when
+        DeleteUserDto.Response response = userService.deleteUser(principalDetails);
+
+        //then
+        assertEquals(true, response.getSuccess());
+        assertEquals(1L, response.getUserId());
+    }
+
+    @Test
+    @DisplayName("사용자 삭제 실패 - 존재하지 않는 사용자")
+    void deleteUser_fail_userNotFound() {
+        //given
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.empty());
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.deleteUser(principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+    }
 }
