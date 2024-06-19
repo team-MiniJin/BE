@@ -42,7 +42,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         ResponseCookie cookie = ResponseCookie.from(key, value)
                 .maxAge(60 * 60 * 60)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .httpOnly(true)
                 .sameSite("None")
