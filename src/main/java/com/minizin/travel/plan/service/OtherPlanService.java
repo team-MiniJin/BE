@@ -26,7 +26,6 @@ public class OtherPlanService {
     private final PlanRepository planRepository;
     private final PlanScheduleRepository planScheduleRepository;
 
-    final int INITIAL_VALUE = 0;
     final int DEFAULT_PAGE_SIZE = 6; // #29
     private final PlanBudgetRepository planBudgetRepository;
 
@@ -36,9 +35,9 @@ public class OtherPlanService {
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
         // 테스트
-        Long userId = 1L;
+        Long userId = 2L;
 
-        List<Plan> planList = findOtherPlanByLastPlanIdCheckExistCursor(userId, lastPlanId, page);
+        List<Plan> planList = findOtherPlanByLastPlanIdCheckExistCursor(userId, region, theme, lastPlanId, page);
         List<OthersListPlanDto> othersListPlanDtoList = new ArrayList<>();
         Long planId = 0L;
 
@@ -59,9 +58,9 @@ public class OtherPlanService {
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
         // 테스트
-        Long userId = 1L;
+        Long userId = 2L;
 
-        List<Plan> planList = findOtherPlanScrapsByLastPlanIdCheckExistCursor(userId, lastPlanId, page);
+        List<Plan> planList = findOtherPlanScrapsByLastPlanIdCheckExistCursor(userId, region, theme, lastPlanId, page);
         List<OthersListPlanDto> othersListPlanDtoList = new ArrayList<>();
         Long planId = 0L;
 
@@ -76,6 +75,21 @@ public class OtherPlanService {
                 .build();
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
+
+/*
+    private List<OthersListPlanDto> selectOthersListPlan(List<Plan> planList) {
+
+        List<OthersListPlanDto> othersListPlanDtoList = new ArrayList<>();
+        Long planId = 0L;
+
+        for (Plan plan : planList) {
+            planId = plan.getId();
+            othersListPlanDtoList.add(selectOthersPlanAndSchedule(plan));
+        }
+
+        return othersListPlanDtoList;
+    }
+ */
 
     private OthersListPlanDto selectOthersPlanAndSchedule(Plan plan) {
 
@@ -96,20 +110,56 @@ public class OtherPlanService {
         return othersListPlanDto;
     }
 
-    private List<Plan> findOtherPlanByLastPlanIdCheckExistCursor(Long userId, Long lastPlanId, Pageable page) {
+    private List<Plan> findOtherPlanByLastPlanIdCheckExistCursor(Long userId, String region, String theme, Long lastPlanId, Pageable page) {
 
-        return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
-                : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+        if (region.isEmpty() && theme.isEmpty()) {
+            // region / theme 둘다 미존재
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+        } else if (region.isEmpty()) {
+            // region 만 미존재
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotAndThemeOrderByIdDesc(userId, theme, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotAndThemeOrderByIdDesc(lastPlanId, userId, theme, page);
+        } else if (theme.isEmpty()) {
+            // theme 만 미존재
 
+            // region / theme 둘다 미존재로 에러 방지용
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+        } else {
+            // region / theme 둘다 존재
+
+            // region / theme 둘다 미존재로 에러 방지용
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+        }
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
-    private List<Plan> findOtherPlanScrapsByLastPlanIdCheckExistCursor(Long userId, Long lastPlanId, Pageable page) {
+    private List<Plan> findOtherPlanScrapsByLastPlanIdCheckExistCursor(Long userId, String region, String theme, Long lastPlanId, Pageable page) {
 
-        return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsAscIdDesc(userId, page)
-                : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsAscIdDesc(lastPlanId, userId, page);
+        if (region.isEmpty() && theme.isEmpty()) {
+            // region / theme 둘다 미존재
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
+        } else if (region.isEmpty()) {
+            // region 만 미존재
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotAndThemeOrderByNumberOfScrapsDescIdDesc(userId, theme, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotAndThemeOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, theme, page);
+        } else if (theme.isEmpty()) {
+            // theme 만 미존재
 
+            // region / theme 둘다 미존재로 에러 방지용
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
+        } else {
+            // region / theme 둘다 존재
+
+            // region / theme 둘다 미존재로 에러 방지용
+            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
+                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
+        }
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
