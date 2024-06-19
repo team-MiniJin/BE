@@ -5,10 +5,7 @@ import com.minizin.travel.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,5 +50,12 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         return userService.updateNickname(request, principalDetails);
+    }
+
+    @DeleteMapping("/users")
+    public DeleteUserDto.Response deleteUser(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return userService.deleteUser(principalDetails);
     }
 }

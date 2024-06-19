@@ -72,4 +72,13 @@ public class UserService {
 
         return UpdateNicknameDto.Response.fromUserEntity(userEntity);
     }
+
+    public DeleteUserDto.Response deleteUser(PrincipalDetails principalDetails) {
+        UserEntity userEntity = userRepository.findByUsername(principalDetails.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+
+        userRepository.delete(userEntity);
+
+        return DeleteUserDto.Response.fromUserEntity(userEntity);
+    }
 }
