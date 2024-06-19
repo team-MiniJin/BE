@@ -14,13 +14,15 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonPropertyOrder({"id", "userNickname", "planName", "theme", "startDate", "endDate"
+@JsonPropertyOrder({"id", "userId", "userNickname", "planName", "theme", "startDate", "endDate"
         , "planBudget", "scope", "numberOfMembers", "numberOfScraps", "regionList", "othersListPlanScheduleDtoList"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class OthersListPlanDto {
 
     @JsonProperty("plan_id")
     private Long id;
+
+    private Long userId;
 
     @Setter
     private String userNickname;
@@ -52,6 +54,7 @@ public class OthersListPlanDto {
     public static OthersListPlanDto toDto(Plan plan) {
         return OthersListPlanDto.builder()
                 .id(plan.getId())
+                .userId(plan.getUserId())
                 .planName(plan.getPlanName())
                 .theme(plan.getTheme())
                 .startDate(plan.getStartDate())

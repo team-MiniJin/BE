@@ -46,6 +46,10 @@ public class OtherPlanService {
             othersListPlanDtoList.add(selectOthersPlanAndSchedule(plan));
         }
 
+        if (!planRepository.existsByIdLessThan(planId)) {
+            planId = null;
+        }
+
         return ResponseOthersPlanDto.builder()
                 .data(othersListPlanDtoList)
                 .nextCursor(planId)
@@ -67,6 +71,10 @@ public class OtherPlanService {
         for (Plan plan : planList) {
             planId = plan.getId();
             othersListPlanDtoList.add(selectOthersPlanAndSchedule(plan));
+        }
+
+        if (!planRepository.existsByIdLessThan(planId)) {
+            planId = null;
         }
 
         return ResponseOthersPlanDto.builder()
@@ -117,21 +125,19 @@ public class OtherPlanService {
             return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
                     : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
         } else if (region.isEmpty()) {
-            // region 만 미존재
+            // theme 만 존재
             return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotAndThemeOrderByIdDesc(userId, theme, page)
                     : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotAndThemeOrderByIdDesc(lastPlanId, userId, theme, page);
         } else if (theme.isEmpty()) {
-            // theme 만 미존재
-
-            // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+            // region 만 존재
+            return lastPlanId == 0 ? planRepository.findScopeIsTrueAndUserIdNotAndRegionOrderByIdDesc(userId, region, DEFAULT_PAGE_SIZE)
+                    : planRepository.findLessThanAndScopeIsTrueAndUserIdNotAndRegionOrderByIdDesc(lastPlanId, userId, region, DEFAULT_PAGE_SIZE);
         } else {
             // region / theme 둘다 존재
 
             // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByIdDesc(userId, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByIdDesc(lastPlanId, userId, page);
+            return lastPlanId == 0 ? planRepository.findScopeIsTrueAndUserIdNotThemeAndRegionOrderByIdDesc(userId, region, theme, DEFAULT_PAGE_SIZE)
+                    : planRepository.findLessThanAndScopeIsTrueAndUserIdNotThemeAndRegionOrderByIdDesc(lastPlanId, userId, region, theme, DEFAULT_PAGE_SIZE);
         }
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
@@ -144,21 +150,20 @@ public class OtherPlanService {
             return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
                     : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
         } else if (region.isEmpty()) {
-            // region 만 미존재
+            // theme 만 존재
             return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotAndThemeOrderByNumberOfScrapsDescIdDesc(userId, theme, page)
                     : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotAndThemeOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, theme, page);
         } else if (theme.isEmpty()) {
-            // theme 만 미존재
+            // region 만 존재
 
-            // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
+            return lastPlanId == 0 ? planRepository.findScopeIsTrueAndUserIdNotAndRegionOrderByNumberOfScrapsDescIdDesc(userId, region, DEFAULT_PAGE_SIZE)
+                    : planRepository.findLessThanAndScopeIsTrueAndUserIdNotAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, region, DEFAULT_PAGE_SIZE);
         } else {
             // region / theme 둘다 존재
 
             // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(userId, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndUserIdNotOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, page);
+            return lastPlanId == 0 ? planRepository.findScopeIsTrueAndUserIdNotThemeAndRegionOrderByNumberOfScrapsDescIdDesc(userId, region, theme, DEFAULT_PAGE_SIZE)
+                    : planRepository.findLessThanAndScopeIsTrueAndUserIdNotThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, userId, region, theme, DEFAULT_PAGE_SIZE);
         }
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
