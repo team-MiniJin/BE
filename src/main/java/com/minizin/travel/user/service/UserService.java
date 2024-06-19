@@ -2,6 +2,8 @@ package com.minizin.travel.user.service;
 
 import com.minizin.travel.user.domain.dto.FindIdDto;
 import com.minizin.travel.user.domain.dto.FindPasswordDto;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.dto.UpdatePasswordDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.UserErrorCode;
@@ -9,6 +11,7 @@ import com.minizin.travel.user.domain.exception.CustomUserException;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public FindIdDto.Response findId(FindIdDto.Request request) {
         UserEntity userEntity = userRepository.findByEmailAndLoginType(request.getEmail(), LoginType.LOCAL)
@@ -31,7 +35,20 @@ public class UserService {
                 .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
 
         String password = mailService.sendTemporaryPassword(request);
-        userEntity.setPassword(password);
+        userEntity.setPassword(bCryptPasswordEncoder.encode(password));
     }
 
+    @Transactional
+    public UpdatePasswordDto.Response updatePassword(
+            UpdatePasswordDto.Request request, PrincipalDetails principalDetails) {
+        UserEntity userEntity = userRepository.findByUsername(principalDetails.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+        if (!bCryptPasswordEncoder.matches(request.getOriginalPassword(), userEntity.getPassword())) {
+            throw new CustomUserException(UserErrorCode.PASSWORD_UN_MATCHED);
+        }
+
+        userEntity.setPassword(bCryptPasswordEncoder.encode(request.getChangePassword()));
+
+        return UpdatePasswordDto.Response.fromUserEntity(userEntity);
+    }
 }
