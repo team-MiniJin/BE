@@ -235,12 +235,62 @@ class UserServiceTest {
                 .build();
         PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
 
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.empty());
+
         //when
         CustomUserException exception = assertThrows(CustomUserException.class,
                 () -> userService.updateEmail(request, principalDetails));
 
         //then
         assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
-        
+
+    }
+
+    @Test
+    @DisplayName("닉네임 수정 성공")
+    void updateNickname_success() {
+        //given
+        UpdateNicknameDto.Request request = new UpdateNicknameDto.Request();
+        request.setNickname("nickname2");
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .username("username")
+                .nickname("nickname")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+
+        //when
+        UpdateNicknameDto.Response response = userService.updateNickname(request, principalDetails);
+
+        //then
+        assertEquals(true, response.getSuccess());
+        assertEquals(1L, response.getUserId());
+        assertEquals("nickname2", response.getChangedNickname());
+    }
+
+    @Test
+    @DisplayName("닉네임 수정 실패 - 존재하지 않는 사용자")
+    void updateNickname_fail_userNotFound() {
+        //given
+        UpdateNicknameDto.Request request = new UpdateNicknameDto.Request();
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.empty());
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.updateNickname(request, principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+
     }
 }
