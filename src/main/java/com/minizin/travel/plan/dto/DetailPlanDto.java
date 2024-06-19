@@ -1,5 +1,6 @@
 package com.minizin.travel.plan.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Builder
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers",
         "numberOfScraps", "regionList", "detailPlanScheduleDtoList"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -25,6 +27,9 @@ public class DetailPlanDto {
     private Long userId;
 
     private String planName;
+
+    @Setter
+    private String userNickname;
 
     private String theme;
 
