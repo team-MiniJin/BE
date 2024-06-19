@@ -2,6 +2,8 @@ package com.minizin.travel.user.service;
 
 import com.minizin.travel.user.domain.dto.FindIdDto;
 import com.minizin.travel.user.domain.dto.FindPasswordDto;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.dto.UpdatePasswordDto;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.UserErrorCode;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
@@ -28,6 +31,9 @@ class UserServiceTest {
 
     @Mock
     private MailService mailService;
+
+    @Mock
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -85,7 +91,8 @@ class UserServiceTest {
                 .willReturn(Optional.of(userEntity));
         given(mailService.sendTemporaryPassword(request))
                 .willReturn("password");
-
+        given(bCryptPasswordEncoder.encode("password"))
+                .willReturn("password");
 
         //when
         userService.findPassword(request);
@@ -110,5 +117,89 @@ class UserServiceTest {
 
         //then
         assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 성공")
+    void updatePassword_success() {
+        //given
+        UpdatePasswordDto.Request request = new UpdatePasswordDto.Request();
+        request.setOriginalPassword("original");
+        request.setChangePassword("change");
+
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .username("username")
+                .password("original")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+        given(bCryptPasswordEncoder.matches(request.getOriginalPassword(), userEntity.getPassword()))
+                .willReturn(true);
+        given(bCryptPasswordEncoder.encode(request.getChangePassword()))
+                .willReturn("change");
+
+        //when
+        UpdatePasswordDto.Response response = userService.updatePassword(request, principalDetails);
+
+        //then
+        assertEquals(true, response.getSuccess());
+        assertEquals(1L, response.getUserId());
+        assertEquals("change", response.getChangedPassword());
+
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 실패 - 존재하지 않는 사용자")
+    void updatePassword_fail_userNotFound() {
+        //given
+        UpdatePasswordDto.Request request = new UpdatePasswordDto.Request();
+
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.empty());
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.updatePassword(request, principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 실패 - 일치하지 않는 비밀번호")
+    void updatePassword_fail_passwordUnMatched() {
+        //given
+        UpdatePasswordDto.Request request = new UpdatePasswordDto.Request();
+        request.setOriginalPassword("original");
+        request.setChangePassword("change");
+
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .username("username")
+                .password("password")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+        given(bCryptPasswordEncoder.matches(request.getOriginalPassword(), userEntity.getPassword()))
+                .willReturn(false);
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.updatePassword(request, principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.PASSWORD_UN_MATCHED, exception.getUserErrorCode());
+
     }
 }
