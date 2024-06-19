@@ -1,9 +1,6 @@
 package com.minizin.travel.user.service;
 
-import com.minizin.travel.user.domain.dto.FindIdDto;
-import com.minizin.travel.user.domain.dto.FindPasswordDto;
-import com.minizin.travel.user.domain.dto.PrincipalDetails;
-import com.minizin.travel.user.domain.dto.UpdatePasswordDto;
+import com.minizin.travel.user.domain.dto.*;
 import com.minizin.travel.user.domain.entity.UserEntity;
 import com.minizin.travel.user.domain.enums.LoginType;
 import com.minizin.travel.user.domain.enums.UserErrorCode;
@@ -201,5 +198,49 @@ class UserServiceTest {
         //then
         assertEquals(UserErrorCode.PASSWORD_UN_MATCHED, exception.getUserErrorCode());
 
+    }
+
+    @Test
+    @DisplayName("이메일 수정 성공")
+    void updateEmail_success() {
+        //given
+        UpdateEmailDto.Request request = new UpdateEmailDto.Request();
+        request.setEmail("email2");
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .username("username")
+                .email("email")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+
+        //when
+        UpdateEmailDto.Response response = userService.updateEmail(request, principalDetails);
+
+        //then
+        assertEquals(true, response.getSuccess());
+        assertEquals(1L, response.getUserId());
+        assertEquals("email2", response.getChangedEmail());
+    }
+
+    @Test
+    @DisplayName("이메일 수정 실패 - 존재하지 않는 사용자")
+    void updateEmail_fail_userNotFound() {
+        //given
+        UpdateEmailDto.Request request = new UpdateEmailDto.Request();
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.updateEmail(request, principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+        
     }
 }

@@ -28,6 +28,7 @@ public class UserEntity {
     @Setter
     private String password;
 
+    @Setter
     private String email;
 
     @Setter
