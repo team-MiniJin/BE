@@ -29,7 +29,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String username = principalDetails.getUsername();
         Role role = principalDetails.getUserEntity().getRole();
 
-        String token = tokenProvider.createJwt(username, role.toString(), 60 * 60 * 1000L);
+        String token = tokenProvider.createJwt(username, role.toString(), 24 * 60 * 60 * 1000L);
 
         // 응답에 쿠키로 jwt 발급
         response.addHeader("Set-Cookie", createCookie("Authorization", token).toString());
