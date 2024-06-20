@@ -21,6 +21,13 @@ public class UserService {
     private final MailService mailService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    public UserDto.Response getUserInfo(PrincipalDetails principalDetails) {
+        UserEntity userEntity = userRepository.findByUsername(principalDetails.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+
+        return UserDto.Response.fromUserEntity(userEntity);
+    }
+
     public FindIdDto.Response findId(FindIdDto.Request request) {
         UserEntity userEntity = userRepository.findByEmailAndLoginType(request.getEmail(), LoginType.LOCAL)
                 .orElseThrow(() -> new CustomUserException(UserErrorCode.EMAIL_UN_REGISTERED));

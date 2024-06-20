@@ -13,6 +13,13 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/users")
+    public UserDto.Response getUserInfo(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return userService.getUserInfo(principalDetails);
+    }
+
     @PostMapping("/users/find-id")
     public FindIdDto.Response findId(
             @RequestBody @Valid FindIdDto.Request request

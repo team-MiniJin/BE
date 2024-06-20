@@ -36,6 +36,51 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
+    @DisplayName("사용자 정보 조회 성공")
+    void getUserInfo_success() {
+        //given
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .username("username")
+                .email("email")
+                .nickname("nickname")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.of(userEntity));
+
+        //when
+        UserDto.Response response = userService.getUserInfo(principalDetails);
+
+        //then
+        assertEquals(1L, response.getUserId());
+        assertEquals("username", response.getUsername());
+        assertEquals("email", response.getEmail());
+        assertEquals("nickname", response.getNickname());
+    }
+
+    @Test
+    @DisplayName("사용자 정보 조회 실패 - 존재하지 않는 사용자")
+    void getUserInfo_fail_userNotFound() {
+        //given
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .build();
+        PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+
+        given(userRepository.findByUsername(principalDetails.getUsername()))
+                .willReturn(Optional.empty());
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.getUserInfo(principalDetails));
+
+        //then
+        assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+    }
+
+    @Test
     @DisplayName("아이디 찾기 성공")
     void findId_success() {
         //given
