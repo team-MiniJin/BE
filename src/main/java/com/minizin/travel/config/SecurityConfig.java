@@ -110,8 +110,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> {
                     log.debug("Configuring URL authorization");
                     auth.requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
-                    auth.requestMatchers("/", "/auth/**", "/mails/auth-code/**", "/tour/**",
-                                    "/users/find-id", "/users/find-password").permitAll()
+                    auth.requestMatchers("/", "/auth/**", "/mails/auth-code/**",
+                                    "/users/find-id", "/users/find-password", "/tour/**",
+                                    "plans/others/newest", "plans/others/scraps",
+                                    "plans/others/details/{plan_id}", "plans/popular/week")
+                            .permitAll()
                             .anyRequest().authenticated();
                 });
 
