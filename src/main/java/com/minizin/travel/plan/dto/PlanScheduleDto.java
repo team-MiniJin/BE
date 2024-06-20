@@ -3,20 +3,22 @@ package com.minizin.travel.plan.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.minizin.travel.plan.entity.PlanSchedule;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class PlanScheduleDto {
 
-    private String scheduleDate;
+    @Setter
+    private String scheduleDate; // 직렬화, 역직렬화 문제로 수정
 
     private String placeCategory;
 
@@ -31,6 +33,7 @@ public class PlanScheduleDto {
     private String arrivalTime;
 
     @JsonProperty("budgets")
+    @Setter
     private List<PlanBudgetDto> planBudgetDtos;
 
     private Double x;
@@ -38,5 +41,19 @@ public class PlanScheduleDto {
 
     // #29 2024.06.02 내 여행 일정 조회
     private String placeAddr;
+
+    public static PlanScheduleDto toDto(PlanSchedule planSchedule) {
+        return PlanScheduleDto.builder()
+                .scheduleDate(String.valueOf(planSchedule.getScheduleDate()))
+                .placeCategory(planSchedule.getPlaceCategory())
+                .placeName(planSchedule.getPlaceName())
+                .region(planSchedule.getRegion())
+                .placeMemo(planSchedule.getPlaceMemo())
+                .arrivalTime(String.valueOf(planSchedule.getArrivalTime()))
+                .x(planSchedule.getX())
+                .y(planSchedule.getY())
+                .placeAddr(planSchedule.getPlaceAddr())
+                .build();
+    }
 }
 

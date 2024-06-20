@@ -79,5 +79,14 @@ public class PlanController {
     }
     // #39 2024.06.10 다가오는 여행 일정 조회 END //
 
+    // #107 2024.06.20 일정 복사하기 START //
+    @GetMapping("/plans/copy/{plan_id}")
+    public ResponseEntity<?> copyAndCreatePlan(@PathVariable("plan_id") Long planId) {
+
+        var result = planService.copyAndCreatePlan(planId);
+
+        return ResponseEntity.ok(result);
+    }
+    // #107 2024.06.20 일정 복사하기 END //
 }
 
