@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(CustomUserException.class)
@@ -26,11 +28,18 @@ public class GlobalExceptionHandler {
                         e.getMailErrorCode().getMessage())
                 );
     }
-    
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        List<ValidationErrorResponse.FieldError> errors = e.getBindingResult().getFieldErrors()
+                .stream().map(error -> new ValidationErrorResponse.FieldError(
+                        error.getField(),
+                        error.getRejectedValue(),
+                        error.getDefaultMessage()))
+                .toList();
+
         return ResponseEntity.badRequest()
-                .body(new ErrorResponse(ValidationErrorCode.INVALID_REQUEST.getStatus(),
-                        ValidationErrorCode.INVALID_REQUEST.getMessage()));
+                .body(new ValidationErrorResponse(ValidationErrorCode.INVALID_REQUEST.getStatus(),
+                        ValidationErrorCode.INVALID_REQUEST.getMessage(), errors));
     }
 }
