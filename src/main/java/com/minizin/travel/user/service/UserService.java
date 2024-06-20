@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -28,8 +30,11 @@ public class UserService {
 
     @Transactional
     public void findPassword(FindPasswordDto.Request request) {
-        UserEntity userEntity = userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail())
+        UserEntity userEntity = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
+        if (!Objects.equals(userEntity.getEmail(), request.getEmail())) {
+            throw new CustomUserException(UserErrorCode.USER_EMAIL_UN_MATCHED);
+        }
 
         String password = mailService.sendTemporaryPassword(request);
         userEntity.setPassword(bCryptPasswordEncoder.encode(password));

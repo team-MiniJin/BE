@@ -16,6 +16,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 @Service
@@ -88,7 +89,25 @@ public class MailService {
     }
 
     private String createPassword() {
-        return Integer.toString(10000000 + new Random().nextInt(90000000));
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(8);
+
+        password.append(lower.charAt(random.nextInt(lower.length())));
+        password.append(upper.charAt(random.nextInt(upper.length())));
+        password.append(digits.charAt(random.nextInt(digits.length())));
+        password.append(special.charAt(random.nextInt(special.length())));
+
+        String allChars = upper + lower + digits + special;
+        for (int i = 4; i < 8; i++) {
+            password.append(allChars.charAt(random.nextInt(allChars.length())));
+        }
+
+        return password.toString();
     }
 
     // 인증코드 생성
