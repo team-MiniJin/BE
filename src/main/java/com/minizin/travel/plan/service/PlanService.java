@@ -322,7 +322,7 @@ public class PlanService {
 
             DetailPlanScheduleDto detailPlanScheduleDto = DetailPlanScheduleDto.toDto(planSchedule);
             regionList.add(planSchedule.getRegion());
-            detailPlanScheduleDto.setScheduleDays(++days);
+            detailPlanScheduleDto.setScheduleDays((int) ChronoUnit.DAYS.between(plan.getStartDate(), detailPlanScheduleDto.getScheduleDate()) + 1);
             detailPlanScheduleDto.setDetailPlanBudgetDtoList(detailPlanBudgetDtoList);
             detailPlanScheduleDtoList.add(detailPlanScheduleDto);
         }
