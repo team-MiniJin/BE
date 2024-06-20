@@ -1,15 +1,22 @@
 package com.minizin.travel.plan.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.minizin.travel.plan.entity.PlanSchedule;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 @Builder
 @Getter
+@JsonPropertyOrder({"id", "scheduleDate", "placeName", "region", "arrivalTime", "x", "y"
+        , "placeAddr", "placeCategory"})
+@JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class OthersListPlanScheduleDto {
 
     @JsonProperty("schedule_id")
@@ -21,7 +28,7 @@ public class OthersListPlanScheduleDto {
 
     private String region;
 
-    private LocalTime arrivalTime;
+    private String arrivalTime;
 
     private Double x;
     private Double y;
@@ -36,7 +43,7 @@ public class OthersListPlanScheduleDto {
                 .scheduleDate(planSchedule.getScheduleDate())
                 .placeName(planSchedule.getPlaceName())
                 .region(planSchedule.getRegion())
-                .arrivalTime(planSchedule.getArrivalTime())
+                .arrivalTime(planSchedule.getArrivalTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .x(planSchedule.getX())
                 .y(planSchedule.getY())
                 .placeAddr(planSchedule.getPlaceAddr())
