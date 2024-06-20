@@ -387,4 +387,48 @@ public class PlanService {
     }
     // #39 2024.06.10 다가오는 여행 일정 조회 END //
 
+    // #107 2024.06.20 일정 복사하기 START //
+    public ResponsePlanDto copyAndCreatePlan(Long planId) {
+
+        // 로그인한 유저의 id
+        Long userId = 1L;
+
+        Plan plan = planRepository.findById(planId).get();
+
+        int planDays = (int) ChronoUnit.DAYS.between(plan.getStartDate(), plan.getEndDate());
+        LocalDate endDate = LocalDate.now().plusDays(planDays);
+        Plan newPlan = planRepository.save(Plan.builder()
+                .userId(plan.getUserId())
+                .planName(plan.getPlanName())
+                .theme(plan.getTheme())
+                .startDate(LocalDate.now())
+                .endDate(endDate)
+                .scope(plan.isScope())
+                .numberOfMembers(plan.getNumberOfMembers())
+                .numberOfScraps(INITIAL_VALUE)
+                .createdAt(LocalDateTime.now())
+                .modifiedAt(LocalDateTime.now())
+                .build());
+
+        // 기존 스케줄 찾기
+        List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(planId);
+        planDays = (int) ChronoUnit.DAYS.between(plan.getStartDate(), LocalDate.now());
+
+        for (PlanSchedule planSchedule : planScheduleList) {
+            PlanScheduleDto planScheduleDto = PlanScheduleDto.toDto(planSchedule);
+            planScheduleDto.setScheduleDate(String.valueOf(LocalDate.parse(planScheduleDto.getScheduleDate()).plusDays(planDays)));
+            Long scheduleId = createPlanSchedule(planScheduleDto, newPlan.getId()).getId();
+
+            // 기존 예산 찾기
+            List<PlanBudget> planBudgetList = planBudgetRepository.findAllByScheduleId(planSchedule.getId());
+            // 새 예산 넣기
+            for (PlanBudget planBudget : planBudgetList) {
+                createPlanBudget(PlanBudgetDto.toDto(planBudget), scheduleId);
+            }
+        }
+
+        return ResponsePlanDto.copySuccess(newPlan); // #87 Request 예외/에러 처리 : Response success 코드 정리
+
+    }
+    // #107 2024.06.20 일정 복사하기 END //
 }

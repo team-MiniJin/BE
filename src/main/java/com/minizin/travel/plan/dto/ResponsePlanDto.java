@@ -61,4 +61,16 @@ public class ResponsePlanDto {
                 .message("날짜가 유효하지 않습니다.")
                 .data(data).build();
     }
+
+    public static ResponsePlanDto copySuccess(Plan plan) {
+
+        return ResponsePlanDto.builder()
+                .success(true)
+                .message("일정을 복사하였습니다.")
+                .planId(plan.getId())
+                .numberOfScraps(plan.getNumberOfScraps())
+                .createAt(plan.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .updatedAt(plan.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .build();
+    }
 }
