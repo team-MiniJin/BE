@@ -84,7 +84,7 @@ class UserServiceTest {
                 .username("username")
                 .email("email")
                 .build();
-        given(userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail()))
+        given(userRepository.findByUsername(request.getUsername()))
                 .willReturn(Optional.of(userEntity));
         given(mailService.sendTemporaryPassword(request))
                 .willReturn("password");
@@ -105,7 +105,7 @@ class UserServiceTest {
         FindPasswordDto.Request request = new FindPasswordDto.Request();
         request.setUsername("username");
         request.setEmail("email");
-        given(userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail()))
+        given(userRepository.findByUsername(request.getUsername()))
                 .willReturn(Optional.empty());
 
         //when
@@ -114,6 +114,28 @@ class UserServiceTest {
 
         //then
         assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getUserErrorCode());
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 발급 실패 - 사용자에게 등록된 이메일이 아님")
+    void findPassword_fail_userEmailUnMatched() {
+        //given
+        FindPasswordDto.Request request = new FindPasswordDto.Request();
+        request.setUsername("username");
+        request.setEmail("email2");
+        UserEntity userEntity = UserEntity.builder()
+                .username("username")
+                .email("email")
+                .build();
+        given(userRepository.findByUsername(request.getUsername()))
+                .willReturn(Optional.of(userEntity));
+
+        //when
+        CustomUserException exception = assertThrows(CustomUserException.class,
+                () -> userService.findPassword(request));
+
+        //then
+        assertEquals(UserErrorCode.USER_EMAIL_UN_MATCHED, exception.getUserErrorCode());
     }
 
     @Test
