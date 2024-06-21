@@ -19,9 +19,10 @@ public class OtherPlanController {
     @GetMapping("/plans/others/newest")
     public ResponseEntity<?> selectOthersListPlan(@RequestParam("cursor_id") Long lastPlanId,
                                                   @RequestParam("region") String region,
-                                                  @RequestParam("theme") String theme) {
+                                                  @RequestParam("theme") String theme,
+                                                  @RequestParam("search") String search) {
 
-        var result = otherPlanService.selectOthersListPlan(lastPlanId, region, theme);
+        var result = otherPlanService.selectOthersListPlan(lastPlanId, region, theme, search);
 
         return ResponseEntity.ok(result);
     }
@@ -31,9 +32,10 @@ public class OtherPlanController {
     @GetMapping("/plans/others/scraps")
     public ResponseEntity<?> selectOthersListPlanScraps(@RequestParam("cursor_id") Long lastPlanId,
                                                         @RequestParam("region") String region,
-                                                        @RequestParam("theme") String theme) {
+                                                        @RequestParam("theme") String theme,
+                                                        @RequestParam("search") String search) {
 
-        var result = otherPlanService.selectOthersListPlanScraps(lastPlanId, region, theme);
+        var result = otherPlanService.selectOthersListPlanScraps(lastPlanId, region, theme, search);
 
         return ResponseEntity.ok(result);
     }

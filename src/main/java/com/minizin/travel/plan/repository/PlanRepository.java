@@ -26,80 +26,54 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(Long userId, LocalDate today);
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
-    List<Plan> findByIdLessThanAndScopeIsTrueOrderByIdDesc(Long id, Pageable pageable);
-
-    List<Plan> findAllByScopeIsTrueOrderByIdDesc(Pageable pageable);
-
-    // 다른 사람 여행 일정 조회(테마)
-    List<Plan> findByIdLessThanAndScopeIsTrueAndThemeOrderByIdDesc(Long id, String theme, Pageable pageable);
-
-    List<Plan> findAllByScopeIsTrueAndThemeOrderByIdDesc(String theme, Pageable pageable);
-
-    // 다른 사람 여행 일정 조회(지역)
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and p.id < :lastPlanId and s.placeAddr like %:region%\n" +
+            "where p.id = s.planId\n" +
+            "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
+            "and (:theme IS NULL OR p.theme = :theme )\n" +
+            "and (:search IS NULL OR (p.planName like %:search%\n" +
+            "OR s.placeAddr like %:search%\n" +
+            "OR s.placeName like %:search%))\n" +
             "and p.scope is true order by p.id desc limit :limit")
-    List<Plan> findLessThanAndScopeIsTrueNotAndRegionOrderByIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("limit") int limit);
+    List<Plan> findLessThanSearchAndThemeAndRegionOrderByIdDesc(
+            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
 
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
             "where p.id = s.planId\n" +
-            "and p.scope is true and s.placeAddr like %:region%\n" +
-            "order by p.id desc limit :limit")
-    List<Plan> findScopeIsTrueNotAndRegionOrderByIdDesc(@Param("region") String region, @Param("limit") int limit);
-
-    // 다른 사람 여행 일정 조회(테마+지역)
-    @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and p.id < :lastPlanId and s.placeAddr like %:region%\n" +
-            "and p.theme = :theme and p.scope is true order by p.id desc limit :limit")
-    List<Plan> findLessThanAndScopeIsTrueNotThemeAndRegionOrderByIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("limit") int limit);
-
-    @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and s.placeAddr like %:region%\n" +
-            "and p.theme = :theme and p.scope is true order by p.id desc limit :limit")
-    List<Plan> findScopeIsTrueNotThemeAndRegionOrderByIdDesc(
-            @Param("region") String region, @Param("theme") String theme, @Param("limit") int limit);
+            "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
+            "and (:theme IS NULL OR p.theme = :theme )\n" +
+            "and (:search IS NULL OR (p.planName like %:search%\n" +
+            "OR s.placeAddr like %:search%\n" +
+            "OR s.placeName like %:search%))\n" +
+            "and p.scope is true order by p.id desc limit :limit")
+    List<Plan> findSearchAndThemeAndRegionOrderByIdDesc(
+            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
-    List<Plan> findByIdLessThanAndScopeIsTrueOrderByNumberOfScrapsDescIdDesc(Long id, Pageable pageable);
-
-    List<Plan> findAllByScopeIsTrueOrderByNumberOfScrapsDescIdDesc(Pageable pageable);
-
-    // 다른 사람 여행 일정 조회(북마크순)(테마)
-    List<Plan> findByIdLessThanAndScopeIsTrueAndThemeOrderByNumberOfScrapsDescIdDesc(Long id, String theme, Pageable pageable);
-
-    List<Plan> findAllByScopeIsTrueAndThemeOrderByNumberOfScrapsDescIdDesc(String theme, Pageable pageable);
-
-    // 다른 사람 여행 일정 조회(북마크순)(지역)
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and p.id < :lastPlanId\n" +
-            "and p.scope is true and s.placeAddr like %:region%\n" +
-            "order by p.numberOfScraps desc, p.id desc limit :limit")
-    List<Plan> findLessThanAndScopeIsTrueAndRegionOrderByNumberOfScrapsDescIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("limit") int limit);
+            "where p.id = s.planId\n" +
+            "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
+            "and (:theme IS NULL OR p.theme = :theme )\n" +
+            "and (:search IS NULL OR (p.planName like %:search%\n" +
+            "OR s.placeAddr like %:search%\n" +
+            "OR s.placeName like %:search%))\n" +
+            "and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
+    List<Plan> findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
+            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
 
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
             "where p.id = s.planId\n" +
-            "and p.scope is true and s.placeAddr like %:region%\n" +
-            "order by p.numberOfScraps desc, p.id desc limit :limit")
-    List<Plan> findScopeIsTrueAndRegionOrderByNumberOfScrapsDescIdDesc(@Param("region") String region, @Param("limit") int limit);
-
-    // 다른 사람 여행 일정 조회(테마+지역)
-    @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and p.id < :lastPlanId and s.placeAddr like %:region%\n" +
-            "and p.theme = :theme and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
-    List<Plan> findLessThanAndScopeIsTrueThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("limit") int limit);
-
-    @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId and s.placeAddr like %:region%\n" +
-            "and p.theme = :theme and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
-    List<Plan> findScopeIsTrueThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
-            @Param("region") String region, @Param("theme") String theme, @Param("limit") int limit);
+            "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
+            "and (:theme IS NULL OR p.theme = :theme )\n" +
+            "and (:search IS NULL OR (p.planName like %:search%\n" +
+            "OR s.placeAddr like %:search%\n" +
+            "OR s.placeName like %:search%))\n" +
+            "and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
+    List<Plan> findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
+            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
     // #129 금주 인기 여행
     List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(LocalDate startDate, LocalDate endDate);
+
 }
