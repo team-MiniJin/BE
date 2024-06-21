@@ -48,6 +48,10 @@ public class ScrapService {
             throw new RuntimeException("이미 저장된 plan");
         }
 
+        if (planRepository.existsByIdAndUserId(planId, userId)) {
+            throw new RuntimeException("본인의 plan은 스크랩 불가합니다.");
+        }
+
         Plan plan = planRepository.findById(planId).get();
         plan.setNumberOfScraps(plan.getNumberOfScraps() + 1);
 

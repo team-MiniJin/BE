@@ -251,6 +251,14 @@ public class PlanService {
     @Transactional
     public ResponseEditPlanDto updatePlan(Long planId, EditPlanDto editPlanDto) {
 
+        if (!planRepository.existsById(planId)) {
+            return ResponseEditPlanDto.builder()
+                    .success(false)
+                    .message("요청하신 plan 은 존재하지 않습니다.")
+                    .planId(planId)
+                    .build();
+        }
+
         /* 추후 PUT요청에 id값이 포함되면 변경 예정 */
 
         // 기존 PlanSchedule 및 PlanBudget 삭제
@@ -299,6 +307,10 @@ public class PlanService {
 
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
     public DetailPlanDto selectDetailPlan(Long planId) {
+
+        if (!planRepository.existsById(planId)) {
+            return DetailPlanDto.existsNot(planId);
+        }
 
         Plan plan = planRepository.findById(planId).get();
 
@@ -389,6 +401,10 @@ public class PlanService {
 
     // #107 2024.06.20 일정 복사하기 START //
     public ResponsePlanDto copyAndCreatePlan(Long planId) {
+
+        if (!planRepository.existsById(planId)) {
+            return ResponsePlanDto.existsNot(planId);
+        }
 
         // 로그인한 유저의 id
         Long userId = 1L;
