@@ -53,7 +53,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .build());
         } else {
             userEntity = existUser.get();
-            userEntity.setNickname(kakaoResponse.getNickname());
         }
 
         return new PrincipalDetails(userEntity);
