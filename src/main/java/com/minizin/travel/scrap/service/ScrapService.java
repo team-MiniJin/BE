@@ -40,16 +40,16 @@ public class ScrapService {
 
         // 해당 plan 이 DB에 저장되었는지 확인
         if (!planRepository.existsById(planId)) {
-            throw new RuntimeException("유효하지 않은 plan id");
+            return ResponseCreateScrapPlanDto.fail(planId, "요청하신 plan 은 존재하지 않습니다.");
         }
 
         // 해당 plan 을 이미 저장하지 않았는지 확인
         if (scrapRepository.existsByPlanIdAndUserId(planId, userId)) {
-            throw new RuntimeException("이미 저장된 plan");
+            return ResponseCreateScrapPlanDto.fail(planId, "이미 북마크한 plan 입니다.");
         }
 
         if (planRepository.existsByIdAndUserId(planId, userId)) {
-            throw new RuntimeException("본인의 plan은 스크랩 불가합니다.");
+            return ResponseCreateScrapPlanDto.fail(planId, "본인의 plan은 북마크할 수 없습니다.");
         }
 
         Plan plan = planRepository.findById(planId).get();
@@ -72,7 +72,7 @@ public class ScrapService {
         Long userId = 1L;
 
         if (!scrapRepository.existsByUserId(userId)) {
-            throw new RuntimeException("스크랩된 plan이 없습니다.");
+            return ResponseSelectScrapedPlansDto.fail("북마크한 plan 이 없습니다.");
         }
 
         List<Scrap> scrapList = findAllByCursorIdCheckExistCursor(userId, cursorId, page);
