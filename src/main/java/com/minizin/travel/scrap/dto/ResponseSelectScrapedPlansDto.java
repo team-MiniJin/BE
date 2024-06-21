@@ -19,8 +19,6 @@ public class ResponseSelectScrapedPlansDto {
 
     private Long cursorId;
 
-    private boolean success;
-
     private String message;
 
     @JsonProperty("scrap_id")
@@ -29,7 +27,6 @@ public class ResponseSelectScrapedPlansDto {
     public static ResponseSelectScrapedPlansDto fail(String message) {
 
         return ResponseSelectScrapedPlansDto.builder()
-                .success(false)
                 .message(message)
                 .build();
     }
