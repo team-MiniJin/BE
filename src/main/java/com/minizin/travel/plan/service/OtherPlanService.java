@@ -130,7 +130,6 @@ public class OtherPlanService {
 
         return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search, page)
                 : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, page);
-        }
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
