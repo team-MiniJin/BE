@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,11 +31,12 @@ public class OtherPlanService {
     private final PlanBudgetRepository planBudgetRepository;
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
-    public ResponseOthersPlanDto selectOthersListPlan(Long lastPlanId, String region, String theme) {
+    public ResponseOthersPlanDto selectOthersListPlan(
+            Long lastPlanId, String region, String theme, String search) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
-        List<Plan> planList = findOtherPlanByLastPlanIdCheckExistCursor(region, theme, lastPlanId, page);
+        List<Plan> planList = findOtherPlanByLastPlanIdCheckExistCursor(region, theme, search, lastPlanId, page);
         List<OthersListPlanDto> othersListPlanDtoList = new ArrayList<>();
         Long planId = 0L;
 
@@ -43,7 +45,8 @@ public class OtherPlanService {
             othersListPlanDtoList.add(selectOthersPlanAndSchedule(plan));
         }
 
-        if (!planRepository.existsByIdLessThan(planId)) {
+        if (findOtherPlanByLastPlanIdCheckExistCursor(region, theme, search, planId, page).isEmpty()) {
+
             planId = null;
         }
 
@@ -54,11 +57,12 @@ public class OtherPlanService {
     }
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
-    public ResponseOthersPlanDto selectOthersListPlanScraps(Long lastPlanId, String region, String theme) {
+    public ResponseOthersPlanDto selectOthersListPlanScraps(
+            Long lastPlanId, String region, String theme, String search) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
-        List<Plan> planList = findOtherPlanScrapsByLastPlanIdCheckExistCursor(region, theme, lastPlanId, page);
+        List<Plan> planList = findOtherPlanScrapsByLastPlanIdCheckExistCursor(region, theme, search, lastPlanId, page);
         List<OthersListPlanDto> othersListPlanDtoList = new ArrayList<>();
         Long planId = 0L;
 
@@ -67,7 +71,8 @@ public class OtherPlanService {
             othersListPlanDtoList.add(selectOthersPlanAndSchedule(plan));
         }
 
-        if (!planRepository.existsByIdLessThan(planId)) {
+        if (findOtherPlanScrapsByLastPlanIdCheckExistCursor(region, theme, search, planId, page).isEmpty()) {
+
             planId = null;
         }
 
@@ -112,53 +117,37 @@ public class OtherPlanService {
         return othersListPlanDto;
     }
 
-    private List<Plan> findOtherPlanByLastPlanIdCheckExistCursor(String region, String theme, Long lastPlanId, Pageable page) {
+    private List<Plan> findOtherPlanByLastPlanIdCheckExistCursor(String region, String theme, String search, Long lastPlanId, Pageable page) {
 
-        if (region.isEmpty() && theme.isEmpty()) {
-            // region / theme 둘다 미존재
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueOrderByIdDesc(page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueOrderByIdDesc(lastPlanId, page);
-        } else if (region.isEmpty()) {
-            // theme 만 존재
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndThemeOrderByIdDesc(theme, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndThemeOrderByIdDesc(lastPlanId, theme, page);
-        } else if (theme.isEmpty()) {
-            // region 만 존재
-            return lastPlanId == 0 ? planRepository.findScopeIsTrueNotAndRegionOrderByIdDesc(region, DEFAULT_PAGE_SIZE)
-                    : planRepository.findLessThanAndScopeIsTrueNotAndRegionOrderByIdDesc(lastPlanId, region, DEFAULT_PAGE_SIZE);
-        } else {
-            // region / theme 둘다 존재
-
-            // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findScopeIsTrueNotThemeAndRegionOrderByIdDesc(region, theme, DEFAULT_PAGE_SIZE)
-                    : planRepository.findLessThanAndScopeIsTrueNotThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, DEFAULT_PAGE_SIZE);
+        if (StringUtils.isEmpty(region)) {
+            region = null;
         }
+        if (StringUtils.isEmpty(theme)) {
+            theme = null;
+        }
+        if (StringUtils.isEmpty(search)) {
+            search = null;
+        }
+
+        return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search,DEFAULT_PAGE_SIZE)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
-    private List<Plan> findOtherPlanScrapsByLastPlanIdCheckExistCursor(String region, String theme, Long lastPlanId, Pageable page) {
+    private List<Plan> findOtherPlanScrapsByLastPlanIdCheckExistCursor(String region, String theme, String search, Long lastPlanId, Pageable page) {
 
-        if (region.isEmpty() && theme.isEmpty()) {
-            // region / theme 둘다 미존재
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueOrderByNumberOfScrapsDescIdDesc(page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueOrderByNumberOfScrapsDescIdDesc(lastPlanId, page);
-        } else if (region.isEmpty()) {
-            // theme 만 존재
-            return lastPlanId == 0 ? planRepository.findAllByScopeIsTrueAndThemeOrderByNumberOfScrapsDescIdDesc(theme, page)
-                    : planRepository.findByIdLessThanAndScopeIsTrueAndThemeOrderByNumberOfScrapsDescIdDesc(lastPlanId, theme, page);
-        } else if (theme.isEmpty()) {
-            // region 만 존재
-
-            return lastPlanId == 0 ? planRepository.findScopeIsTrueAndRegionOrderByNumberOfScrapsDescIdDesc(region, DEFAULT_PAGE_SIZE)
-                    : planRepository.findLessThanAndScopeIsTrueAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, DEFAULT_PAGE_SIZE);
-        } else {
-            // region / theme 둘다 존재
-
-            // region / theme 둘다 미존재로 에러 방지용
-            return lastPlanId == 0 ? planRepository.findScopeIsTrueThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, DEFAULT_PAGE_SIZE)
-                    : planRepository.findLessThanAndScopeIsTrueThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, DEFAULT_PAGE_SIZE);
+        if (StringUtils.isEmpty(region)) {
+            region = null;
         }
+        if (StringUtils.isEmpty(theme)) {
+            theme = null;
+        }
+        if (StringUtils.isEmpty(search)) {
+            search = null;
+        }
+        return lastPlanId == 0? planRepository.findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, search, DEFAULT_PAGE_SIZE)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
