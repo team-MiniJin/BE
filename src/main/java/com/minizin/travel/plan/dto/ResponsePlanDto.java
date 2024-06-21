@@ -79,6 +79,7 @@ public class ResponsePlanDto {
         return ResponsePlanDto.builder()
                 .success(false)
                 .message("요청하신 plan 은 존재하지 않습니다.")
+                .planId(planId)
                 .build();
     }
 }
