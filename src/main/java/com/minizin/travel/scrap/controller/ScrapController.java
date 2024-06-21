@@ -36,11 +36,11 @@ public class ScrapController {
     // #50 스크랩 조회 END //
 
     // #51 스크랩 삭제 START //
-    @DeleteMapping("/scraps/{scrap_id}")
-    public ResponseEntity<?> deleteScrapedPlan(@PathVariable("scrap_id") Long scrapId,
+    @DeleteMapping("/scraps/{plan_id}")
+    public ResponseEntity<?> deleteScrapedPlan(@PathVariable("plan_id") Long planId,
                                                @AuthenticationPrincipal PrincipalDetails user) {
 
-        var result = scrapService.deleteScrapedPlan(scrapId, user);
+        var result = scrapService.deleteScrapedPlan(planId, user);
 
         return ResponseEntity.ok(result);
     }

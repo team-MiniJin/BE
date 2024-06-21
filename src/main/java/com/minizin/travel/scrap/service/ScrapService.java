@@ -111,39 +111,29 @@ public class ScrapService {
 
     // #51 스크랩 삭제 START //
     @Transactional
-    public ResponseDeleteScrapedPlanDto deleteScrapedPlan(Long scrapId, PrincipalDetails user) {
+    public ResponseDeleteScrapedPlanDto deleteScrapedPlan(Long planId, PrincipalDetails user) {
 
         Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
-        if (!scrapRepository.existsById(scrapId)) {
+        if (!scrapRepository.existsByPlanIdAndUserId(planId, userId)) {
 
             return ResponseDeleteScrapedPlanDto.builder()
                     .success(false)
                     .message("존재하지 않는 scrap 입니다.")
-                    .scrapId(scrapId)
                     .build();
         }
 
-        Scrap scrap = scrapRepository.findById(scrapId).get();
+        Scrap scrap = scrapRepository.findByPlanIdAndUserId(planId, userId).get();
 
-        if (scrap.getUserId().equals(userId)) {
-
-            return ResponseDeleteScrapedPlanDto.builder()
-                    .success(false)
-                    .message("로그인한 사용자가 북마크한 plan 이 아닙니다.")
-                    .scrapId(scrapId)
-                    .build();
-        }
-        Long planId = scrapRepository.findById(scrapId).get().getPlanId();
-        Plan plan = planRepository.findById(planId).get();
+        Plan plan = planRepository.findById(scrap.getPlanId()).get();
         plan.setNumberOfScraps(plan.getNumberOfScraps() - 1);
 
-        scrapRepository.deleteById(scrapId);
+        scrapRepository.deleteById(scrap.getId());
 
         return ResponseDeleteScrapedPlanDto.builder()
                 .success(true)
                 .message("Scrap Deleted Successfully")
-                .scrapId(scrapId)
+                .scrapId(scrap.getId())
                 .build();
     }
     // #51 스크랩 삭제 END //
