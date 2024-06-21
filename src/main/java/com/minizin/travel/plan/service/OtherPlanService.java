@@ -128,8 +128,8 @@ public class OtherPlanService {
             search = null;
         }
 
-        return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search,DEFAULT_PAGE_SIZE)
-                : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
+        return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search, page)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, page);
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
@@ -145,8 +145,8 @@ public class OtherPlanService {
         if (StringUtils.isEmpty(search)) {
             search = null;
         }
-        return lastPlanId == 0? planRepository.findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, search, DEFAULT_PAGE_SIZE)
-                : planRepository.findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
+        return lastPlanId == 0? planRepository.findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, search, page)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, search, page);
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
