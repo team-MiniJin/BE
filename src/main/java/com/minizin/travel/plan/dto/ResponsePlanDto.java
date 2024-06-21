@@ -73,4 +73,12 @@ public class ResponsePlanDto {
                 .updatedAt(plan.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .build();
     }
+
+    public static ResponsePlanDto existsNot(Long planId) {
+
+        return ResponsePlanDto.builder()
+                .success(false)
+                .message("요청하신 plan 은 존재하지 않습니다.")
+                .build();
+    }
 }

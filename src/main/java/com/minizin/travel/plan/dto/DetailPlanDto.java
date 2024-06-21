@@ -9,13 +9,14 @@ import com.minizin.travel.plan.entity.Plan;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Builder
 @Getter
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers",
         "numberOfScraps", "regionList", "detailPlanScheduleDtoList"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -38,13 +39,13 @@ public class DetailPlanDto {
     private LocalDate endDate;
 
     @Setter
-    private int planBudget;
+    private Integer planBudget;
 
     private boolean scope;
 
-    private int numberOfMembers;
+    private Integer numberOfMembers;
 
-    private int numberOfScraps;
+    private Integer numberOfScraps;
 
     @Setter
     private List<String> regionList;
@@ -52,6 +53,9 @@ public class DetailPlanDto {
     @Setter
     @JsonProperty("schedules")
     private List<DetailPlanScheduleDto> detailPlanScheduleDtoList;
+
+    private Integer error;
+    private String message;
 
     public static DetailPlanDto toDto(Plan plan) {
         return DetailPlanDto.builder()
@@ -64,6 +68,15 @@ public class DetailPlanDto {
                 .scope(plan.isScope())
                 .numberOfMembers(plan.getNumberOfMembers())
                 .numberOfScraps(plan.getNumberOfScraps())
+                .build();
+    }
+
+    public static DetailPlanDto existsNot(Long planId) {
+
+        return DetailPlanDto.builder()
+                .error(-1)
+                .id(planId)
+                .message("요청하신 plan 은 존재하지 않습니다.")
                 .build();
     }
 
