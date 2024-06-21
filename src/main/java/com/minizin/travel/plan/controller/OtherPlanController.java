@@ -50,7 +50,7 @@ public class OtherPlanController {
     // #106 2024.06.16 금주 인기 여행 일정 조회(북마크순) END //
 
     // #129 다른 사람의 여행 일정 상세 보기 START //
-    @GetMapping("/plans/others/details/{plan_id}")
+    @GetMapping("/plans/others/{plan_id}")
     public ResponseEntity<?> selectOtherDetailPlan(@PathVariable("plan_id") Long planId) {
 
         var result = otherPlanService.selectOtherDetailPlan(planId);
