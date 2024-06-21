@@ -29,10 +29,10 @@ public class TourController {
     private final TourService tourService;
 
     @GetMapping("/detailCommon")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
-        return createResponseEntity(tourService.getTourAPIFromSiteDetailCommon(requestParam));
+    public CompletableFuture<ResponseEntity<Void>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return tourService.getTourAPIFromSiteDetailCommon(requestParam)
+            .thenApply(response -> ResponseEntity.ok().<Void>build());
     }
-
 
     //    @Operation(summary = "Get areaBasedList", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areaBasedList")
