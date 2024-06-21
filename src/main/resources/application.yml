@@ -35,8 +35,8 @@ spring:
 
   logging:
     level:
-      com.minizin.travel.config: DEBUG
-      root: TRACE
+      com.minizin.travel.config: INFO
+      root: INFO
     file:
       name: logs/myapp.log
     pattern:
@@ -44,13 +44,13 @@ spring:
       file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50}:%line - %msg%n"
     org:
       springframework:
-        security: DEBUG
-        web: DEBUG
-        beans.factory: DEBUG
+        security: INFO
+        web: INFO
+        beans.factory: INFO
       hibernate:
         SQL: DEBUG
         type:
-          descriptor.sql.BasicBinder: TRACE
+          descriptor.sql.BasicBinder: INFO
 
 api-tour:
   serviceKey_De: K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA==
