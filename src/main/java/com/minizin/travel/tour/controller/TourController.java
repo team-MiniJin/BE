@@ -6,6 +6,8 @@ import com.minizin.travel.tour.service.TourService;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,10 +29,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TourController {
     private final TourService tourService;
+    Logger logger = LoggerFactory.getLogger(getClass());
 
     @GetMapping("/detailCommon")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
-        return createResponseEntity(tourService.getTourAPIFromSiteDetailCommon(requestParam));
+    public CompletableFuture<ResponseEntity<String>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return tourService.getTourAPIFromSiteDetailCommon(requestParam)
+            .thenApply(response -> {
+                logger.info(response);  // 성공 메시지를 로그에 출력
+                return ResponseEntity.ok(response);
+            });
     }
 
 

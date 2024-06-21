@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import okhttp3.HttpUrl;
@@ -44,7 +45,11 @@ public class TourService {
 
     @Value("${api-tour.serviceKey_De}")
     public String serviceKey;
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient.Builder()
+        .connectTimeout(6000, TimeUnit.SECONDS)
+        .readTimeout(6000, TimeUnit.SECONDS)
+        .writeTimeout(6000, TimeUnit.SECONDS)
+        .build();
     private final Gson gson = new Gson();
     private final String baseUrl = "https://apis.data.go.kr/B551011/KorService1/";
     private final TourAPIRepository tourAPIRepository;
@@ -52,23 +57,23 @@ public class TourService {
     Logger logger = LoggerFactory.getLogger(getClass());
     private static final int MAX_RETRIES = 3;
 
-    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteDetailCommon(TourAPIDto.TourRequest requestParam) {
+    public CompletableFuture<String> getTourAPIFromSiteDetailCommon(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "detailCommon1";
 
         long startTime = System.currentTimeMillis();
-        int PageNo = Integer.parseInt(Optional.ofNullable(requestParam.getPageNo()).orElse("0"));
+        int pageNo = Integer.parseInt(Optional.ofNullable(requestParam.getPageNo()).orElse("0"));
         int pageSize = Integer.parseInt(Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000"));
 
-
-
-        PageRequest pageRequest = PageRequest.of(PageNo, pageSize);
+        PageRequest pageRequest = PageRequest.of(pageNo, pageSize);
         Page<TourAPI> tourAPIPage = tourAPIRepository.findAll(pageRequest);
+        List<TourAPI> tourAPIs = tourAPIPage.getContent();
 
-        List<CompletableFuture<TourAPI>> futures = tourAPIPage.stream()
+        List<CompletableFuture<Void>> futures = tourAPIs.stream()
             .map(tourAPI -> {
                 String contentId = tourAPI.getContentId();
                 String contentTypeId = tourAPI.getContentTypeId();
 
+                // Prepare parameters for API request
                 Map<String, String> params = Map.ofEntries(
                     Map.entry("ServiceKey", serviceKey),
                     Map.entry("MobileOS", "ETC"),
@@ -90,22 +95,19 @@ public class TourService {
                 String url = buildUrlWithParams(getCategoryUrl, params);
                 return putSingleCompletableFuture(url, tourAPI);
             })
-            .map(future -> future.exceptionally(ex -> {
-                ex.printStackTrace();
-                return null;
-            }))
             .collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
             .thenApply(v -> {
-                // Calculate and log the elapsed time
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
 
-                return futures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
+                if (!tourAPIs.isEmpty()) {
+                    tourAPIRepository.saveAll(tourAPIs);
+                }
+
+                return "getTourAPIFromSiteDetailCommon executed successfully";
             });
     }
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteSearchKeyword(TourAPIDto.TourRequest requestParam) {
@@ -243,37 +245,47 @@ public class TourService {
         return urlBuilder.build().toString();
     }
 
-    @NotNull
-    private CompletableFuture<TourAPI> putSingleCompletableFuture(String url, TourAPI existingTourAPI) {
+    private CompletableFuture<Void> putSingleCompletableFuture(String url, TourAPI existingTourAPI) {
         Request request = new Request.Builder()
             .url(url)
             .get()
             .addHeader("Content-type", "application/json")
             .build();
 
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             try (Response response = client.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     throw new IOException("Unexpected code " + response);
                 }
                 String responseJson = response.body().string();
-                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
-                TourAPIDto.TourResponse.Body.Items.Item item = tourAPIDto.getResponse()
-                    .getBody()
-                    .getItems()
-                    .getItem()
-                    .get(0);
-                // Use the asynchronous update method
-                CompletableFuture<Void> updateFuture = existingTourAPI.updateFromDtoAsync(item);
 
-                // Wait for the update to complete before saving to the repository
-                updateFuture.join();
-                tourAPIRepository.save(existingTourAPI);
+                logger.debug("Response JSON: " + responseJson);
 
-                return existingTourAPI;
+                // JSON 파싱 및 데이터 형식 검증
+                try {
+                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+                    if (tourAPIDto == null || tourAPIDto.getResponse() == null ||
+                        tourAPIDto.getResponse().getBody() == null ||
+                        tourAPIDto.getResponse().getBody().getItems() == null ||
+                        tourAPIDto.getResponse().getBody().getItems().getItem() == null ||
+                        tourAPIDto.getResponse().getBody().getItems().getItem().isEmpty()) {
+                        throw new JsonSyntaxException("Invalid JSON structure");
+                    }
+
+                    TourAPIDto.TourResponse.Body.Items.Item item = tourAPIDto.getResponse()
+                        .getBody()
+                        .getItems()
+                        .getItem()
+                        .get(0);
+
+                    existingTourAPI.updateFromDtoAsync(item).join();
+                    return;  // 성공적으로 처리된 경우 반환
+                } catch (JsonSyntaxException e) {
+                    logger.error("JSON parsing error for URL: " + url , e);
+                    throw e;
+                }
             } catch (IOException | JsonSyntaxException e) {
-                e.printStackTrace();
-                return null;
+                logger.error("Error fetching data for URL: " + url, e);
             }
         }, executorService);
     }
