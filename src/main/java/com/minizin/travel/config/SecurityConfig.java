@@ -112,8 +112,7 @@ public class SecurityConfig {
                     auth.requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
                     auth.requestMatchers("/", "/auth/**", "/mails/auth-code/**",
                                     "/users/find-id", "/users/find-password", "/tour/**",
-                                    "plans/others/newest", "plans/others/scraps",
-                                    "plans/others/details/{plan_id}", "plans/popular/week")
+                                    "plans/others/**", "plans/popular/week")
                             .permitAll()
                             .anyRequest().authenticated();
                 });
