@@ -39,12 +39,11 @@ public class PlanService {
     final int DEFAULT_PAGE_SIZE = 6; // #29
 
     // #28 2024.05.30 내 여행 일정 생성하기 START //
-    public ResponsePlanDto createPlan(PlanDto planDto)
+    public ResponsePlanDto createPlan(PlanDto planDto, PrincipalDetails user)
             throws BadRequestException {
 
         // user 정보 확인
-        // Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         // #87 Request 예외/에러 처리 START
         // 여행 일자 최소 1일 ~ 최대 60일 START //
@@ -162,12 +161,11 @@ public class PlanService {
     // #28 2024.05.30 내 여행 일정 생성하기 END //
 
     // #29 2024.06.02 내 여행 일정 조회 START //
-    public ResponseSelectListPlanDto selectListPlan(Long lastPlanId) {
+    public ResponseSelectListPlanDto selectListPlan(Long lastPlanId, PrincipalDetails user) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
-        // 테스트
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         List<Plan> planList = findAllByLastPlanIdCheckExistCursor(userId, lastPlanId, page);
         List<SelectListPlanDto> listPlanDtoList = new ArrayList<>();
@@ -192,7 +190,7 @@ public class PlanService {
             listPlanDtoList.add(selectListPlanDto);
         }
 
-        if (!planRepository.existsByIdLessThan(planId)) {
+        if (!planRepository.existsByIdLessThanAndUserId(planId, userId)) {
             planId = null;
         }
 
@@ -249,7 +247,7 @@ public class PlanService {
 
     // #32 2024.06.07 내 여행 일정 수정 START //
     @Transactional
-    public ResponseEditPlanDto updatePlan(Long planId, EditPlanDto editPlanDto) {
+    public ResponseEditPlanDto updatePlan(Long planId, EditPlanDto editPlanDto, PrincipalDetails user) {
 
         if (!planRepository.existsById(planId)) {
             return ResponseEditPlanDto.builder()
@@ -271,6 +269,15 @@ public class PlanService {
         // plan id 로 plan DB 찾아오기
         // plan DB 에 저장
         Plan plan = planRepository.findById(planId).get();
+
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        if (!plan.getUserId().equals(userId)) {
+            return ResponseEditPlanDto.builder()
+                    .success(false)
+                    .message("로그인한 사용자의 id가 아닙니다.")
+                    .planId(planId)
+                    .build();
+        }
 
         Plan newPlan = planRepository.save(Plan.builder()
                 .id(planId)
@@ -306,13 +313,17 @@ public class PlanService {
     // #32 2024.06.07 내 여행 일정 수정 END //
 
     // #38 2024.06.08 내 여행 일정 상세 보기 START //
-    public DetailPlanDto selectDetailPlan(Long planId) {
+    public DetailPlanDto selectDetailPlan(Long planId, PrincipalDetails user) {
 
         if (!planRepository.existsById(planId)) {
             return DetailPlanDto.existsNot(planId);
         }
 
         Plan plan = planRepository.findById(planId).get();
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        if (!plan.getUserId().equals(userId)) {
+            return DetailPlanDto.notAuth(planId, "로그인한 사용자의 plan 이 아닙니다.");
+        }
 
         return findListOfPlanScheduleDtoAndPlanBudgetDto(plan);
     }
@@ -350,14 +361,22 @@ public class PlanService {
 
     // #47 2024.06.13 내 여행 일정 삭제 START //
     @Transactional
-    public ResponseDeletePlanDto deletePlan(Long planId) {
-
-        // 로그인한 유저 비교
+    public ResponseDeletePlanDto deletePlan(Long planId, PrincipalDetails user) {
 
         if (!planRepository.existsById(planId)) {
             return ResponseDeletePlanDto.builder()
                     .success(false)
                     .message("여행 일정 id가 유효하지 않습니다.")
+                    .planId(planId)
+                    .build();
+        }
+
+        Plan plan = planRepository.findById(planId).get();
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        if (!plan.getUserId().equals(userId)) {
+            return ResponseDeletePlanDto.builder()
+                    .success(false)
+                    .message("로그인한 사용자의 plan 이 아닙니다.")
                     .planId(planId)
                     .build();
         }
@@ -379,13 +398,12 @@ public class PlanService {
     // #47 2024.06.13 내 여행 일정 삭제 END //
 
     // #39 2024.06.10 다가오는 여행 일정 조회 START //
-    public List<UpcomingPlanDto> selectUpcomingPlan() {
+    public List<UpcomingPlanDto> selectUpcomingPlan(PrincipalDetails user) {
 
-        // 테스트
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         List<UpcomingPlanDto> upcomingPlanDtoList = new ArrayList<>();
-        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(userId, LocalDate.now());
+        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAscIdDesc(userId, LocalDate.now());
 
         for (Plan plan : planList) {
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
@@ -400,21 +418,20 @@ public class PlanService {
     // #39 2024.06.10 다가오는 여행 일정 조회 END //
 
     // #107 2024.06.20 일정 복사하기 START //
-    public ResponsePlanDto copyAndCreatePlan(Long planId) {
+    public ResponsePlanDto copyAndCreatePlan(Long planId, PrincipalDetails user) {
 
         if (!planRepository.existsById(planId)) {
             return ResponsePlanDto.existsNot(planId);
         }
 
-        // 로그인한 유저의 id
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         Plan plan = planRepository.findById(planId).get();
 
         int planDays = (int) ChronoUnit.DAYS.between(plan.getStartDate(), plan.getEndDate());
         LocalDate endDate = LocalDate.now().plusDays(planDays);
         Plan newPlan = planRepository.save(Plan.builder()
-                .userId(plan.getUserId())
+                .userId(userId)
                 .planName(plan.getPlanName())
                 .theme(plan.getTheme())
                 .startDate(LocalDate.now())

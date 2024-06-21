@@ -18,24 +18,24 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     List<Plan> findAllByUserIdOrderByIdDesc(Long userId, Pageable pageable);
 
-    boolean existsByIdLessThan(Long id);
+    boolean existsByIdLessThanAndUserId(Long id, Long userId);
 
     boolean existsByIdAndUserId(Long id, Long userId);
 
     // #39 2024.06.10 다가오는 여행 일정 조회 //
-    List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(Long userId, LocalDate today);
+    List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAscIdDesc(Long userId, LocalDate today);
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId\n" +
+            "where p.id = s.planId and p.id < :lastPlanId\n" +
             "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
             "and (:theme IS NULL OR p.theme = :theme )\n" +
             "and (:search IS NULL OR (p.planName like %:search%\n" +
             "OR s.placeAddr like %:search%\n" +
             "OR s.placeName like %:search%))\n" +
-            "and p.scope is true order by p.id desc limit :limit")
+            "and p.scope is true order by p.id desc")
     List<Plan> findLessThanSearchAndThemeAndRegionOrderByIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
+            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, Pageable pageable);
 
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
             "where p.id = s.planId\n" +
@@ -44,22 +44,22 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
             "and (:search IS NULL OR (p.planName like %:search%\n" +
             "OR s.placeAddr like %:search%\n" +
             "OR s.placeName like %:search%))\n" +
-            "and p.scope is true order by p.id desc limit :limit")
+            "and p.scope is true order by p.id desc")
     List<Plan> findSearchAndThemeAndRegionOrderByIdDesc(
-            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
+            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, Pageable pageable);
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId\n" +
+            "where p.id = s.planId and p.id < :lastPlanId\n" +
             "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
             "and (:theme IS NULL OR p.theme = :theme )\n" +
             "and (:search IS NULL OR (p.planName like %:search%\n" +
             "OR s.placeAddr like %:search%\n" +
             "OR s.placeName like %:search%))\n" +
-            "and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
+            "and p.scope is true order by p.numberOfScraps desc, p.id desc")
     List<Plan> findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
-            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
+            @Param("lastPlanId") Long lastPlanId, @Param("region") String region, @Param("theme") String theme, @Param("search") String search, Pageable pageable);
 
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
             "where p.id = s.planId\n" +
@@ -68,9 +68,9 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
             "and (:search IS NULL OR (p.planName like %:search%\n" +
             "OR s.placeAddr like %:search%\n" +
             "OR s.placeName like %:search%))\n" +
-            "and p.scope is true order by p.numberOfScraps desc, p.id desc limit :limit")
+            "and p.scope is true order by p.numberOfScraps desc, p.id desc")
     List<Plan> findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(
-            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, @Param("limit") int limit);
+            @Param("region") String region, @Param("theme") String theme, @Param("search") String search, Pageable pageable);
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
     // #129 금주 인기 여행

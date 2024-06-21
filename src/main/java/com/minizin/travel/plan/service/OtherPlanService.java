@@ -2,11 +2,10 @@ package com.minizin.travel.plan.service;
 
 import com.minizin.travel.plan.dto.*;
 import com.minizin.travel.plan.entity.Plan;
-import com.minizin.travel.plan.entity.PlanBudget;
 import com.minizin.travel.plan.entity.PlanSchedule;
-import com.minizin.travel.plan.repository.PlanBudgetRepository;
 import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
+import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +27,8 @@ public class OtherPlanService {
     private final PlanScheduleRepository planScheduleRepository;
 
     final int DEFAULT_PAGE_SIZE = 6; // #29
-    private final PlanBudgetRepository planBudgetRepository;
+
+    private final UserRepository userRepository;
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
     public ResponseOthersPlanDto selectOthersListPlan(
@@ -72,7 +72,6 @@ public class OtherPlanService {
         }
 
         if (findOtherPlanScrapsByLastPlanIdCheckExistCursor(region, theme, search, planId, page).isEmpty()) {
-
             planId = null;
         }
 
@@ -129,8 +128,9 @@ public class OtherPlanService {
             search = null;
         }
 
-        return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search,DEFAULT_PAGE_SIZE)
-                : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
+        return lastPlanId == 0 ? planRepository.findSearchAndThemeAndRegionOrderByIdDesc(region, theme, search, page)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByIdDesc(lastPlanId, region, theme, search, page);
+        }
     }
     // #48 2024.06.10 다른 사람 여행 일정 조회 END //
 
@@ -146,8 +146,8 @@ public class OtherPlanService {
         if (StringUtils.isEmpty(search)) {
             search = null;
         }
-        return lastPlanId == 0? planRepository.findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, search, DEFAULT_PAGE_SIZE)
-                : planRepository.findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, search, DEFAULT_PAGE_SIZE);
+        return lastPlanId == 0? planRepository.findSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(region, theme, search, page)
+                : planRepository.findLessThanSearchAndThemeAndRegionOrderByNumberOfScrapsDescIdDesc(lastPlanId, region, theme, search, page);
     }
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
@@ -164,7 +164,7 @@ public class OtherPlanService {
             PopWeekPlanDto newPopWeekPlanDto = PopWeekPlanDto.toDto(plan);
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
             newPopWeekPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
-            // 유저 닉네임 추가 newPopWeekPlanDto.setUserNickname();
+            newPopWeekPlanDto.setUserNickname(userRepository.findById(plan.getUserId()).get().getNickname());
             popWeekPlanDtoList.add(newPopWeekPlanDto);
         }
 
@@ -181,8 +181,12 @@ public class OtherPlanService {
 
         Plan plan = planRepository.findById(planId).get();
 
+        if (!plan.isScope()) {
+            return DetailPlanDto.notAuth(planId, "비공개 plan 입니다.");
+        }
+
         DetailPlanDto detailPlanDto = planService.findListOfPlanScheduleDtoAndPlanBudgetDto(plan);
-        detailPlanDto.setUserNickname("유저 닉네임 HARD CORDING");
+        detailPlanDto.setUserNickname(userRepository.findById(plan.getUserId()).get().getNickname());
 
         return detailPlanDto;
     }
