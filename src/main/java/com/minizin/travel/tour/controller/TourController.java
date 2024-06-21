@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,15 +29,15 @@ public class TourController {
     private final TourService tourService;
 
     @GetMapping("/detailCommon")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataDetailCommon() {
-        return createResponseEntity(tourService.getTourAPIFromSiteDetailCommon());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return createResponseEntity(tourService.getTourAPIFromSiteDetailCommon(requestParam));
     }
 
 
     //    @Operation(summary = "Get areaBasedList", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areaBasedList")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedList() {
-        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedList(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList(requestParam));
     }
 
 //    @Operation(summary = "Get areaCode", description = "Retrieve a specific areaBasedList by its ID")
@@ -47,8 +48,8 @@ public class TourController {
 
 //    @Operation(summary = "Get searchkeyword", description = "Retrieve a specific searchkeyword by keyword")
     @GetMapping("/searchkeyword")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getTourAPIFromSiteSearchKeyword() {
-        return createResponseEntity(tourService.getTourAPIFromSiteSearchKeyword());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getTourAPIFromSiteSearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return createResponseEntity(tourService.getTourAPIFromSiteSearchKeyword(requestParam));
     }
 
     private CompletableFuture<ResponseEntity<List<TourAPI>>> createResponseEntity(CompletableFuture<List<TourAPI>> future) {

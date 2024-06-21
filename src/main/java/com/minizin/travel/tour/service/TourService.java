@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,12 +63,16 @@ public class TourService {
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteDetailCommon() {
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteDetailCommon(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "detailCommon1";
 
         long startTime = System.currentTimeMillis();
+        int PageNo = Integer.parseInt(Optional.ofNullable(requestParam.getPageNo()).orElse("0"));
+        int pageSize = Integer.parseInt(Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000"));
 
-        PageRequest pageRequest = PageRequest.of(2, 1000);
+
+
+        PageRequest pageRequest = PageRequest.of(PageNo, pageSize);
         Page<TourAPI> tourAPIPage = tourAPIRepository.findAll(pageRequest);
 
         List<CompletableFuture<TourAPI>> futures = tourAPIPage.stream()
@@ -90,7 +95,7 @@ public class TourService {
                     Map.entry("mapinfoYN", "Y"),
                     Map.entry("overviewYN", "Y"),
                     Map.entry("numOfRows", "100"),
-                    Map.entry("pageNo", "1")
+                    Map.entry("pageNo", "0")
                 );
 
                 String url = buildUrlWithParams(getCategoryUrl, params);
@@ -114,15 +119,20 @@ public class TourService {
                     .collect(Collectors.toList());
             });
     }
-    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteSearchKeyword() {
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteSearchKeyword(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "searchKeyword1";
+        String keyword = Optional.ofNullable(requestParam.getKeyword()).orElse("강원");
+        String pageNo = Optional.ofNullable(requestParam.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000");
 
         Map<String, String> params = Map.of(
             "ServiceKey", serviceKey,
             "MobileOS", "ETC",
             "MobileApp", "AppTest",
             "_type", "json",
-            "keyword", "강원"
+            "keyword", keyword,
+            "pageNo",pageNo,
+            "numOfRows", numOfRows
         );
 
         String url = buildUrlWithParams(getCategoryUrl, params);
@@ -130,28 +140,30 @@ public class TourService {
         return getListCompletableFuture(url);
     }
 
-    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList() {
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "areaBasedList1";
-        int[] areaCodes = {1, 2, 3, 4, 5, 6, 7, 8, 31, 32};
-        int[] contentTypeIds = {12,14,15,25,28,32,38,39};
+        long startTime = System.currentTimeMillis();
+        String[] areaCodes = {"1","2","3","4","5","6","7","8","31","32"};
+        String[] contentTypeIds = {"12","14","15","25","28","32","38","39"};
+        String pageNo = Optional.ofNullable(requestParam.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000");
        /* int[] sigunguCodes = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
             27, 28, 29, 30, 31, 99}; 같은 시군구 코드에 다른지역 표기가 있어 제외*/
 
         // stream(contentTypeIds) or Arrays.stream(areaCodes) 로 활용
         List<CompletableFuture<List<TourAPI>>> futures = Arrays.stream(areaCodes)
-            .boxed()
             .flatMap(areaCode -> Arrays.stream(contentTypeIds)
-                .mapToObj(contentTypeId -> {
+                .map(contentTypeId -> {
                     Map<String, String> params = Map.of(
                         "ServiceKey", serviceKey,
                         "MobileOS", "ETC",
                         "MobileApp", "AppTest",
                         "_type", "json",
-                        "areaCode", String.valueOf(areaCode),
-                        "numOfRows", "50",
-                        "pageNo", "1",
-                        "contentTypeId", String.valueOf(contentTypeId)
+                        "areaCode", areaCode,
+                        "numOfRows", numOfRows,
+                        "pageNo", pageNo,
+                        "contentTypeId", contentTypeId
                     );
 
                     String url = buildUrlWithParams(getCategoryUrl, params);
@@ -160,11 +172,15 @@ public class TourService {
             ).collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream()
-                .map(CompletableFuture::join)
-                .flatMap(List::stream)
-                .collect(Collectors.toList())
-            );
+            .thenApply(v -> {
+                long endTime = System.currentTimeMillis();
+                long duration = endTime - startTime;
+                logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
+                return futures.stream()
+                    .map(CompletableFuture::join)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            });
     }
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode() {
         String getCategoryUrl = baseUrl + "areaCode1";
