@@ -1,25 +1,14 @@
 package com.minizin.travel.tour.service;
 
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import com.minizin.travel.tour.domain.entity.TourAPI;
 import com.minizin.travel.tour.domain.repository.TourAPIRepository;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.JsonSyntaxException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,10 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import okhttp3.OkHttpClient;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Class: TourService Project: travel Package: com.minizin.travel.tour.service
@@ -101,7 +88,7 @@ public class TourService {
                 );
 
                 String url = buildUrlWithParams(getCategoryUrl, params);
-                return getSingleCompletableFuture(url, tourAPI);
+                return putSingleCompletableFuture(url, tourAPI);
             })
             .map(future -> future.exceptionally(ex -> {
                 ex.printStackTrace();
@@ -177,7 +164,7 @@ public class TourService {
             .thenApply(v -> {
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
-                logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
+                logger.info("getTourAPIFromSiteAreaBasedList executed in " + duration + " ms");
                 return futures.stream()
                     .map(CompletableFuture::join)
                     .flatMap(List::stream)
@@ -215,14 +202,31 @@ public class TourService {
                     }
 
                     String responseJson = response.body().string();
-                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
-                    List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
 
-                    tourAPIRepository.saveAll(tourAPIList);
+//                    logger.info("Response JSON: " + responseJson); // Log the JSON response
 
-                    return tourAPIList;
+                    // items이 비어있을 때 Error Msg없이 스킵
+                    if (responseJson.contains("\"items\": \"\"")) {
+                        continue;
+                    }
+
+                    try {
+                        TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+
+                        List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
+
+                        if (!tourAPIList.isEmpty()) {
+                            tourAPIRepository.saveAll(tourAPIList);
+                            return tourAPIList;
+                        }
+                    }catch (JsonSyntaxException e) {
+                        if (!e.getMessage().contains("\"items\": \"\",")) {
+                            logger.error("JSON parsing error: " + e.getMessage());
+                        }
+                    }
+
                 } catch (IOException | JsonSyntaxException e) {
-                    logger.error("Error fetching data from URL: {} on attempt {}/{}", url, attempt, retries, e);
+                    logger.error("Error fetching data from URL: {} on attempt {}/{} & ", url, attempt, retries, e);
                     if (attempt == retries) {
                         return Collections.emptyList();
                     }
@@ -232,6 +236,7 @@ public class TourService {
         }, executorService);
     }
 
+
     private String buildUrlWithParams(String baseUrl, Map<String, String> params) {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl).newBuilder();
         params.forEach((key, value) -> urlBuilder.addQueryParameter(key, value));
@@ -239,7 +244,7 @@ public class TourService {
     }
 
     @NotNull
-    private CompletableFuture<TourAPI> getSingleCompletableFuture(String url, TourAPI existingTourAPI) {
+    private CompletableFuture<TourAPI> putSingleCompletableFuture(String url, TourAPI existingTourAPI) {
         Request request = new Request.Builder()
             .url(url)
             .get()
