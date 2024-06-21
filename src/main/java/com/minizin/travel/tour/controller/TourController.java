@@ -27,7 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class TourController {
     private final TourService tourService;
 
-//    @Operation(summary = "Get areaBasedList", description = "Retrieve a specific areaBasedList by its ID")
+    @GetMapping("/detailCommon")
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataDetailCommon() {
+        return createResponseEntity(tourService.getTourAPIFromSiteDetailCommon());
+    }
+
+
+    //    @Operation(summary = "Get areaBasedList", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areaBasedList")
     public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedList() {
         return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList());
