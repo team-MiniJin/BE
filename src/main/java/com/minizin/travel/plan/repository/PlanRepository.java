@@ -23,7 +23,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
 
     // #39 2024.06.10 다가오는 여행 일정 조회 //
-    List<Plan> findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(Long userId, LocalDate today);
+    List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(Long userId, LocalDate today);
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
     List<Plan> findByIdLessThanAndScopeIsTrueOrderByIdDesc(Long id, Pageable pageable);

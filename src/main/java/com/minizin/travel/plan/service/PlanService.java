@@ -385,7 +385,7 @@ public class PlanService {
         Long userId = 1L;
 
         List<UpcomingPlanDto> upcomingPlanDtoList = new ArrayList<>();
-        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateAfterOrderByStartDateAsc(userId, LocalDate.now());
+        List<Plan> planList = planRepository.findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(userId, LocalDate.now());
 
         for (Plan plan : planList) {
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
