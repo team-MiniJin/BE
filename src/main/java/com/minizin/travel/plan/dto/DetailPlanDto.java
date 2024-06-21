@@ -15,7 +15,7 @@ import java.util.List;
 
 @Builder
 @Getter
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"id", "userId", "planName", "theme", "startDate", "endDate", "planBudget", "scope", "numberOfMembers",
         "numberOfScraps", "regionList", "detailPlanScheduleDtoList"})
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)
