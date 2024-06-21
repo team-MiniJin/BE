@@ -1,5 +1,6 @@
 package com.minizin.travel.tour.service;
 
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
@@ -62,6 +63,7 @@ public class TourService {
     private final TourAPIRepository tourAPIRepository;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
     Logger logger = LoggerFactory.getLogger(getClass());
+    private static final int MAX_RETRIES = 3;
 
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteDetailCommon(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "detailCommon1";
@@ -137,7 +139,7 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url);
+        return getListCompletableFuture(url, MAX_RETRIES);
     }
 
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList(TourAPIDto.TourRequest requestParam) {
@@ -167,7 +169,7 @@ public class TourService {
                     );
 
                     String url = buildUrlWithParams(getCategoryUrl, params);
-                    return getListCompletableFuture(url);
+                    return getListCompletableFuture(url, MAX_RETRIES);
                 })
             ).collect(Collectors.toList());
 
@@ -194,11 +196,11 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url);
+        return getListCompletableFuture(url, MAX_RETRIES);
     }
 
     @NotNull
-    private CompletableFuture<List<TourAPI>> getListCompletableFuture(String url) {
+    private CompletableFuture<List<TourAPI>> getListCompletableFuture(String url, int retries) {
         Request request = new Request.Builder()
             .url(url)
             .get()
@@ -206,25 +208,27 @@ public class TourService {
             .build();
 
         return CompletableFuture.supplyAsync(() -> {
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected code " + response);
-                }
-                System.out.println("Response =" + response);
-                String responseJson = response.body().string();
-                System.out.println(responseJson);
-                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+            for (int attempt = 1; attempt <= retries; attempt++) {
+                try (Response response = client.newCall(request).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected code " + response);
+                    }
 
-                List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
-                for (TourAPI tourAPI : tourAPIList) {
-                    tourAPIRepository.save(tourAPI);
-                }
+                    String responseJson = response.body().string();
+                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+                    List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
 
-                return tourAPIList;
-            } catch (IOException | JsonSyntaxException e) {
-                e.printStackTrace();
-                return Collections.emptyList();
+                    tourAPIRepository.saveAll(tourAPIList);
+
+                    return tourAPIList;
+                } catch (IOException | JsonSyntaxException e) {
+                    logger.error("Error fetching data from URL: {} on attempt {}/{}", url, attempt, retries, e);
+                    if (attempt == retries) {
+                        return Collections.emptyList();
+                    }
+                }
             }
+            return Collections.emptyList();
         }, executorService);
     }
 
