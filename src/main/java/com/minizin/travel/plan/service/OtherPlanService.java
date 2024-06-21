@@ -109,6 +109,7 @@ public class OtherPlanService {
         }
 
         OthersListPlanDto othersListPlanDto = OthersListPlanDto.toDto(plan);
+        othersListPlanDto.setUserNickname(userRepository.findById(plan.getId()).get().getNickname());
         othersListPlanDto.setRegionList(planService.duplicateRegionList(regionList));
         othersListPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
         othersListPlanDto.setOthersListPlanScheduleDtoList(othersListPlanScheduleDtoList);

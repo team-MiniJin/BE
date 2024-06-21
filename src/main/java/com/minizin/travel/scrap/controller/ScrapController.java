@@ -1,9 +1,11 @@
 package com.minizin.travel.scrap.controller;
 
 import com.minizin.travel.scrap.service.ScrapService;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequiredArgsConstructor
@@ -13,19 +15,21 @@ public class ScrapController {
 
     // #49 스크랩 생성 START //
     @PostMapping("/scraps/{plan_id}")
-    public ResponseEntity<?> createScrap(@PathVariable("plan_id") Long planId) {
+    public ResponseEntity<?> createScrap(@PathVariable("plan_id") Long planId,
+                                         @AuthenticationPrincipal PrincipalDetails user) {
 
-        var result = scrapService.createScrap(planId);
+        var result = scrapService.createScrap(planId, user);
 
         return ResponseEntity.ok(result);
     }
     // #49 스크랩 생성 END //
 
     // #50 스크랩 조회 START //
-    @GetMapping("/scraps/{cursor_id}")
-    public ResponseEntity<?> selectListScrapedPlans(@PathVariable("cursor_id") Long cursorId) {
+    @GetMapping("/scraps")
+    public ResponseEntity<?> selectListScrapedPlans(@RequestParam("cursor_id") Long cursorId,
+                                                    @AuthenticationPrincipal PrincipalDetails user) {
 
-        var result = scrapService.selectListScrapedPlans(cursorId);
+        var result = scrapService.selectListScrapedPlans(cursorId, user);
 
         return ResponseEntity.ok(result);
     }
@@ -33,9 +37,10 @@ public class ScrapController {
 
     // #51 스크랩 삭제 START //
     @DeleteMapping("/scraps/{scrap_id}")
-    public ResponseEntity<?> deleteScrapedPlan(@PathVariable("scrap_id") Long scrapId) {
+    public ResponseEntity<?> deleteScrapedPlan(@PathVariable("scrap_id") Long scrapId,
+                                               @AuthenticationPrincipal PrincipalDetails user) {
 
-        var result = scrapService.deleteScrapedPlan(scrapId);
+        var result = scrapService.deleteScrapedPlan(scrapId, user);
 
         return ResponseEntity.ok(result);
     }
