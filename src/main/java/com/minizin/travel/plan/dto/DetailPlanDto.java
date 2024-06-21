@@ -9,7 +9,6 @@ import com.minizin.travel.plan.entity.Plan;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -77,6 +76,15 @@ public class DetailPlanDto {
                 .error(-1)
                 .id(planId)
                 .message("요청하신 plan 은 존재하지 않습니다.")
+                .build();
+    }
+
+    public static DetailPlanDto notAuth(Long planId, String message) {
+
+        return DetailPlanDto.builder()
+                .error(-2)
+                .id(planId)
+                .message(message)
                 .build();
     }
 

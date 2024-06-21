@@ -18,16 +18,16 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     List<Plan> findAllByUserIdOrderByIdDesc(Long userId, Pageable pageable);
 
-    boolean existsByIdLessThan(Long id);
+    boolean existsByIdLessThanAndUserId(Long id, Long userId);
 
     boolean existsByIdAndUserId(Long id, Long userId);
 
     // #39 2024.06.10 다가오는 여행 일정 조회 //
-    List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAsc(Long userId, LocalDate today);
+    List<Plan> findTop6ByUserIdAndStartDateGreaterThanEqualOrderByStartDateAscIdDesc(Long userId, LocalDate today);
 
     // #48 2024.06.10 다른 사람 여행 일정 조회 START //
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId\n" +
+            "where p.id = s.planId and p.id < :lastPlanId\n" +
             "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
             "and (:theme IS NULL OR p.theme = :theme )\n" +
             "and (:search IS NULL OR (p.planName like %:search%\n" +
@@ -51,7 +51,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) START //
     @Query("select DISTINCT p from Plan p, PlanSchedule s\n" +
-            "where p.id = s.planId\n" +
+            "where p.id = s.planId and p.id < :lastPlanId\n" +
             "and (:region IS NULL OR s.placeAddr like %:region%)\n" +
             "and (:theme IS NULL OR p.theme = :theme )\n" +
             "and (:search IS NULL OR (p.planName like %:search%\n" +
