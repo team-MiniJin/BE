@@ -11,6 +11,8 @@ import com.minizin.travel.scrap.dto.ResponseSelectScrapedPlansDto;
 import com.minizin.travel.scrap.dto.SelectScrapedPlansDto;
 import com.minizin.travel.scrap.entity.Scrap;
 import com.minizin.travel.scrap.repository.ScrapRepository;
+import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,15 +30,16 @@ public class ScrapService {
     private final ScrapRepository scrapRepository;
     private final PlanRepository planRepository;
     private final PlanScheduleRepository planScheduleRepository;
-    private final PlanService planSerivce;
+    private final UserRepository userRepository;
+    private final PlanService planService;
 
     final int DEFAULT_PAGE_SIZE = 6;
 
     // #49 스크랩 생성 START //
-    public ResponseCreateScrapPlanDto createScrap(Long planId) {
+    public ResponseCreateScrapPlanDto createScrap(Long planId,
+                                                  PrincipalDetails user) {
 
-        // 테스트
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         // 해당 plan 이 DB에 저장되었는지 확인
         if (!planRepository.existsById(planId)) {
@@ -48,11 +51,12 @@ public class ScrapService {
             return ResponseCreateScrapPlanDto.fail(planId, "이미 북마크한 plan 입니다.");
         }
 
-        if (planRepository.existsByIdAndUserId(planId, userId)) {
+        Plan plan = planRepository.findById(planId).get();
+
+        if (plan.getUserId().equals(userId)) {
             return ResponseCreateScrapPlanDto.fail(planId, "본인의 plan은 북마크할 수 없습니다.");
         }
 
-        Plan plan = planRepository.findById(planId).get();
         plan.setNumberOfScraps(plan.getNumberOfScraps() + 1);
 
         return ResponseCreateScrapPlanDto.toDto(scrapRepository.save(Scrap.builder()
@@ -64,12 +68,11 @@ public class ScrapService {
     // #49 스크랩 생성 END //
 
     // #50 스크랩 조회 START //
-    public ResponseSelectScrapedPlansDto selectListScrapedPlans(Long cursorId) {
+    public ResponseSelectScrapedPlansDto selectListScrapedPlans(Long cursorId, PrincipalDetails user) {
 
         Pageable page = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
-        // 테스트
-        Long userId = 1L;
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         if (!scrapRepository.existsByUserId(userId)) {
             return ResponseSelectScrapedPlansDto.fail("북마크한 plan 이 없습니다.");
@@ -84,11 +87,11 @@ public class ScrapService {
 
             SelectScrapedPlansDto newListScrpaedPlanDto = SelectScrapedPlansDto.toDto(plan);
             newListScrpaedPlanDto.setId(scrapId);
-            // 닉네임 추가 필요
+            newListScrpaedPlanDto.setUserNickname(userRepository.findById(plan.getId()).get().getNickname());
 
             // 예산 계산
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
-            newListScrpaedPlanDto.setPlanBudget(planSerivce.calculateTotalPlanBudget(planScheduleList));
+            newListScrpaedPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
 
             scrapedPlansDtoList.add(newListScrpaedPlanDto);
         }
@@ -108,7 +111,9 @@ public class ScrapService {
 
     // #51 스크랩 삭제 START //
     @Transactional
-    public ResponseDeleteScrapedPlanDto deleteScrapedPlan(Long scrapId) {
+    public ResponseDeleteScrapedPlanDto deleteScrapedPlan(Long scrapId, PrincipalDetails user) {
+
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
 
         if (!scrapRepository.existsById(scrapId)) {
 
@@ -119,6 +124,16 @@ public class ScrapService {
                     .build();
         }
 
+        Scrap scrap = scrapRepository.findById(scrapId).get();
+
+        if (scrap.getUserId().equals(userId)) {
+
+            return ResponseDeleteScrapedPlanDto.builder()
+                    .success(false)
+                    .message("로그인한 사용자가 북마크한 plan 이 아닙니다.")
+                    .scrapId(scrapId)
+                    .build();
+        }
         Long planId = scrapRepository.findById(scrapId).get().getPlanId();
         Plan plan = planRepository.findById(planId).get();
         plan.setNumberOfScraps(plan.getNumberOfScraps() - 1);
