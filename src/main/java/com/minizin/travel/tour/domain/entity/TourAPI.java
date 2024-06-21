@@ -8,6 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -181,13 +184,13 @@ public class TourAPI {
     @Column(name = "zipcode")
     private String zipcode;
 
-    @Column(name = "homepage")
+    @Column(name = "homepage", columnDefinition = "TEXT")
     private String homepage;
 
     @Column(name = "tel_name")
     private String telName;
 
-    @Column(name = "overview")
+    @Column(name = "overview", columnDefinition = "TEXT")
     private String overview;
 
     public TourAPIDto.TourResponse.Body.Items.Item toDto() {
@@ -229,5 +232,47 @@ public class TourAPI {
             .telname(Optional.ofNullable(this.getTelName()).orElse(""))
             .overview(Optional.ofNullable(this.getOverview()).orElse(""))
             .build();
+    }
+
+    private static final ExecutorService threadPool = Executors.newCachedThreadPool();
+    public CompletableFuture<Void> updateFromDtoAsync(TourAPIDto.TourResponse.Body.Items.Item dto) {
+        return CompletableFuture.runAsync(() -> {
+            if (dto.getAddr1() != null) this.addr1 = dto.getAddr1();
+            if (dto.getAddr2() != null) this.addr2 = dto.getAddr2();
+            if (dto.getAreacode() != null) this.areaCode = dto.getAreacode();
+            if (dto.getBenikia() != null) this.benikia = dto.getBenikia();
+            if (dto.getBooktour() != null) this.booktour = dto.getBooktour();
+            if (dto.getCat1() != null) this.cat1 = dto.getCat1();
+            if (dto.getCat2() != null) this.cat2 = dto.getCat2();
+            if (dto.getCat3() != null) this.cat3 = dto.getCat3();
+            if (dto.getCode() != null) this.code = dto.getCode();
+            if (dto.getContentid() != null) this.contentId = dto.getContentid();
+            if (dto.getContenttypeid() != null) this.contentTypeId = dto.getContenttypeid();
+            if (dto.getCpyrhtDivCd() != null) this.cpyrhtDivCd = dto.getCpyrhtDivCd();
+            if (dto.getCreatedtime() != null) this.createdTime = dto.getCreatedtime();
+            if (dto.getDist() != null) this.dist = dto.getDist();
+            if (dto.getEventstartdate() != null) this.eventStartDate = dto.getEventstartdate();
+            if (dto.getFirstimage() != null) this.firstImage = dto.getFirstimage();
+            if (dto.getFirstimage2() != null) this.firstImage2 = dto.getFirstimage2();
+            if (dto.getGoodstay() != null) this.goodStay = dto.getGoodstay();
+            if (dto.getHanok() != null) this.hanok = dto.getHanok();
+            if (dto.getMapx() != null) this.mapX = dto.getMapx();
+            if (dto.getMapy() != null) this.mapY = dto.getMapy();
+            if (dto.getMlevel() != null) this.mlevel = dto.getMlevel();
+            if (dto.getModifiedtime() != null) this.modifiedTime = dto.getModifiedtime();
+            if (dto.getName() != null) this.name = dto.getName();
+            if (dto.getNumOfRows() != null) this.numOfRows = dto.getNumOfRows();
+            if (dto.getPageNo() != null) this.pageNo = dto.getPageNo();
+            if (dto.getRnum() != null) this.rnum = dto.getRnum();
+            if (dto.getSigungucode() != null) this.sigunguCode = dto.getSigungucode();
+            if (dto.getTel() != null) this.tel = dto.getTel();
+            if (dto.getTitle() != null) this.title = dto.getTitle();
+            if (dto.getTotalCnt() != null) this.totalCnt = dto.getTotalCnt();
+            if (dto.getTotalCount() != null) this.totalCount = dto.getTotalCount();
+            if (dto.getZipcode() != null) this.zipcode = dto.getZipcode();
+            if (dto.getHomepage() != null) this.homepage = dto.getHomepage();
+            if (dto.getTelname() != null) this.telName = dto.getTelname();
+            if (dto.getOverview() != null) this.overview = dto.getOverview();
+        }, threadPool);
     }
 }

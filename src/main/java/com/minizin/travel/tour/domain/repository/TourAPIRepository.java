@@ -6,6 +6,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 import jakarta.persistence.Tuple;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,5 +34,7 @@ public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
 
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.addr1 LIKE CONCAT('%', :keyword, '%')")
     List<TourAPI> findDistinctSearchKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    Page<TourAPI> findAll(Pageable pageable);
 
 }

@@ -1,6 +1,7 @@
 package com.minizin.travel.tour.domain.dto;
 
 import com.minizin.travel.tour.domain.entity.TourAPI;
+import jakarta.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -143,8 +144,10 @@ public class TourAPIDto {
                     private Integer totalCnt;
                     private Integer totalCount;
                     private String zipcode;
+                    @Column(columnDefinition = "TEXT")
                     private String homepage;
                     private String telname;
+                    @Column(columnDefinition = "TEXT")
                     private String overview;
                     private String readcount;
 

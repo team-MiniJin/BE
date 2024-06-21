@@ -83,7 +83,7 @@ public class TourInfoService {
     }
 
     public TourAPIDto getTourDataSearchKeyword(TourAPIDto.TourRequest requestUrl) throws IOException {
-        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("1");
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("0");
         String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("100");
         int totalCount = Integer.parseInt(pageNo) * Integer.parseInt(numOfRows);
         String keyword = Optional.ofNullable(requestUrl.getKeyword()).orElse("강원");
