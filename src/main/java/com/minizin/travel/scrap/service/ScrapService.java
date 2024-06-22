@@ -9,6 +9,9 @@ import com.minizin.travel.scrap.dto.*;
 import com.minizin.travel.scrap.entity.Scrap;
 import com.minizin.travel.scrap.repository.ScrapRepository;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
+import com.minizin.travel.user.domain.entity.UserEntity;
+import com.minizin.travel.user.domain.enums.UserErrorCode;
+import com.minizin.travel.user.domain.exception.CustomUserException;
 import com.minizin.travel.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -84,15 +87,19 @@ public class ScrapService {
             scrapId = scrap.getId();
             Plan plan = planRepository.findById(scrap.getPlanId()).get();
 
-            SelectScrapedPlansDto newListScrpaedPlanDto = SelectScrapedPlansDto.toDto(plan);
-            newListScrpaedPlanDto.setId(scrapId);
-            newListScrpaedPlanDto.setUserNickname(userRepository.findById(plan.getId()).get().getNickname());
+            SelectScrapedPlansDto newSelectScrapedPlanDto = SelectScrapedPlansDto.toDto(plan);
+            newSelectScrapedPlanDto.setId(scrapId);
+            newSelectScrapedPlanDto.setUserNickname(userRepository.findById(plan.getId()).get().getNickname());
 
             // 예산 계산
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
-            newListScrpaedPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
+            newSelectScrapedPlanDto.setPlanBudget(planService.calculateTotalPlanBudget(planScheduleList));
 
-            scrapedPlansDtoList.add(newListScrpaedPlanDto);
+            scrapedPlansDtoList.add(newSelectScrapedPlanDto);
+        }
+
+        if (!findAllByCursorIdCheckExistCursor(userId, scrapId, page).isEmpty()) {
+            scrapId = null;
         }
 
         return ResponseSelectScrapedPlansDto.builder()
@@ -139,9 +146,10 @@ public class ScrapService {
 
     public ResponseCheckScrapedPlanDto checkScrapedPlan(Long planId, PrincipalDetails user) {
 
-        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+        UserEntity userEntity = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND));
 
-        if (!scrapRepository.existsByPlanIdAndUserId(planId, userId)) {
+        if (!scrapRepository.existsByPlanIdAndUserId(planId, userEntity.getId())) {
 
             return ResponseCheckScrapedPlanDto.builder()
                     .success(false)
