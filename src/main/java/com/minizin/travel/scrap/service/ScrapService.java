@@ -50,9 +50,11 @@ public class ScrapService {
 
         Plan plan = planRepository.findById(planId).get();
 
+        /*
         if (plan.getUserId().equals(userId)) {
             return ResponseCreateScrapPlanDto.fail(planId, "본인의 plan은 북마크할 수 없습니다.");
         }
+        */
 
         plan.setNumberOfScraps(plan.getNumberOfScraps() + 1);
 
