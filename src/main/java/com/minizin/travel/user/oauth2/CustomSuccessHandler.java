@@ -35,7 +35,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addHeader("Set-Cookie", createCookie("Authorization", token).toString());
 
         // 프론트 측 특정 uri로 리다이렉트
-        response.sendRedirect("http://localhost:3000/kakao-redirect");
+        response.sendRedirect("https://lyckabc.synology.me:23080/kakao-redirect");
     }
 
     private ResponseCookie createCookie(String key, String value) {
