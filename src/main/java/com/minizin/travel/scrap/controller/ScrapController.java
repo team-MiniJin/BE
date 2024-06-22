@@ -45,4 +45,13 @@ public class ScrapController {
         return ResponseEntity.ok(result);
     }
     // #51 스크랩 삭제 END //
+
+    @GetMapping("/scraps/check/{plan_id}")
+    public ResponseEntity<?> checkScrapedPlan(@PathVariable("plan_id") Long planId,
+                                              @AuthenticationPrincipal PrincipalDetails user) {
+
+        var result = scrapService.checkScrapedPlan(planId, user);
+
+        return ResponseEntity.ok(result);
+    }
 }

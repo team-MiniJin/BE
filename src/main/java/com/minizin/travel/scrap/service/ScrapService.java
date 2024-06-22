@@ -5,10 +5,7 @@ import com.minizin.travel.plan.entity.PlanSchedule;
 import com.minizin.travel.plan.repository.PlanRepository;
 import com.minizin.travel.plan.repository.PlanScheduleRepository;
 import com.minizin.travel.plan.service.PlanService;
-import com.minizin.travel.scrap.dto.ResponseCreateScrapPlanDto;
-import com.minizin.travel.scrap.dto.ResponseDeleteScrapedPlanDto;
-import com.minizin.travel.scrap.dto.ResponseSelectScrapedPlansDto;
-import com.minizin.travel.scrap.dto.SelectScrapedPlansDto;
+import com.minizin.travel.scrap.dto.*;
 import com.minizin.travel.scrap.entity.Scrap;
 import com.minizin.travel.scrap.repository.ScrapRepository;
 import com.minizin.travel.user.domain.dto.PrincipalDetails;
@@ -137,4 +134,22 @@ public class ScrapService {
                 .build();
     }
     // #51 스크랩 삭제 END //
+
+    public ResponseCheckScrapedPlanDto checkScrapedPlan(Long planId, PrincipalDetails user) {
+
+        Long userId = userRepository.findByUsername(user.getUsername()).get().getId();
+
+        if (!scrapRepository.existsByPlanIdAndUserId(planId, userId)) {
+
+            return ResponseCheckScrapedPlanDto.builder()
+                    .success(false)
+                    .message("존재하지 않는 scrap 입니다.")
+                    .build();
+        }
+
+        return ResponseCheckScrapedPlanDto.builder()
+                .success(true)
+                .message("존재하는 scrap 입니다.")
+                .build();
+    }
 }
