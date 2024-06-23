@@ -90,8 +90,8 @@ public class TourService {
                     Map.entry("addrinfoYN", "Y"),
                     Map.entry("mapinfoYN", "Y"),
                     Map.entry("overviewYN", "Y"),
-                    Map.entry("numOfRows", "100"),
-                    Map.entry("pageNo", "0")
+                    Map.entry("numOfRows", "10"),
+                    Map.entry("pageNo", "1")
                 );
 
                 String url = buildUrlWithParams(getCategoryUrl, params);
