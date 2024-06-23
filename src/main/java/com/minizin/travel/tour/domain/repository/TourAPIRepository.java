@@ -35,6 +35,7 @@ public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.addr1 LIKE CONCAT('%', :keyword, '%')")
     List<TourAPI> findDistinctSearchKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT t FROM TourAPI t WHERE t.contentId IS NOT NULL AND t.contentId != '' GROUP BY t.contentId ORDER BY t.overview")
     Page<TourAPI> findAll(Pageable pageable);
 
 }
