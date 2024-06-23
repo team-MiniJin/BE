@@ -157,7 +157,7 @@ public class TourInfoService {
             .items(items)
             .numOfRows(numOfRows)
             .pageNo(pageNo)
-            .totalCount(pagedItems.size())
+            .totalCount(itemList.size())
             .build();
 
         // Header 객체 생성
