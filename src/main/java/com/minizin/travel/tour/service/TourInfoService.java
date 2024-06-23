@@ -51,7 +51,7 @@ public class TourInfoService {
     private final ObjectMapper objectMapper;
 
     public TourAPIDto getTourDataByAreaCode() throws IOException {
-        int pageNo = 1;
+        int pageNo = 0;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
