@@ -174,6 +174,31 @@ public class TourService {
                     .collect(Collectors.toList());
             });
     }
+
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedListSingle(TourAPIDto.TourRequest requestParam) {
+        String getCategoryUrl = baseUrl + "areaBasedList1";
+        String pageNo = Optional.ofNullable(requestParam.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestParam.getNumOfRows()).orElse("10");
+        String areaCode = Optional.ofNullable(requestParam.getAreaCode()).orElse("");
+        String contentTypeId = Optional.ofNullable(requestParam.getContentTypeId()).orElse("");
+        String sigunguCode = Optional.ofNullable(requestParam.getSigunguCode()).orElse("");
+
+        Map<String, String> params = Map.of(
+            "ServiceKey", serviceKey,
+            "MobileOS", "ETC",
+            "MobileApp", "AppTest",
+            "_type", "json",
+            "areaCode",areaCode,
+            "contentTypeId",contentTypeId,
+            "sigunguCode",sigunguCode,
+            "pageNo", pageNo,
+            "numOfRows", numOfRows
+        );
+
+        String url = buildUrlWithParams(getCategoryUrl, params);
+
+        return getListCompletableFuture(url, MAX_RETRIES);
+    }
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode() {
         String getCategoryUrl = baseUrl + "areaCode1";
 

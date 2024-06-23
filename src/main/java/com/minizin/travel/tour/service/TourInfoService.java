@@ -13,8 +13,11 @@ import jakarta.persistence.TupleElement;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Collator;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,66 +55,109 @@ public class TourInfoService {
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
+        int numOfRows = 12;
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
         // 응답 객체 생성
-        TourAPIDto responseDto = createTourAPIDto(rawItems, pageNo);
+        TourAPIDto responseDto = createTourAPIDto(rawItems, pageNo,numOfRows);
 
         return responseDto;
     }
 
     public TourAPIDto getTourDataByAreaBasedList(TourAPIDto.TourRequest requestUrl) throws IOException {
-        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("1");
-        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("100");
-        int totalCount = Integer.parseInt(pageNo) * Integer.parseInt(numOfRows);
-        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("1");
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("10");
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
+        String contentTypeId = Optional.ofNullable(requestUrl.getContentTypeId()).orElse("");
+        String sigunguCode = Optional.ofNullable(requestUrl.getSigunguCode()).orElse("");
 
-        Pageable pageable = PageRequest.of(Integer.parseInt(pageNo), totalCount);
+        int page = Integer.parseInt(pageNo);
+        int size = Integer.parseInt(numOfRows);
+
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode, pageable);
+        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode);
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .filter(tourAPI ->
+                (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
+                    (contentTypeId.isEmpty() || tourAPI.getContentTypeId().equals(contentTypeId)) &&
+                    (sigunguCode.isEmpty() || tourAPI.getSigunguCode().equals(sigunguCode))
+            )
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
+        List<TourAPIDto.TourResponse.Body.Items.Item> sortedItems = sortItemsByTitle(rawItems);
 
-        TourAPIDto responseDto = createTourAPIDto(rawItems, Integer.parseInt(pageNo));
+        TourAPIDto responseDto = createTourAPIDto(sortedItems, page, size);
 
         return responseDto;
     }
 
     public TourAPIDto getTourDataSearchKeyword(TourAPIDto.TourRequest requestUrl) throws IOException {
         String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("0");
-        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("100");
-        int totalCount = Integer.parseInt(pageNo) * Integer.parseInt(numOfRows);
-        String keyword = Optional.ofNullable(requestUrl.getKeyword()).orElse("강원");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("10");
+        String keyword = Optional.ofNullable(requestUrl.getKeyword()).orElse("");
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
+        String contentTypeId = Optional.ofNullable(requestUrl.getContentTypeId()).orElse("");
+        String sigunguCode = Optional.ofNullable(requestUrl.getSigunguCode()).orElse("");
 
-        Pageable pageable = PageRequest.of(0, Integer.parseInt(numOfRows));
+        int page = Integer.parseInt(pageNo);
+        int size = Integer.parseInt(numOfRows);
+
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword, pageable);
+        List<TourAPI> rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .filter(tourAPI ->
+                (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
+                    (contentTypeId.isEmpty() || tourAPI.getContentTypeId().equals(contentTypeId)) &&
+                    (sigunguCode.isEmpty() || tourAPI.getSigunguCode().equals(sigunguCode))
+            )
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
-        TourAPIDto responseDto = createTourAPIDto(rawItems, Integer.parseInt(pageNo));
+        List<TourAPIDto.TourResponse.Body.Items.Item> sortedItems = sortItemsByTitle(rawItems);
+
+        TourAPIDto responseDto = createTourAPIDto(sortedItems, page, size);
 
         return responseDto;
     }
 
-        private TourAPIDto createTourAPIDto(List<TourAPIDto.TourResponse.Body.Items.Item> itemList, int pageNo) {
+    private List<TourAPIDto.TourResponse.Body.Items.Item> sortItemsByTitle(List<TourAPIDto.TourResponse.Body.Items.Item> items) {
+        Collator collator = Collator.getInstance(Locale.KOREAN);
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> koreanItems = items.stream()
+            .filter(item -> item.getTitle().matches("^[ㄱ-ㅎ가-힣].*"))
+            .sorted(Comparator.comparing(TourAPIDto.TourResponse.Body.Items.Item::getTitle, collator))
+            .collect(Collectors.toList());
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> nonKoreanItems = items.stream()
+            .filter(item -> !item.getTitle().matches("^[ㄱ-ㅎ가-힣].*"))
+            .sorted(Comparator.comparing(TourAPIDto.TourResponse.Body.Items.Item::getTitle, collator))
+            .collect(Collectors.toList());
+
+        koreanItems.addAll(nonKoreanItems);
+        return koreanItems;
+    }
+
+        private TourAPIDto createTourAPIDto(List<TourAPIDto.TourResponse.Body.Items.Item> itemList, int pageNo, int numOfRows) {
+        // 객체 page별로 반환
+        int start = Math.min(pageNo * numOfRows, itemList.size());
+        int end = Math.min((pageNo + 1) * numOfRows, itemList.size());
+        List<TourAPIDto.TourResponse.Body.Items.Item> pagedItems = itemList.subList(start, end);
+
         // Items 객체로 변환
         TourAPIDto.TourResponse.Body.Items items = TourAPIDto.TourResponse.Body.Items.builder()
-            .item(itemList)
+            .item(pagedItems)
             .build();
 
         // Body 객체 생성
         TourAPIDto.TourResponse.Body body = TourAPIDto.TourResponse.Body.builder()
             .items(items)
-            .numOfRows(items.getItem().size())
-            .pageNo(Optional.ofNullable(pageNo).orElse(1))
-            .totalCount(items.getItem().size())
+            .numOfRows(numOfRows)
+            .pageNo(pageNo)
+            .totalCount(itemList.size())
             .build();
 
         // Header 객체 생성

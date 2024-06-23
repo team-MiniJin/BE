@@ -1,13 +1,19 @@
 package com.minizin.travel.tour.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import com.minizin.travel.tour.domain.entity.TourAPI;
 import com.minizin.travel.tour.service.TourService;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -24,12 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
 //@Tag(name = "Tour Controller")
+@Slf4j
 @RestController
 @RequestMapping("/tour")
 @RequiredArgsConstructor
 public class TourController {
     private final TourService tourService;
     Logger logger = LoggerFactory.getLogger(getClass());
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @GetMapping("/detailCommon")
     public CompletableFuture<ResponseEntity<String>> getAPITourDataDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestParam) {
@@ -46,8 +54,13 @@ public class TourController {
     public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedList(@ModelAttribute TourAPIDto.TourRequest requestParam) {
         return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList(requestParam));
     }
+    @GetMapping("/areaBasedListSingle")
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedListSingle(@ModelAttribute TourAPIDto.TourRequest requestUrl) {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedListSingle(requestUrl));
+    }
 
-//    @Operation(summary = "Get areaCode", description = "Retrieve a specific areaBasedList by its ID")
+
+    //    @Operation(summary = "Get areaCode", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areacode")
     public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaCode() {
         return createResponseEntity(tourService.getTourAPIFromSiteAreaCode());
