@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -70,7 +71,7 @@ public class TourService {
         Page<TourAPI> tourAPIPage = tourAPIRepository.findAll(pageRequest);
         List<TourAPI> tourAPIs = tourAPIPage.getContent();
 
-        List<CompletableFuture<TourAPIDto.TourResponse.Body.Items.Item>> futures = tourAPIs.stream()
+        List<CompletableFuture<Void>> futures = tourAPIs.stream()
             .map(tourAPI -> {
                 String contentId = tourAPI.getContentId();
                 String contentTypeId = tourAPI.getContentTypeId();
@@ -91,28 +92,22 @@ public class TourService {
                     Map.entry("mapinfoYN", "Y"),
                     Map.entry("overviewYN", "Y"),
                     Map.entry("numOfRows", "10"),
-                    Map.entry("pageNo", "1")
+                    Map.entry("pageNo", "0")
                 );
 
                 String url = buildUrlWithParams(getCategoryUrl, params);
-                return fetchTourAPIData(url, tourAPI);
+                return fetchAndUpdateTourAPIData(url, tourAPI);
             })
             .collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
             .thenApply(v -> {
-                List<TourAPIDto.TourResponse.Body.Items.Item> items = futures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-
-                if (!items.isEmpty()) {
-                    saveTourAPIItems(items);
-                }
-
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
-
+                if (!tourAPIs.isEmpty()) {
+                    tourAPIRepository.saveAll(tourAPIs);
+                }
                 return "getTourAPIFromSiteDetailCommon executed successfully";
             });
     }
@@ -251,14 +246,14 @@ public class TourService {
         return urlBuilder.build().toString();
     }
 
-    private CompletableFuture<TourAPIDto.TourResponse.Body.Items.Item> fetchTourAPIData(String url, TourAPI existingTourAPI) {
+    private CompletableFuture<Void> fetchAndUpdateTourAPIData(String url, TourAPI existingTourAPI) {
         Request request = new Request.Builder()
             .url(url)
             .get()
             .addHeader("Content-type", "application/json")
             .build();
 
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             try (Response response = client.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     throw new IOException("Unexpected code " + response);
@@ -266,29 +261,21 @@ public class TourService {
                 String responseJson = response.body().string();
                 logger.debug("Response JSON: " + responseJson);
 
+                // JSON 파싱 및 데이터 형식 검증
                 TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
-                if (tourAPIDto == null || tourAPIDto.getResponse() == null ||
-                    tourAPIDto.getResponse().getBody() == null ||
-                    tourAPIDto.getResponse().getBody().getItems() == null ||
-                    tourAPIDto.getResponse().getBody().getItems().getItem() == null ||
-                    tourAPIDto.getResponse().getBody().getItems().getItem().isEmpty()) {
-                    throw new JsonSyntaxException("Invalid JSON structure");
-                }
 
-                return tourAPIDto.getResponse().getBody().getItems().getItem().get(0);
+                TourAPIDto.TourResponse.Body.Items.Item item = tourAPIDto.getResponse()
+                    .getBody()
+                    .getItems()
+                    .getItem()
+                    .get(0);
+
+                existingTourAPI.updateFromDtoAsync(item);
             } catch (IOException | JsonSyntaxException e) {
                 logger.error("Error fetching data for URL: " + url, e);
                 throw new CompletionException(e);
             }
         }, executorService);
-    }
-
-    @Transactional
-    public void saveTourAPIItems(List<TourAPIDto.TourResponse.Body.Items.Item> items) {
-        List<TourAPI> tourAPIs = items.stream()
-            .map(TourAPIDto.TourResponse.Body.Items.Item::toEntity)
-            .collect(Collectors.toList());
-        tourAPIRepository.saveAll(tourAPIs);
     }
 
 }
