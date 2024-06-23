@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import okhttp3.OkHttpClient;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Class: TourService Project: travel Package: com.minizin.travel.tour.service
@@ -68,7 +70,7 @@ public class TourService {
         Page<TourAPI> tourAPIPage = tourAPIRepository.findAll(pageRequest);
         List<TourAPI> tourAPIs = tourAPIPage.getContent();
 
-        List<CompletableFuture<Void>> futures = tourAPIs.stream()
+        List<CompletableFuture<TourAPIDto.TourResponse.Body.Items.Item>> futures = tourAPIs.stream()
             .map(tourAPI -> {
                 String contentId = tourAPI.getContentId();
                 String contentTypeId = tourAPI.getContentTypeId();
@@ -93,19 +95,23 @@ public class TourService {
                 );
 
                 String url = buildUrlWithParams(getCategoryUrl, params);
-                return putSingleCompletableFuture(url, tourAPI);
+                return fetchTourAPIData(url, tourAPI);
             })
             .collect(Collectors.toList());
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
             .thenApply(v -> {
+                List<TourAPIDto.TourResponse.Body.Items.Item> items = futures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList());
+
+                if (!items.isEmpty()) {
+                    saveTourAPIItems(items);
+                }
+
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
-
-                if (!tourAPIs.isEmpty()) {
-                    tourAPIRepository.saveAll(tourAPIs);
-                }
 
                 return "getTourAPIFromSiteDetailCommon executed successfully";
             });
@@ -245,49 +251,44 @@ public class TourService {
         return urlBuilder.build().toString();
     }
 
-    private CompletableFuture<Void> putSingleCompletableFuture(String url, TourAPI existingTourAPI) {
+    private CompletableFuture<TourAPIDto.TourResponse.Body.Items.Item> fetchTourAPIData(String url, TourAPI existingTourAPI) {
         Request request = new Request.Builder()
             .url(url)
             .get()
             .addHeader("Content-type", "application/json")
             .build();
 
-        return CompletableFuture.runAsync(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             try (Response response = client.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     throw new IOException("Unexpected code " + response);
                 }
                 String responseJson = response.body().string();
-
                 logger.debug("Response JSON: " + responseJson);
 
-                // JSON 파싱 및 데이터 형식 검증
-                try {
-                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
-                    if (tourAPIDto == null || tourAPIDto.getResponse() == null ||
-                        tourAPIDto.getResponse().getBody() == null ||
-                        tourAPIDto.getResponse().getBody().getItems() == null ||
-                        tourAPIDto.getResponse().getBody().getItems().getItem() == null ||
-                        tourAPIDto.getResponse().getBody().getItems().getItem().isEmpty()) {
-                        throw new JsonSyntaxException("Invalid JSON structure");
-                    }
-
-                    TourAPIDto.TourResponse.Body.Items.Item item = tourAPIDto.getResponse()
-                        .getBody()
-                        .getItems()
-                        .getItem()
-                        .get(0);
-
-                    existingTourAPI.updateFromDtoAsync(item).join();
-                    return;  // 성공적으로 처리된 경우 반환
-                } catch (JsonSyntaxException e) {
-                    logger.error("JSON parsing error for URL: " + url , e);
-                    throw e;
+                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+                if (tourAPIDto == null || tourAPIDto.getResponse() == null ||
+                    tourAPIDto.getResponse().getBody() == null ||
+                    tourAPIDto.getResponse().getBody().getItems() == null ||
+                    tourAPIDto.getResponse().getBody().getItems().getItem() == null ||
+                    tourAPIDto.getResponse().getBody().getItems().getItem().isEmpty()) {
+                    throw new JsonSyntaxException("Invalid JSON structure");
                 }
+
+                return tourAPIDto.getResponse().getBody().getItems().getItem().get(0);
             } catch (IOException | JsonSyntaxException e) {
                 logger.error("Error fetching data for URL: " + url, e);
+                throw new CompletionException(e);
             }
         }, executorService);
+    }
+
+    @Transactional
+    public void saveTourAPIItems(List<TourAPIDto.TourResponse.Body.Items.Item> items) {
+        List<TourAPI> tourAPIs = items.stream()
+            .map(TourAPIDto.TourResponse.Body.Items.Item::toEntity)
+            .collect(Collectors.toList());
+        tourAPIRepository.saveAll(tourAPIs);
     }
 
 }

@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository;
 public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
 
     // TourAPI 에서 중복 값 없이(DISTINCT) Null 값 & 빈 값('') 제외하고 가져오기.
-    @Query(value = "SELECT DISTINCT t FROM TourAPI t WHERE t.code IS NOT NULL AND t.code != ''")
+    @Query(value = "SELECT t FROM TourAPI t WHERE t.code IS NOT NULL AND t.code != '' GROUP BY t.code")
     List<TourAPI>  findDistinctAreaCode();
 
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.areaCode = :areaCode")
@@ -35,6 +35,7 @@ public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.addr1 LIKE CONCAT('%', :keyword, '%')")
     List<TourAPI> findDistinctSearchKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT t FROM TourAPI t WHERE t.contentId IS NOT NULL AND t.contentId != '' GROUP BY t.contentId ORDER BY t.overview")
     Page<TourAPI> findAll(Pageable pageable);
 
 }
