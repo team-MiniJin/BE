@@ -50,25 +50,33 @@ public class TourInfoController {
     @GetMapping("/areaBasedList1")
     public ResponseEntity<String> getTourDataByBasedList(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
         log.info("Received request: {}", requestUrl);
-        return processTourRequest(requestUrl, () -> {
-            try {
-                return tourInfoService.getTourDataByAreaBasedList(requestUrl);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try {
+            return processTourRequest(requestUrl, () -> {
+                try {
+                    return tourInfoService.getTourDataByAreaBasedList(requestUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            return handleException(e);
+        }
     }
 
     @GetMapping("/searchKeyword1")
-    public ResponseEntity<String> getTourDataBySearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
+    public ResponseEntity<String> getTourDataBySearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestUrl) {
         log.info("Received request: {}", requestUrl);
-        return processTourRequest(requestUrl, () -> {
-            try {
-                return tourInfoService.getTourDataSearchKeyword(requestUrl);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try {
+            return processTourRequest(requestUrl, () -> {
+                try {
+                    return tourInfoService.getTourDataSearchKeyword(requestUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            return handleException(e);
+        }
     }
 
     private ResponseEntity<String> processTourRequest(TourAPIDto.TourRequest requestUrl, Supplier<TourAPIDto> tourDataSupplier) {
@@ -87,14 +95,22 @@ public class TourInfoController {
                     .body(errorResponse);
             }
         } catch (RuntimeException e) {
-            if (e.getCause() instanceof IOException) {
-                String errorResponse = "{\"successful\":false,\"error\":\"IOException occurred\"}";
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                    .body(errorResponse);
-            } else {
-                throw e;
-            }
+            throw e;
+        }
+    }
+
+    private ResponseEntity<String> handleException(RuntimeException e) {
+        String errorResponse;
+        if (e.getCause() instanceof IOException) {
+            errorResponse = "{\"successful\":false,\"error\":\"IOException occurred\"}";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(errorResponse);
+        } else {
+            errorResponse = "{\"successful\":false,\"error\":\"Unexpected error occurred\"}";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(errorResponse);
         }
     }
 }
