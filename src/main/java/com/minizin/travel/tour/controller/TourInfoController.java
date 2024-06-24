@@ -40,7 +40,7 @@ public class TourInfoController {
         log.info("Received request: {}", requestUrl);
         return processTourRequest(requestUrl, () -> {
             try {
-                return tourInfoService.getTourDataByAreaCode();
+                return tourInfoService.getTourDataByAreaCode(requestUrl);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -50,14 +50,17 @@ public class TourInfoService {
     private final String myAPIUrl = "http://lyckabc.synology.me:20280/";
     private final ObjectMapper objectMapper;
 
-    public TourAPIDto getTourDataByAreaCode() throws IOException {
+    public TourAPIDto getTourDataByAreaCode(TourAPIDto.TourRequest requestUrl) throws IOException {
         int pageNo = 0;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
         int numOfRows = 100;
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .filter(tourAPI ->
+                areaCode.isEmpty() || tourAPI.getCode().equals(areaCode))
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
