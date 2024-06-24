@@ -206,7 +206,8 @@ public class TourService {
             "ServiceKey", serviceKey,
             "MobileOS", "ETC",
             "MobileApp", "AppTest",
-            "_type", "json"
+            "_type", "json",
+            "numOfRows","100"
         );
 
         String url = buildUrlWithParams(getCategoryUrl, params);

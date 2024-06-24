@@ -55,7 +55,7 @@ public class TourInfoService {
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
-        int numOfRows = 12;
+        int numOfRows = 100;
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .map(TourAPI::toDto)
