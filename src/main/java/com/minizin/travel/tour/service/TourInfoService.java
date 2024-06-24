@@ -32,6 +32,7 @@ import okhttp3.ResponseBody;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Class: TourInfoService Project: travel Package: com.minizin.travel.tour.service
@@ -50,19 +51,49 @@ public class TourInfoService {
     private final String myAPIUrl = "http://lyckabc.synology.me:20280/";
     private final ObjectMapper objectMapper;
 
-    public TourAPIDto getTourDataByAreaCode() throws IOException {
+    public TourAPIDto getTourDataByAreaCode(TourAPIDto.TourRequest requestUrl) throws IOException {
         int pageNo = 0;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
-        int numOfRows = 12;
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
+        int numOfRows = 100;
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .filter(tourAPI ->
+                areaCode.isEmpty() || tourAPI.getCode().equals(areaCode))
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
         // 응답 객체 생성
         TourAPIDto responseDto = createTourAPIDto(rawItems, pageNo,numOfRows);
+
+        return responseDto;
+    }
+
+    public TourAPIDto getTourDataByDetailCommon(TourAPIDto.TourRequest requestUrl) throws IOException {
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("10");
+        String contentId = Optional.ofNullable(requestUrl.getContentId()).orElse("");
+
+        int page = Integer.parseInt(pageNo);
+        int size = Integer.parseInt(numOfRows);
+
+        List<TourAPI> rawEntities;
+        // 데이터베이스에서 중복 제거된 데이터 가져오기
+        if (contentId != "") {
+            rawEntities = tourAPIRepository.findByContentId(contentId);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .map(TourAPI::toDto)
+            .collect(Collectors.toList());
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> sortedItems = sortItemsByTitle(rawItems);
+
+        TourAPIDto responseDto = createTourAPIDto(sortedItems, page, size);
 
         return responseDto;
     }
@@ -76,9 +107,14 @@ public class TourInfoService {
 
         int page = Integer.parseInt(pageNo);
         int size = Integer.parseInt(numOfRows);
+        List<TourAPI> rawEntities;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode);
+        if (areaCode != "") {
+            rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
@@ -106,8 +142,14 @@ public class TourInfoService {
         int page = Integer.parseInt(pageNo);
         int size = Integer.parseInt(numOfRows);
 
+        List<TourAPI> rawEntities;
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
+        if (keyword != "") {
+            rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
+
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
