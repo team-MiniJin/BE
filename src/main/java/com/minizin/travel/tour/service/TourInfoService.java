@@ -145,19 +145,17 @@ public class TourInfoService {
         int page = Integer.parseInt(pageNo);
         int size = Integer.parseInt(numOfRows);
 
-        List<TourAPI> rawEntities;
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        if (keyword != "") {
-            rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
-        } else {
-            rawEntities = tourAPIRepository.findAllList();
-        }
+
+        List<TourAPI> rawEntities = tourAPIRepository.findAllList();
+
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
                     (contentTypeId.isEmpty() || tourAPI.getContentTypeId().equals(contentTypeId)) &&
-                    (sigunguCode.isEmpty() || tourAPI.getSigunguCode().equals(sigunguCode))
+                    (sigunguCode.isEmpty() || tourAPI.getSigunguCode().equals(sigunguCode)) &&
+                    (keyword.isEmpty() || (tourAPI.getAddr1().contains(keyword) || tourAPI.getTitle().contains(keyword)))
             )
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
