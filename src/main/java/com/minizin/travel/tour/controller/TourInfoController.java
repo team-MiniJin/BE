@@ -64,7 +64,7 @@ public class TourInfoController {
     }
 
     @GetMapping("/searchKeyword1")
-    public ResponseEntity<String> getTourDataBySearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestUrl) {
+    public ResponseEntity<String> getTourDataBySearchKeyword(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
         log.info("Received request: {}", requestUrl);
         try {
             return processTourRequest(requestUrl, () -> {
@@ -79,9 +79,25 @@ public class TourInfoController {
         }
     }
 
+    @GetMapping("/detailCommon1")
+    public ResponseEntity<String> getTourDataByDetailCommon(@ModelAttribute TourAPIDto.TourRequest requestUrl) throws IOException {
+        log.info("Received request: {}", requestUrl);
+        try {
+            return processTourRequest(requestUrl, () -> {
+                try {
+                    return tourInfoService.getTourDataByDetailCommon(requestUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            return handleException(e);
+        }
+    }
+
     private ResponseEntity<String> processTourRequest(TourAPIDto.TourRequest requestUrl, Supplier<TourAPIDto> tourDataSupplier) {
         try {
-            if (requestUrl.getServiceKey() != null && "0".equals(requestUrl.getServiceKey())) {
+            if (requestUrl.getServiceKey() != null ) {
                 TourAPIDto responseDto = tourDataSupplier.get();
                 String jsonResponse = gson.toJson(responseDto);
                 log.info(jsonResponse);

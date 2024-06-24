@@ -32,6 +32,7 @@ import okhttp3.ResponseBody;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Class: TourInfoService Project: travel Package: com.minizin.travel.tour.service
@@ -66,6 +67,33 @@ public class TourInfoService {
 
         // 응답 객체 생성
         TourAPIDto responseDto = createTourAPIDto(rawItems, pageNo,numOfRows);
+
+        return responseDto;
+    }
+
+    public TourAPIDto getTourDataByDetailCommon(TourAPIDto.TourRequest requestUrl) throws IOException {
+        String pageNo = Optional.ofNullable(requestUrl.getPageNo()).orElse("0");
+        String numOfRows = Optional.ofNullable(requestUrl.getNumOfRows()).orElse("10");
+        String contentId = Optional.ofNullable(requestUrl.getContentId()).orElse("");
+
+        int page = Integer.parseInt(pageNo);
+        int size = Integer.parseInt(numOfRows);
+
+        List<TourAPI> rawEntities;
+        // 데이터베이스에서 중복 제거된 데이터 가져오기
+        if (contentId != "") {
+            rawEntities = tourAPIRepository.findByContentId(contentId);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
+            .map(TourAPI::toDto)
+            .collect(Collectors.toList());
+
+        List<TourAPIDto.TourResponse.Body.Items.Item> sortedItems = sortItemsByTitle(rawItems);
+
+        TourAPIDto responseDto = createTourAPIDto(sortedItems, page, size);
 
         return responseDto;
     }

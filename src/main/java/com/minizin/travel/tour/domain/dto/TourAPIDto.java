@@ -44,6 +44,7 @@ public class TourAPIDto {
         private String cat2;
         private String cat3;
         private String contentTypeId;
+        private String contentId;
         private String eventStartDate;
         private String keyword;
         private String listYN;
@@ -54,7 +55,6 @@ public class TourAPIDto {
         private String pageNo;
         private String radius;
         private String sigunguCode;
-        private String contentId;
         private String defaultYN;
         private String firstImageYN;
         private String areacodeYN;

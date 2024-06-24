@@ -46,6 +46,9 @@ public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
 
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.contentId IS NOT NULL AND t.contentId != '' AND t.overview = '' GROUP BY t.contentId")
     Page<TourAPI> findAll(Pageable pageable);
+
+    @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.contentId = :contentId GROUP BY t.contentId")
+    List<TourAPI> findByContentId(@Param("contentId") String contentId);
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.contentId IS NOT NULL AND t.contentId != '' GROUP BY t.contentId")
     List<TourAPI> findAllList();
 
