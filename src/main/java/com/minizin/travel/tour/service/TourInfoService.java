@@ -79,9 +79,14 @@ public class TourInfoService {
 
         int page = Integer.parseInt(pageNo);
         int size = Integer.parseInt(numOfRows);
+        List<TourAPI> rawEntities;
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode);
+        if (areaCode != "") {
+            rawEntities = tourAPIRepository.findDistinctAreaBasedList(areaCode);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
@@ -109,8 +114,14 @@ public class TourInfoService {
         int page = Integer.parseInt(pageNo);
         int size = Integer.parseInt(numOfRows);
 
+        List<TourAPI> rawEntities;
         // 데이터베이스에서 중복 제거된 데이터 가져오기
-        List<TourAPI> rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
+        if (keyword != "") {
+            rawEntities = tourAPIRepository.findDistinctSearchKeyword(keyword);
+        } else {
+            rawEntities = tourAPIRepository.findAllList();
+        }
+
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
