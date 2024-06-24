@@ -1,47 +1,39 @@
-package com.minizin.travel.user.domain;
+package com.minizin.travel.chat.domain;
 
-import com.minizin.travel.global.BaseEntity;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Class: BaseEntity Project: com.minizin.travel.user.domain
+ * Class: BaseEntity Project: package com.minizin.travel.chat.domain
  * <p>
- * Description: User
+ * Description: ChatMessage
  *
  * @author JANG CHIHUN
- * @date 6/3/24 21:30 Copyright (c) 2024 MiniJin
+ * @date 6/74/24 11:30 Copyright (c) 2024 MiniJin
  * @see <a href="https://github.com/team-MiniJin/BE">GitHub Repository</a>
  */
-@Builder
+
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Builder
 @Entity
-@Table(name = "users")
-public class User extends BaseEntity {
+public class ChatMessage {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long userId;
+	private Long id;
 
-	private String username;
-
-	private String password;
-
-	private String nickname;
-
-	private String email;
-
-	private String phone;
-
-
+	private String roomId;
+	private String sender;
+	private String message;
+	private LocalDateTime timestamp;
 }
