@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository;
 public interface TourAPIRepository extends JpaRepository<TourAPI, Long> {
 
     // TourAPI 에서 중복 값 없이(DISTINCT) Null 값 & 빈 값('') 제외하고 가져오기.
-    @Query(value = "SELECT t FROM TourAPI t WHERE t.code IS NOT NULL AND t.code != '' GROUP BY t.code")
+    @Query(value = "SELECT DISTINCT t FROM TourAPI t WHERE  t.code IS NOT NULL AND t.code != '' GROUP BY t.code,t.sigunguCode")
     List<TourAPI>  findDistinctAreaCode();
 
     @Query("SELECT DISTINCT t FROM TourAPI t WHERE t.areaCode = :areaCode GROUP BY t.contentId")

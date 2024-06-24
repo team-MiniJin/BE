@@ -46,22 +46,25 @@ import org.springframework.util.StringUtils;
 @Service
 @RequiredArgsConstructor
 public class TourInfoService {
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
     private final TourAPIRepository tourAPIRepository;
-    private final String myAPIUrl = "http://lyckabc.synology.me:20280/";
-    private final ObjectMapper objectMapper;
 
     public TourAPIDto getTourDataByAreaCode(TourAPIDto.TourRequest requestUrl) throws IOException {
         int pageNo = 0;
+        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
 
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findDistinctAreaCode();
-        String areaCode = Optional.ofNullable(requestUrl.getAreaCode()).orElse("");
         int numOfRows = 100;
 
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
-            .filter(tourAPI ->
-                areaCode.isEmpty() || tourAPI.getCode().equals(areaCode))
+            .filter(tourAPI -> {
+                if (!areaCode.isEmpty()) {
+                    return !tourAPI.getSigunguCode().isEmpty() && tourAPI.getCode().equals(areaCode);
+                } else {
+                    return tourAPI.getSigunguCode().isEmpty();
+                }
+            })
             .map(TourAPI::toDto)
             .collect(Collectors.toList());
 
