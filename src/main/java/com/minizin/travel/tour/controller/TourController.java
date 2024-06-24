@@ -55,15 +55,15 @@ public class TourController {
         return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedList(requestParam));
     }
     @GetMapping("/areaBasedListSingle")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedListSingle(@ModelAttribute TourAPIDto.TourRequest requestUrl) {
-        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedListSingle(requestUrl));
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaBasedListSingle(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaBasedListSingle(requestParam));
     }
 
 
     //    @Operation(summary = "Get areaCode", description = "Retrieve a specific areaBasedList by its ID")
     @GetMapping("/areacode")
-    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaCode() {
-        return createResponseEntity(tourService.getTourAPIFromSiteAreaCode());
+    public CompletableFuture<ResponseEntity<List<TourAPI>>> getAPITourDataAreaCode(@ModelAttribute TourAPIDto.TourRequest requestParam) {
+        return createResponseEntity(tourService.getTourAPIFromSiteAreaCode(requestParam));
     }
 
 //    @Operation(summary = "Get searchkeyword", description = "Retrieve a specific searchkeyword by keyword")

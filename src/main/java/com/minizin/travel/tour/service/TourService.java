@@ -135,7 +135,7 @@ public class TourService {
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "areaBasedList1";
         long startTime = System.currentTimeMillis();
-        String[] areaCodes = {"1","2","3","4","5","6","7","8","31","32"};
+        String[] areaCodes = {"1","2","3","4","5","6","7","8","31","32","33","34","35","36","37","38","39"};
         String[] contentTypeIds = {"12","14","15","25","28","32","38","39"};
         String pageNo = Optional.ofNullable(requestParam.getPageNo()).orElse("0");
         String numOfRows = Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000");
@@ -197,22 +197,26 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url, MAX_RETRIES);
+        return getListCompletableFuture(url,MAX_RETRIES);
     }
-    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode() {
+    public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "areaCode1";
+        String areaCode = Optional.ofNullable(requestParam.getAreaCode()).orElse("");
+        boolean codeOrSigungu = areaCode.isEmpty();
 
         Map<String, String> params = Map.of(
             "ServiceKey", serviceKey,
             "MobileOS", "ETC",
             "MobileApp", "AppTest",
             "_type", "json",
-            "numOfRows","100"
+            "numOfRows","100",
+            "areaCode",areaCode
         );
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url, MAX_RETRIES);
+
+        return getListCompletableFutureForArea(url, areaCode, codeOrSigungu);
     }
 
     @NotNull
@@ -301,6 +305,53 @@ public class TourService {
                 logger.error("Error fetching data for URL: " + url, e);
                 throw new CompletionException(e);
             }
+        }, executorService);
+    }
+
+    @NotNull
+    private CompletableFuture<List<TourAPI>> getListCompletableFutureForArea(String url,String areaCode,boolean codeOrSigungu) {
+        Request request = new Request.Builder()
+            .url(url)
+            .get()
+            .addHeader("Content-type", "application/json")
+            .build();
+
+        return CompletableFuture.supplyAsync(() -> {
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                }
+
+                String responseJson = response.body().string();
+
+//                    logger.info("Response JSON: " + responseJson); // Log the JSON response
+
+                // items이 비어있을 때 Error Msg없이 스킵
+                if (responseJson.contains("\"items\": \"\"")) {
+                    return Collections.emptyList(); // Return an empty list instead of continue;
+                }
+
+                try {
+                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+
+
+                    List<TourAPI> tourAPIList = tourAPIDto.toEntityListArea(areaCode,codeOrSigungu);
+
+                    if (!tourAPIList.isEmpty()) {
+                        tourAPIRepository.saveAll(tourAPIList);
+                        return tourAPIList;
+                    }
+                }catch (JsonSyntaxException e) {
+                    if (!e.getMessage().contains("\"items\": \"\",")) {
+                        logger.error("JSON parsing error: " + e.getMessage());
+                    }
+                }
+
+            } catch (IOException | JsonSyntaxException e) {
+
+            }
+
+            return Collections.emptyList();
         }, executorService);
     }
 

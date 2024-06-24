@@ -191,6 +191,20 @@ public class TourAPIDto {
                             .overview(Optional.ofNullable(overview).orElse(""))
                             .build();
                     }
+                    public TourAPI toEntitySigungu(String codeArea,boolean codeOrSigungu) {
+                        if (!codeOrSigungu) {
+                            sigungucode = code;
+                            code = codeArea;
+                        }
+                        return TourAPI.builder()
+                            .code(Optional.ofNullable(code).orElse(""))
+                            .sigunguCode(Optional.ofNullable(sigungucode).orElse(""))
+                            .rnum(Optional.ofNullable(rnum).orElse(0))
+                            .totalCnt(Optional.ofNullable(totalCnt).orElse(0))
+                            .totalCount(Optional.ofNullable(totalCount).orElse(0))
+                            .name(Optional.ofNullable(name).orElse(""))
+                            .build();
+                    }
                 }
             }
         }
@@ -201,6 +215,18 @@ public class TourAPIDto {
         if (response != null && response.getBody() != null && response.getBody().getItems() != null) {
             for (TourResponse.Body.Items.Item item : response.getBody().getItems().getItem()) {
                 TourAPI tourAPI = item.toEntity();
+                tourAPIList.add(tourAPI);
+            }
+        }
+        return tourAPIList;
+    }
+
+    public List<TourAPI> toEntityListArea(String codeArea,boolean codeOrSigungu) {
+        List<TourAPI> tourAPIList = new ArrayList<>();
+        if (response != null && response.getBody() != null && response.getBody().getItems() != null) {
+            for (TourResponse.Body.Items.Item item : response.getBody().getItems().getItem()) {
+                TourAPI tourAPI = item.toEntitySigungu(codeArea, codeOrSigungu);
+
                 tourAPIList.add(tourAPI);
             }
         }
