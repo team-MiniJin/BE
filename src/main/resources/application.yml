@@ -51,6 +51,9 @@ spring:
         SQL: DEBUG
         type:
           descriptor.sql.BasicBinder: INFO
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 api-tour:
   serviceKey_De: K9eWaIkQyqUUDZPWH+jI2Br1awNS1WaksaOZ6EiUbWTEzpVBeXnhTuPjni4n6auCsAUANYZ5o3Q89TF0sFU4bA==
