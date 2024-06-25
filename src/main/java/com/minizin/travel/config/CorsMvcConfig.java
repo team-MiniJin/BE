@@ -20,12 +20,5 @@ public class CorsMvcConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .maxAge(3600L);
     }
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        log.debug("Configuring resource handlers for Swagger UI");
-        registry.addResourceHandler("/swagger-ui/**")
-            .addResourceLocations("classpath:/META-INF/resources/webjars/springdoc-openapi-ui/");
-        registry.addResourceHandler("/v3/api-docs/**")
-            .addResourceLocations("classpath:/META-INF/resources/");
-    }
+
 }
