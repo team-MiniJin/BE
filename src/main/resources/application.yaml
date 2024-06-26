@@ -35,3 +35,16 @@ spring:
       hibernate:
         SQL: DEBUG
         type: descriptor.sql.BasicBinder=TRACE
+
+cloud:
+  aws:
+    credentials:
+      accessKey: test
+      secretKey: test
+    s3:
+      bucket: relink
+      url: https://s3.ap-northeast-2.amazonaws.com/relink
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
