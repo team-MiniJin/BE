@@ -192,6 +192,9 @@ public class TourAPIDto {
                             .build();
                     }
                     public TourAPI toEntitySigungu(String codeArea,boolean codeOrSigungu) {
+                        // areaCode 가 비어있을 때 모든 특별시, 도를 검색 (true)
+                        // areaCode가 있을 때는 해당 areaCode의 sigungu를 검색 (false)
+                        // !codeOrSigungu -> areaCode가 있을 때 sigungucode에 code를 넣고 code에 areaCode를 넣는다.
                         if (!codeOrSigungu) {
                             sigungucode = code;
                             code = codeArea;

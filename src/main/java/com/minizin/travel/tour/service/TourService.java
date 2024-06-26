@@ -62,21 +62,23 @@ public class TourService {
 
     public CompletableFuture<String> getTourAPIFromSiteDetailCommon(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "detailCommon1";
-
+        // 기존 TourAPI entity(DB)에 detail 정보 추가해서 DB업데이트 하기.
         long startTime = System.currentTimeMillis();
         int pageNo = Integer.parseInt(Optional.ofNullable(requestParam.getPageNo()).orElse("0"));
         int pageSize = Integer.parseInt(Optional.ofNullable(requestParam.getNumOfRows()).orElse("1000"));
 
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize);
+        // overview 정보가 추가 안된 데이터만 중복값 없이 가져오기
+        // (pageable 한 이유는 간혹 DB 업데이트가 안되는 data들을 page를 통해 건너뛰기 위함)
         Page<TourAPI> tourAPIPage = tourAPIRepository.findAll(pageRequest);
         List<TourAPI> tourAPIs = tourAPIPage.getContent();
 
+        //가져온 TourAPI 목록의 모든 데이터들을 비동기 방식으로 공공데이터 api에 정보 요청
         List<CompletableFuture<Void>> futures = tourAPIs.stream()
             .map(tourAPI -> {
                 String contentId = tourAPI.getContentId();
                 String contentTypeId = tourAPI.getContentTypeId();
 
-                // Prepare parameters for API request
                 Map<String, String> params = Map.ofEntries(
                     Map.entry("ServiceKey", serviceKey),
                     Map.entry("MobileOS", "ETC"),
@@ -94,8 +96,9 @@ public class TourService {
                     Map.entry("numOfRows", "10"),
                     Map.entry("pageNo", "0")
                 );
-
+                // 각 Entity Data별로 공공데이터 Request url에 맞춰 request param을 build 하기.
                 String url = buildUrlWithParams(getCategoryUrl, params);
+                // 각 Entity Data별로 공공데이터에 요청한 detail정보 update하기.
                 return fetchAndUpdateTourAPIData(url, tourAPI);
             })
             .collect(Collectors.toList());
@@ -106,12 +109,15 @@ public class TourService {
                 long duration = endTime - startTime;
                 logger.info("getTourAPIFromSiteDetailCommon executed in " + duration + " ms");
                 if (!tourAPIs.isEmpty()) {
+                    // 비동기 방식으로 가져온 모든 업데이트된 정보들을 한번에 저장.
                     tourAPIRepository.saveAll(tourAPIs);
                 }
                 return "getTourAPIFromSiteDetailCommon executed successfully";
             });
     }
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteSearchKeyword(TourAPIDto.TourRequest requestParam) {
+        //baseUrl에 공공데이터의 request url에 맞춰 카테고리url 넣기
+        // + requestParam에 들어간 keyword, pageNo,numOfRows에 맞춰 공공데이터에서 값 가져오기
         String getCategoryUrl = baseUrl + "searchKeyword1";
         String keyword = Optional.ofNullable(requestParam.getKeyword()).orElse("강원");
         String pageNo = Optional.ofNullable(requestParam.getPageNo()).orElse("0");
@@ -129,7 +135,7 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url, MAX_RETRIES);
+        return getListCompletableFuture(url);
     }
 
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaBasedList(TourAPIDto.TourRequest requestParam) {
@@ -159,7 +165,7 @@ public class TourService {
                     );
 
                     String url = buildUrlWithParams(getCategoryUrl, params);
-                    return getListCompletableFuture(url, MAX_RETRIES);
+                    return getListCompletableFuture(url);
                 })
             ).collect(Collectors.toList());
 
@@ -197,12 +203,15 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-        return getListCompletableFuture(url,MAX_RETRIES);
+        return getListCompletableFuture(url);
     }
     public CompletableFuture<List<TourAPI>> getTourAPIFromSiteAreaCode(TourAPIDto.TourRequest requestParam) {
         String getCategoryUrl = baseUrl + "areaCode1";
         String areaCode = Optional.ofNullable(requestParam.getAreaCode()).orElse("");
+        // areaCode 가 비어있으면 code(true) areaCode가 있으면 Sigungu(false)
         boolean codeOrSigungu = areaCode.isEmpty();
+        // areaCode 가 비어있을 때 모든 특별시, 도를 검색 (true)
+        // areaCode가 있을 때는 해당 areaCode의 sigungu를 검색 (false)
 
         Map<String, String> params = Map.of(
             "ServiceKey", serviceKey,
@@ -215,60 +224,50 @@ public class TourService {
 
         String url = buildUrlWithParams(getCategoryUrl, params);
 
-
         return getListCompletableFutureForArea(url, areaCode, codeOrSigungu);
     }
 
     @NotNull
-    private CompletableFuture<List<TourAPI>> getListCompletableFuture(String url, int retries) {
+    private CompletableFuture<List<TourAPI>> getListCompletableFuture(String url) {
+        // 공공데이터 request url에 맞춰 build된 url에 json형식으로 header 추가
         Request request = new Request.Builder()
             .url(url)
             .get()
             .addHeader("Content-type", "application/json")
             .build();
 
+        //build된 url을 기반으로 공공데이터 비동기 방식으로 response 가져오기 -> Entity 저장
         return CompletableFuture.supplyAsync(() -> {
-            for (int attempt = 1; attempt <= retries; attempt++) {
-                try (Response response = client.newCall(request).execute()) {
-                    if (!response.isSuccessful()) {
-                        throw new IOException("Unexpected code " + response);
-                    }
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                }
 
-                    String responseJson = response.body().string();
+                String responseJson = response.body().string();
 
 //                    logger.info("Response JSON: " + responseJson); // Log the JSON response
 
-                    // items이 비어있을 때 Error Msg없이 스킵
-                    if (responseJson.contains("\"items\": \"\"")) {
-                        continue;
-                    }
+                // items이 비어있을 때 Error Msg없이 emptyList 출력 - 이 코드가 없으면 error 발생
+                if (responseJson.contains("\"items\": \"\"")) {
+                    return Collections.emptyList();
+                }
 
-                    try {
-                        TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
 
-                        List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
+                List<TourAPI> tourAPIList = tourAPIDto.toEntityList();
 
-                        if (!tourAPIList.isEmpty()) {
-                            tourAPIRepository.saveAll(tourAPIList);
-                            return tourAPIList;
-                        }
-                    }catch (JsonSyntaxException e) {
-                        if (!e.getMessage().contains("\"items\": \"\",")) {
-                            logger.error("JSON parsing error: " + e.getMessage());
-                        }
-                    }
-
-                } catch (IOException | JsonSyntaxException e) {
-                    logger.error("Error fetching data from URL: {} on attempt {}/{} & ", url, attempt, retries, e);
-                    if (attempt == retries) {
-                        return Collections.emptyList();
-                    }
+                if (!tourAPIList.isEmpty()) {
+                    tourAPIRepository.saveAll(tourAPIList);
+                    return tourAPIList;
+                }
+            } catch (IOException | JsonSyntaxException e) {
+                if (!e.getMessage().contains("\"items\": \"\",")) {
+                    logger.error("JSON parsing error: " + e.getMessage());
                 }
             }
             return Collections.emptyList();
         }, executorService);
     }
-
 
     private String buildUrlWithParams(String baseUrl, Map<String, String> params) {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl).newBuilder();
@@ -299,7 +298,7 @@ public class TourService {
                     .getItems()
                     .getItem()
                     .get(0);
-
+                // 공공데이터에서 가져온 data를 기존 Entity Data(TourAPI)에 업데이트
                 existingTourAPI.updateFromDtoAsync(item);
             } catch (IOException | JsonSyntaxException e) {
                 logger.error("Error fetching data for URL: " + url, e);
@@ -326,31 +325,25 @@ public class TourService {
 
 //                    logger.info("Response JSON: " + responseJson); // Log the JSON response
 
-                // items이 비어있을 때 Error Msg없이 스킵
+                // items이 비어있을 때 Error Msg없이 emptyList 출력 - 이 코드가 없으면 error 발생
                 if (responseJson.contains("\"items\": \"\"")) {
-                    return Collections.emptyList(); // Return an empty list instead of continue;
+                    return Collections.emptyList();
                 }
 
-                try {
-                    TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
+                TourAPIDto tourAPIDto = gson.fromJson(responseJson, TourAPIDto.class);
 
+                List<TourAPI> tourAPIList = tourAPIDto.toEntityListArea(areaCode,codeOrSigungu);
 
-                    List<TourAPI> tourAPIList = tourAPIDto.toEntityListArea(areaCode,codeOrSigungu);
-
-                    if (!tourAPIList.isEmpty()) {
-                        tourAPIRepository.saveAll(tourAPIList);
-                        return tourAPIList;
-                    }
-                }catch (JsonSyntaxException e) {
-                    if (!e.getMessage().contains("\"items\": \"\",")) {
-                        logger.error("JSON parsing error: " + e.getMessage());
-                    }
+                if (!tourAPIList.isEmpty()) {
+                    tourAPIRepository.saveAll(tourAPIList);
+                    return tourAPIList;
                 }
 
             } catch (IOException | JsonSyntaxException e) {
-
+                if (!e.getMessage().contains("\"items\": \"\",")) {
+                    logger.error("JSON parsing error: " + e.getMessage());
+                }
             }
-
             return Collections.emptyList();
         }, executorService);
     }
