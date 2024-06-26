@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -74,6 +75,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     // #58 2024.06.12 다른 사람 여행 일정 조회(북마크순) END //
 
     // #129 금주 인기 여행
-    List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(LocalDate startDate, LocalDate endDate);
+    //List<Plan> findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(LocalDate startDate, LocalDate endDate);
+
+    List<Plan> findTop20ByCreatedAtBetweenOrderByNumberOfScrapsDescIdDesc(LocalDateTime startDate, LocalDateTime endDate);
 
 }
