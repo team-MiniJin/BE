@@ -15,7 +15,8 @@ public class CorsMvcConfig implements WebMvcConfigurer {
         log.debug("Configuring CORS mappings");
         corsRegistry.addMapping("/**")
                 .exposedHeaders("Set-Cookie", "Authorization")
-                .allowedOrigins("http://localhost:3000", "https://fe-two-blond.vercel.app")
+                .allowedOrigins("http://localhost:3000", "https://fe-two-blond.vercel.app",
+                    "http://lyckabc.synology.me:20280", "https://lyckabc.synology.me:23080")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowCredentials(true)
                 .maxAge(3600L);
