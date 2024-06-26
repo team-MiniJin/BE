@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -156,9 +157,9 @@ public class OtherPlanService {
 
         List<PopWeekPlanDto> popWeekPlanDtoList = new ArrayList<>();
 
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(6);
-        List<Plan> planList = planRepository.findTop20ByStartDateBetweenOrderByNumberOfScrapsDescIdDesc(startDate, endDate);
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusDays(6);
+        List<Plan> planList = planRepository.findTop20ByCreatedAtBetweenOrderByNumberOfScrapsDescIdDesc(startDate, endDate);
 
         for (Plan plan : planList) {
             PopWeekPlanDto newPopWeekPlanDto = PopWeekPlanDto.toDto(plan);
