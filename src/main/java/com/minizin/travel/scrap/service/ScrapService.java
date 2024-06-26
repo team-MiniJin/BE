@@ -89,7 +89,7 @@ public class ScrapService {
 
             SelectScrapedPlansDto newSelectScrapedPlanDto = SelectScrapedPlansDto.toDto(plan);
             newSelectScrapedPlanDto.setId(scrapId);
-            newSelectScrapedPlanDto.setUserNickname(userRepository.findById(plan.getId()).get().getNickname());
+            newSelectScrapedPlanDto.setUserNickname(userRepository.findById(plan.getUserId()).get().getNickname());
 
             // 예산 계산
             List<PlanSchedule> planScheduleList = planScheduleRepository.findAllByPlanId(plan.getId());
