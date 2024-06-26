@@ -34,14 +34,14 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     // 채팅방 생성
-    @PostMapping("/createroom")
+    @PostMapping("/chat/room")
     public ChatRoomResponse createRoom(@RequestParam ChatRoomRequest request) {
         ChatRoomResponse room = chatRoomService.createChatRoom(request);
         log.info("CREATE Chat Room {}", room);
         return room;
     }
 
-    @GetMapping("/rooms")
+    @GetMapping("/chat/rooms")
     public List<ChatRoomResponse> getChatRoom() {
         List<ChatRoomResponse> chatRooms = chatRoomService.findAllRoom();
         log.info("SHOW ALL ChatList {}", chatRooms);
@@ -50,7 +50,7 @@ public class ChatRoomController {
     }
 
     // 채팅방 입장 화면
-    @GetMapping("/room/{roomId}")
+    @GetMapping("/chat/room/{roomId}")
     public ChatRoomResponse roomDetail(@PathVariable String roomId) {
         log.info("roomId {}", roomId);
         return chatRoomService.findRoomById(roomId);
@@ -66,7 +66,7 @@ public class ChatRoomController {
 
 
     // 채팅방 삭제
-    @GetMapping("/caht/delRoom/{roomId}")
+    @GetMapping("/chat/delRoom/{roomId}")
     public void delChatRoom(@PathVariable String roomId) {
         try {
             // roomId 기준으로 채팅방 삭제, 해당 채팅방 안에 있는 사진 삭제
