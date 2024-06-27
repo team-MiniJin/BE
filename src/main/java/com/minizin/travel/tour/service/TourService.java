@@ -4,8 +4,8 @@ package com.minizin.travel.tour.service;
 import com.minizin.travel.tour.domain.dto.TourAPIDto;
 import com.minizin.travel.tour.domain.entity.TourAPI;
 import com.minizin.travel.tour.domain.repository.TourAPIRepository;
-import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.JsonSyntaxException;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,7 +93,6 @@ public class TourService {
                     Map.entry("addrinfoYN", "Y"),
                     Map.entry("mapinfoYN", "Y"),
                     Map.entry("overviewYN", "Y"),
-                    Map.entry("numOfRows", "10"),
                     Map.entry("pageNo", "0")
                 );
                 // 각 Entity Data별로 공공데이터 Request url에 맞춰 request param을 build 하기.

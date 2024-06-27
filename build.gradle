@@ -43,18 +43,17 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    //// test for
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // gson
     implementation 'com.google.code.gson:gson:2.8.8'
     // okhttp
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     //API DOC
-//    implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
-//    implementation 'org.springdoc:springdoc-openapi-webmvc-core:1.6.8'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    //// test for
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
 }
 
 tasks.named('test') {
