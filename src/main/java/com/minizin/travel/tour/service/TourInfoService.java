@@ -137,10 +137,10 @@ public class TourInfoService {
         // 데이터베이스에서 중복 제거된 데이터 가져오기
         List<TourAPI> rawEntities = tourAPIRepository.findAllList();
 
+        // 변수값이 비어있을 때는 오른쪽 filter조건을 건너뜀
+        // 변수값이 비어있지 않은 조건들을 모두 만족 시킨 데이터만 필터링함.
         List<TourAPIDto.TourResponse.Body.Items.Item> rawItems = rawEntities.stream()
             .filter(tourAPI ->
-                // 변수값이 비어있을 때는 오른쪽 filter조건을 건너뜀
-                // 변수값이 비어있지 않은 조건들을 모두 만족 시킨 데이터만 필터링함.
                 (areaCode.isEmpty() || tourAPI.getAreaCode().equals(areaCode)) &&
                     (contentTypeId.isEmpty() || tourAPI.getContentTypeId().equals(contentTypeId)) &&
                     (sigunguCode.isEmpty() || tourAPI.getSigunguCode().equals(sigunguCode)) &&
@@ -169,12 +169,17 @@ public class TourInfoService {
                 return 3;
             })
             // 각 그룹 내 정렬 기준에 맞춰 정렬
-            .thenComparing(item -> {
-                String title = item.getTitle();
-                if (title.matches("^[가-힣ㄱ-ㅎ].*")) return koreanCollator.getCollationKey(title);
-                if (title.matches("^[a-zA-Z].*")) return title.toLowerCase();
-                return title;
-            }, koreanCollator);
+            .thenComparing((item1, item2) -> {
+                String title1 = item1.getTitle();
+                String title2 = item2.getTitle();
+                if (title1.matches("^[가-힣ㄱ-ㅎ].*") && title2.matches("^[가-힣ㄱ-ㅎ].*")) {
+                    return koreanCollator.compare(title1, title2);
+                }
+                if (title1.matches("^[a-zA-Z].*") && title2.matches("^[a-zA-Z].*")) {
+                    return title1.compareToIgnoreCase(title2);
+                }
+                return title1.compareTo(title2);
+            });
 
         return items.stream()
             .sorted(customComparator)
